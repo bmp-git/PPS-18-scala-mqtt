@@ -1,0 +1,18 @@
+language: scala
+scala:
+  - 2.12.2
+
+before_install:
+  - export TZ=Europe/Rome
+  - date
+
+script:
+- './gradlew clean build'
+notifications:
+  email:
+    recipients:
+      - edoardo.barbieri.96@gmail.com
+      - emanuelepancisi@gmail.com
+      - lorenzo_mondani@yahoo.it
+    on_success: never
+    on_failure: always
