@@ -60,7 +60,7 @@
    <parameter name="maxParameters"><![CDATA[8]]></parameter>
   </parameters>
  </check>
- <check level="warning" class="org.scalastyle.scalariform.MagicNumberChecker" enabled="true">
+ <check level="warning" class="org.scalastyle.scalariform.MagicNumberChecker" enabled="false">
   <parameters>
    <parameter name="ignore"><![CDATA[-1,0,1,2,3]]></parameter>
   </parameters>
@@ -130,7 +130,7 @@
    <parameter name="regex"><![CDATA[^[A-Z_]$]]></parameter>
   </parameters>
  </check>
- <check level="warning" class="org.scalastyle.scalariform.UnderscoreImportChecker" enabled="true"></check>
+ <check level="warning" class="org.scalastyle.scalariform.UnderscoreImportChecker" enabled="false"></check>
  <check level="warning" class="org.scalastyle.scalariform.LowercasePatternMatchChecker" enabled="true"></check>
  <check level="warning" class="org.scalastyle.scalariform.MultipleStringLiteralsChecker" enabled="true">
   <parameters>
