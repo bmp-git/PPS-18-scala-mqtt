@@ -1,6 +1,8 @@
+package mqtt.broker
+
 import java.util.Calendar
 
-import mqtt.{BrokerState, Session, Socket}
+import mqtt.{Session, Socket}
 import org.scalatest.FunSuite
 
 import scala.concurrent.duration.Duration

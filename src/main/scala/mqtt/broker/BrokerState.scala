@@ -1,6 +1,8 @@
-package mqtt
-import mqtt.model.{Packet, Types}
+package mqtt.broker
+
 import mqtt.model.Types.ClientID
+import mqtt.model.{Packet, Types}
+import mqtt.{Session, Socket, State}
 
 case class BrokerState(override val sessions: Map[ClientID, Session], override val retains: Map[Types.Topic, Packet.ApplicationMessage]) extends State {
   override def sessionFromClientID(clientID: ClientID): Option[Session] = sessions.get(clientID)
