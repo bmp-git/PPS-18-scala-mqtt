@@ -67,7 +67,7 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   
   def updateSocket(clientId: String, socket: Socket)(state: State): Either[Violation, State] = {
     //disconnect if already connected
-    val s1 = state.sessionFromSocket(socket).fold(state)(_ => state.addClosingChannel(socket, Seq()))
+    val s1 = state.sessionFromClientID(clientId).fold(state)(sess => sess.socket.fold(state)(sk => state.addClosingChannel(sk, Seq())))
     Right(s1.setSocket(clientId, socket))
   }
   
