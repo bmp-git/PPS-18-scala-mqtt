@@ -1,6 +1,5 @@
 package mqtt
 
-import java.net.Socket
 import java.util.Date
 
 import mqtt.model.{Packet, PacketID, QoS}
@@ -19,12 +18,19 @@ trait Builder[I, O] {
   def build(input: I): Seq[O]
 }
 
+trait Channel[T[_], K] {
+  def send(m: T[K])
+}
+
+case class Socket(id: Int) extends Channel[Seq, Byte] {
+  override def send(m: Seq[Byte]): Unit = ()
+}
+
 trait PacketParser extends Parser[Bit, Packet]
 
 trait PacketBuilder extends Builder[Packet, Bit]
 
 case class Session(
-                    clientId: ClientID,
                     socket: Option[Socket],
                     willMessage: Option[ApplicationMessage],
                     keepAlive: Duration,
@@ -40,12 +46,14 @@ trait State {
   def sessions: Map[ClientID, Session]
 
   def retains: Map[Topic, ApplicationMessage]
+  
+  def sessionFromClientID(clientID: ClientID): Option[Session]
+  
+  def sessionFromSocket(socket: Socket): Option[Session]
 
-  def session(socket: Socket): Option[Session]
+  def setSession(clientID: ClientID, session: Session): State
 
-  def setSession(session: Session): State
-
-  def setSocket(socket: Socket, session: Option[Session]): State
+  def setSocket(clientID: ClientID, socket: Socket): State
 }
 
 trait ProtocolManager {
