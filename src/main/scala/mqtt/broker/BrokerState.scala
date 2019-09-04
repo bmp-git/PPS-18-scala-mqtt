@@ -2,9 +2,11 @@ package mqtt.broker
 
 import mqtt.model.Types.ClientID
 import mqtt.model.{Packet, Types}
-import mqtt.{Session, Socket, State}
+import mqtt.Socket
 
-case class BrokerState(override val sessions: Map[ClientID, Session], override val retains: Map[Types.Topic, Packet.ApplicationMessage]) extends State {
+case class BrokerState(override val sessions: Map[ClientID, Session],
+                       override val retains: Map[Types.Topic, Packet.ApplicationMessage],
+                       override val closing: Map[Socket, Seq[Packet]]) extends State {
   override def sessionFromClientID(clientID: ClientID): Option[Session] = sessions.get(clientID)
   
   override def sessionFromSocket(socket: Socket): Option[Session] = sessions.collectFirst { case (_, s) if s.socket.fold(false)(_ == socket) => s }
@@ -23,5 +25,8 @@ case class BrokerState(override val sessions: Map[ClientID, Session], override v
     state.getOrElse(this)
   }
   
-  
+  override def addClosingChannel(socket: Socket, packets: Seq[Packet]): State = {
+    val newClosing = closing + ((socket, packets))
+    this.copy(closing = newClosing)
+  }
 }

@@ -2,7 +2,7 @@ package mqtt.broker
 
 import java.util.Calendar
 
-import mqtt.{Session, Socket}
+import mqtt.Socket
 import org.scalatest.FunSuite
 
 import scala.concurrent.duration.Duration
@@ -38,7 +38,7 @@ class TestBrokerState extends FunSuite {
   val sample_socket_1 = Socket(1)
   val sample_socket_2 = Socket(2)
   
-  val bs0 = BrokerState(Map(), Map())
+  val bs0 = BrokerState(Map(), Map(), Map())
   
   test("An empty BrokerState should have sessions size 0") {
     assert(bs0.sessions.isEmpty)
@@ -97,4 +97,6 @@ class TestBrokerState extends FunSuite {
     val s = bs3.sessionFromSocket(sample_socket_2)
     s.fold(fail)(_.socket.fold(fail)(sk => assert(sk == sample_socket_2)))
   }
+  
+  //TODO addClosingChannel test
 }
