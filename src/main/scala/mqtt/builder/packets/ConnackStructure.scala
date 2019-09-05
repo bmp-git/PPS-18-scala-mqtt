@@ -1,8 +1,8 @@
 package mqtt.builder.packets
 
 import mqtt.builder.PacketStructure
-import mqtt.builder.fragments.PacketFragmentImplicits._
-import mqtt.builder.fragments.CommonPacketFragments._
+import mqtt.builder.fragments.packetFragmentImplicits._
+import mqtt.builder.fragments.commonPacketFragments._
 import mqtt.builder.fragments.PacketFragment
 import mqtt.model.Packet.Connack
 import mqtt.utils.BitImplicits._

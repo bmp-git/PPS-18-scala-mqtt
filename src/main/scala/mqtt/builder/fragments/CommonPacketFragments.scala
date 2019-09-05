@@ -1,14 +1,14 @@
 package mqtt.builder.fragments
 
-import mqtt.builder.BuildContext._
+import mqtt.builder.buildContext._
 import mqtt.model.Packet._
 import mqtt.model.{Packet, PacketID}
 import mqtt.utils.{Bit, VariableLengthInteger}
 import mqtt.utils.BitImplicits._
-import mqtt.builder.fragments.PacketFragmentImplicits._
+import mqtt.builder.fragments.packetFragmentImplicits._
 
 
-object CommonPacketFragments {
+package object commonPacketFragments {
   //Need to be def because of equality check, to rethink if possible
   def RemainingLength: PacketFragment[Packet] = new PacketFragment[Packet] {
     override def build[R <: Packet](packet: R)(implicit context: Context[R]): Seq[Bit] = {

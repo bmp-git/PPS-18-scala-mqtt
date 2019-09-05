@@ -1,9 +1,9 @@
-import mqtt.utils.VariableLengthInteger
-import org.scalatest.FunSuite
+package mqtt.utils
+
 import mqtt.utils.BitImplicits._
+import org.scalatest.FunSuite
 
 class VariableLengthIntegerTest extends FunSuite {
-  
   Map[Int, Seq[Char]](
     0 -> Seq(0x00),
     1 -> Seq(0x01),
@@ -20,7 +20,6 @@ class VariableLengthIntegerTest extends FunSuite {
       val encodedString = encoded.map(_.toByte).toBitsSeq.toBinaryString
       test(s"$value should be encoded in $encodedString") {
         val data = VariableLengthInteger.encode(value)
-        assert(data.length == encoded.length)
         assert(encoded.map(_.toByte) == data)
       }
     }
