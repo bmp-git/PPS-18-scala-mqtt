@@ -63,4 +63,15 @@ class ParserTest extends FunSuite with Matchers {
   test("A byte parser should parse bytes") {
     assert(bytes(1).run(byte) == List((byte.toBytes, Seq())))
   }
+  test("A byte parser should not parse less then a byte") {
+    assert(bytes(1).run(Seq()) == List())
+  }
+  
+  //defaultIfNot parser
+  test("defaultIfNot should not consume input if condition is false") {
+    assert(defaultIfNot(zero, item())(false).run(Seq(0)) == List((zero, Seq(zero))))
+  }
+  test("defaultIfNot should consume input if condition is true") {
+    assert(defaultIfNot(zero, item())(true).run(Seq(0)) == List((zero, Seq())))
+  }
 }

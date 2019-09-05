@@ -2,7 +2,6 @@ package mqtt.parser
 
 import mqtt.model.QoS
 import mqtt.parser.Parsers.MqttParser._
-import mqtt.utils.Bit
 import org.scalatest.{FunSuite, Matchers}
 import mqtt.utils.BitImplicits._
 

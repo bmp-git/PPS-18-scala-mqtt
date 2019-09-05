@@ -2,9 +2,12 @@ package mqtt.parser
 import Monad._
 import mqtt.model.ErrorPacket.MalformedPacket
 import mqtt.model.{Packet, QoS}
-import mqtt.model.Packet.{Disconnect, Puback}
+import mqtt.model.Packet.{ApplicationMessage, Connect, Credential, Disconnect, Protocol, Puback}
+import mqtt.model.Types.{Password, Payload}
 import mqtt.utils.{Bit, MqttUFT8}
 import mqtt.utils.BitImplicits._
+
+import scala.concurrent.duration._
 
 object Parsers {
   
@@ -25,6 +28,8 @@ object Parsers {
   def success[A](a: A): Parser[A] = parserMonad.unit(a)
   
   def failure[A]: Parser[A] = Parser(s => List())
+  
+  def defaultIfNot[A](default: A, p: Parser[A])(predicate: Boolean): Parser[A] = if (predicate) p else Parser(s => List((default, s)))
   
   def or[A, B <: A, C <: A](p1: Parser[B], p2: Parser[C]): Parser[A] = Parser(s => p1.run(s) ++ p2.run(s))
   
@@ -80,11 +85,34 @@ object Parsers {
     
     def connectFlags(): Parser[ConnectFlags] = for {
       username <- item()
-      password <- item()
+      password <- or(conditional(zero())(_ => !username), conditional(item())(_ => username))
       willFlags <- willFlags()
       cleanSession <- item()
-      _ <- bit(0)
-    } yield ConnectFlags(username, password, willFlags, cleanSession)
+      _ <- zero()
+    } yield ConnectFlags(CredentialFlags(username, password), willFlags, cleanSession)
+    
+    def twoBytesInt(): Parser[Int] = for { bytes <- bytes(2) } yield bytes.toBitsSeq.getValue(0, 16).toInt
+    
+    def keepAlive(): Parser[Int] = twoBytesInt()
+    
+    def binaryData(): Parser[Seq[Byte]] = for {
+      length <- twoBytesInt();
+      payload <- defaultIfNot(Seq(), bytes(length))(length > 0)
+    } yield payload
+    
+    def message(): Parser[Payload] = binaryData()
+    
+    def password(): Parser[Password] = binaryData()
+    
+    def willPayload(willFlags: Option[WillFlags]): Parser[Option[ApplicationMessage]] = for {
+      willTopic <- defaultIfNot("", utf8())(willFlags.isDefined)
+      willMessage <- defaultIfNot(Seq(), message())(willFlags.isDefined)
+    } yield willFlags.map(f => Option(ApplicationMessage(f.retain, f.qos, willTopic, willMessage))).head
+    
+    def credentials(flags: CredentialFlags): Parser[Option[Credential]] = for {
+      username <- defaultIfNot("", utf8())(flags.username)
+      password <- defaultIfNot(Seq(), password())(flags.password)
+    } yield if(flags.username) Option(Credential(username, Option(flags.password) collect {case true => password} )) else Option.empty
     
     def connectParser(): Parser[Packet] = for {
       _ <- packetType(ConnectMask)
@@ -92,7 +120,13 @@ object Parsers {
       _ <- bytes(1)
       _ <- protocolName()
       version <- protocolLevel()
-    } yield MalformedPacket
+      flags <- connectFlags()
+      keepAlive <- keepAlive()
+      clientId <- utf8() //check length and chars?  [MQTT-3.1.3-5]
+                         //MAY feature zero bytes clientID [MQTT-3.1.3-6]
+      willMessage <- willPayload(flags.willFlags)
+      credentials <- credentials(flags.credentials)
+    } yield Connect(Protocol("MQTT", version), flags.cleanSession, keepAlive seconds, clientId, credentials, willMessage)
   
     def disconnectParser(): Parser[Packet] = for {
       _ <- disconnectPacketType()
@@ -107,6 +141,6 @@ object Parsers {
       packet_id <- bytes(2)
     } yield Puback(0)
     
-    def mqttParser(): Parser[Packet] = or(disconnectParser(), pubackParser())
+    def mqttParser(): Parser[Packet] = or(disconnectParser(), pubackParser(), connectParser())
   }
 }

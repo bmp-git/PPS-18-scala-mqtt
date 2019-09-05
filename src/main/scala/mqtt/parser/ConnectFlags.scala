@@ -3,10 +3,10 @@ package mqtt.parser
 import mqtt.model.QoS
 
 case class ConnectFlags(
-                       username: Boolean,
-                       password: Boolean,
+                       credentials: CredentialFlags,
                        willFlags: Option[WillFlags],
                        cleanSession: Boolean
                        )
 
 case class WillFlags(retain: Boolean, qos: QoS)
+case class CredentialFlags(username: Boolean, password: Boolean)
