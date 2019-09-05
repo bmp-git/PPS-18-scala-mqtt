@@ -9,6 +9,7 @@ class ParserTest extends FunSuite with Matchers {
   val zero: Bit = Bit(false)
   val one: Bit = Bit(true)
   val some: Seq[Bit] = Seq(0, 1, 0, 1, 1)
+  val byte: Seq[Bit] = Seq(1, 1, 1, 1, 1, 1, 1, 1)
   
   //Item parser
   test("A item parser should parse a single bit") {
@@ -56,5 +57,10 @@ class ParserTest extends FunSuite with Matchers {
   }
   test("A bits parser should not parse nothing") {
     assert(bits(some size).run(Seq()) == List())
+  }
+  
+  //Bytes parser
+  test("A byte parser should parse bytes") {
+    assert(bytes(1).run(byte) == List((byte.toBytes, Seq())))
   }
 }
