@@ -2,7 +2,7 @@ package mqtt.broker
 
 import mqtt.broker.Violation.{GenericViolation, InvalidIdentifier, InvalidProtocolVersion}
 import mqtt.Socket
-import mqtt.model.Packet.ConnectReturnCode.{ConnectionAccepted}
+import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, Protocol}
 
 import scala.concurrent.duration.Duration
@@ -12,13 +12,14 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
     (for {
       _ <- checkProtocol(packet.protocol)
       _ <- checkClientId(packet.clientId)
-      s0 <- manageSession(packet.clientId, packet.cleanSession)(state)
-      sessionPresent = s0._1 //TODO correct workaround
-      s1 <- updateSocket(packet.clientId, socket)(s0._2)
-      s2 <- setWillMessage(packet.clientId, packet.willMessage)(s1)
-      s3 <- setKeepAlive(packet.clientId, packet.keepAlive)(s2)
-      s4 <- replyWithACK(packet.clientId, sessionPresent)(s3)
-    } yield s4) match {
+      s0 <- disconnectOtherConnected(packet.clientId)(state)
+      s1 <- manageSession(packet.clientId, packet.cleanSession)(s0)
+      sessionPresent = s1._1 //TODO correct workaround
+      s2 <- updateSocket(packet.clientId, socket)(s1._2)
+      s3 <- setWillMessage(packet.clientId, packet.willMessage)(s2)
+      s4 <- setKeepAlive(packet.clientId, packet.keepAlive)(s3)
+      s5 <- replyWithACK(packet.clientId, sessionPresent)(s4)
+    } yield s5) match {
       case Left(v) => println(v.msg); v.handle(socket)(state) //close connection in case of error
       case Right(s) => s
     }
@@ -50,6 +51,11 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
     if (clientId.isEmpty || clientId.length > 23) Left(InvalidIdentifier()) else Right(())
   }
   
+  def disconnectOtherConnected(clientId: String)(state: State): Either[Violation, State] = {
+    //disconnect if already connected
+    Right(state.sessionFromClientID(clientId).fold(state)(sess => sess.socket.fold(state)(sk => state.addClosingChannel(sk, Seq()))))
+  }
+  
   def createSession(clientId: String)(state: State): Either[Violation, (Boolean, State)] = {
     //session present 0 in connack
     Right((false, state.setSession(clientId, session = Session.createEmptySession())))
@@ -66,9 +72,7 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   }
   
   def updateSocket(clientId: String, socket: Socket)(state: State): Either[Violation, State] = {
-    //disconnect if already connected
-    val s1 = state.sessionFromClientID(clientId).fold(state)(sess => sess.socket.fold(state)(sk => state.addClosingChannel(sk, Seq())))
-    Right(s1.setSocket(clientId, socket))
+    Right(state.setSocket(clientId, socket))
   }
   
   def setWillMessage(clientId: String, willMessage: Option[ApplicationMessage])(state: State): Either[Violation, State] = {
