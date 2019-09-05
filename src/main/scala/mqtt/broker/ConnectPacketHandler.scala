@@ -1,6 +1,5 @@
 package mqtt.broker
 
-import mqtt.Socket
 import mqtt.broker.StateImplicits.StateTransitionWithError_Implicit
 import mqtt.broker.Violation.{GenericViolation, InvalidIdentifier, InvalidProtocolVersion}
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
@@ -12,6 +11,7 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   
   override def handle(state: State, packet: Connect, socket: Socket): State = {
     val f = for {
+      _ <- checkNotFirstPacketOfSocket(socket)
       _ <- checkProtocol(packet.protocol)
       _ <- checkClientId(packet.clientId)
       _ <- disconnectOtherConnected(packet.clientId)
@@ -28,11 +28,21 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
     }
   }
   
-  //TODO check duplicate connect
-  
-  //TODO check socket is not disconnected
-  
   //TODO publish will packet on protocol violation
+  
+  //TODO move this in the upper layer
+  def checkSocketNotInClosing(socket: Socket): State => Either[Violation, (Unit, State)] = state => {
+    state.closing.get(socket).fold[Either[Violation, (Unit, State)]](Right((), state))(_ => {
+      Left(GenericViolation("Received a packet on a closing socket"))
+    })
+  }
+  
+  def checkNotFirstPacketOfSocket(socket: Socket): State => Either[Violation, (Unit, State)] = state => {
+    // check duplicate connect 3.1.0-2
+    state.sessionFromSocket(socket).fold[Either[Violation, (Unit, State)]](Right((), state))(_ => {
+      Left(GenericViolation("Received two connect packets on same socket"))
+    })
+  }
   
   
   def checkProtocol(protocol: Protocol): State => Either[Violation, (Unit, State)] = state => {

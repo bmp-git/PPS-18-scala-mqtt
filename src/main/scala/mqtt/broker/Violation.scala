@@ -1,6 +1,5 @@
 package mqtt.broker
 
-import mqtt.Socket
 import mqtt.model.Packet
 import mqtt.model.Packet.Connack
 import mqtt.model.Packet.ConnectReturnCode._

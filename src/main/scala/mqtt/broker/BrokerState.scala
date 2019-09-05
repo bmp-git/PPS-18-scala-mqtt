@@ -2,7 +2,6 @@ package mqtt.broker
 
 import mqtt.model.Types.ClientID
 import mqtt.model.{Packet, Types}
-import mqtt.Socket
 
 case class BrokerState(override val sessions: Map[ClientID, Session],
                        override val retains: Map[Types.Topic, Packet.ApplicationMessage],

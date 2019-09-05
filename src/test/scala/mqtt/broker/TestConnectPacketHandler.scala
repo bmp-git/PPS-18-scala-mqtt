@@ -2,7 +2,6 @@ package mqtt.broker
 
 import java.util.Calendar
 
-import mqtt.Socket
 import mqtt.model.Packet.ConnectReturnCode.{ConnectionAccepted, IdentifierRejected, UnacceptableProtocolVersion}
 import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, ConnectReturnCode, Protocol}
 import mqtt.model.QoS.QoS0
@@ -128,5 +127,11 @@ class TestConnectPacketHandler extends FunSuite {
     bs1.sessionFromClientID(sample_id_0).fold(fail)(s => {
       assert(s.keepAlive == Duration(10, "minutes"))
     })
+  }
+  
+  test("Connecting two times should disconnect") {
+    val bs1 = ConnectPacketHandler.handle(bs0, sample_connect_packet_0, sample_socket_0)
+    val bs2 = ConnectPacketHandler.handle(bs1, sample_connect_packet_0, sample_socket_0)
+    assert(bs2.closing.get(sample_socket_0).isDefined)
   }
 }

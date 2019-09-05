@@ -2,7 +2,6 @@ package mqtt.broker
 
 import java.util.{Calendar, Date}
 
-import mqtt.Socket
 import mqtt.model.{Packet, PacketID, QoS}
 import mqtt.model.Packet.ApplicationMessage
 import mqtt.model.Types.{PackedID, TopicFilter}

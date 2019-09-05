@@ -2,6 +2,7 @@ package mqtt
 
 import java.util.Date
 
+import mqtt.broker.Socket
 import mqtt.model.{Packet, PacketID, QoS}
 import mqtt.utils.Bit
 
@@ -18,13 +19,7 @@ trait Builder[I, O] {
   def build(input: I): Seq[O]
 }
 
-trait Channel[T[_], K] {
-  def send(m: T[K])
-}
 
-case class Socket(id: Int) extends Channel[Seq, Byte] {
-  override def send(m: Seq[Byte]): Unit = ()
-}
 
 trait PacketParser extends Parser[Bit, Packet]
 
