@@ -3,11 +3,15 @@ package mqtt.broker
 import mqtt.model.Packet
 import mqtt.model.Packet.Connack
 import mqtt.model.Packet.ConnectReturnCode._
+import mqtt.broker.StateImplicits.StateTransitionWithError_Implicit
+
+
+import mqtt.broker.Common.closeSocketWithPackets
 
 trait Violation {
   def msg: String
-  def handle(socket: Socket)(state: State): State = {
-    state.addClosingChannel(socket, closePackets())
+  def handle(socket: Socket): State => State = state =>  {
+    closeSocketWithPackets(socket, closePackets())(state)
   }
   def closePackets(): Seq[Packet]
 }

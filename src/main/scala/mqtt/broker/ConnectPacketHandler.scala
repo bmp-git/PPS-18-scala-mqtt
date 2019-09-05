@@ -4,6 +4,7 @@ import mqtt.broker.StateImplicits.StateTransitionWithError_Implicit
 import mqtt.broker.Violation.{GenericViolation, InvalidIdentifier, InvalidProtocolVersion}
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, Protocol}
+import mqtt.broker.Common.closeSocket
 
 import scala.concurrent.duration.Duration
 
@@ -16,6 +17,7 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
       _ <- checkClientId(packet.clientId)
       _ <- disconnectOtherConnected(packet.clientId)
       sessionPresent <- manageSession(packet.clientId, packet.cleanSession)
+      _ <- setCleanSessionFlag(packet.clientId, cleanSession = packet.cleanSession)
       _ <- updateSocket(packet.clientId, socket)
       _ <- setWillMessage(packet.clientId, packet.willMessage)
       _ <- setKeepAlive(packet.clientId, packet.keepAlive)
@@ -67,7 +69,9 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   
   def disconnectOtherConnected(clientId: String): State => Either[Violation, (Unit, State)] = state => {
     //disconnect if already connected
-    Right((), state.sessionFromClientID(clientId).fold(state)(sess => sess.socket.fold(state)(sk => state.addClosingChannel(sk, Seq()))))
+    Right((), state.sessionFromClientID(clientId).fold(state)(sess => sess.socket.fold(state)(sk => {
+      closeSocket(sk)(state)
+    })))
   }
   
   //Boolean true if session was present
@@ -83,6 +87,10 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   def recoverSession(clientId: String): State => Either[Violation, (Boolean, State)] = state => {
     //session present 1 in connack
     state.sessionFromClientID(clientId).fold(createSession(clientId)(state))(_ => Right((true, state)))
+  }
+  
+  def setCleanSessionFlag(clientId: String, cleanSession: Boolean): State => Either[Violation, (Unit, State)] = state => {
+    Right((), state.updateUserSession(clientId, s => s.copy(persistent = true)))
   }
   
   def updateSocket(clientId: String, socket: Socket): State => Either[Violation, (Unit, State)] = state => {
