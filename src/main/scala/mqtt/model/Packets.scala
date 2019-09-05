@@ -103,12 +103,12 @@ object Packet {
   case class Unsuback(packetId: PackedID) extends Packet with PacketID
   
   /* 3.12 */
-  case object Pingreq extends Packet
+  case class Pingreq() extends Packet
   
   /* 3.13 */
-  case object Pingresp extends Packet
+  case class Pingresp() extends Packet
   
   /* 3.14 */
-  case object Disconnect extends Packet
+  case class Disconnect() extends Packet
   
 }

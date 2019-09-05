@@ -32,9 +32,9 @@ package object commonPacketFragments {
     case _: Suback => 9
     case _: Unsubscribe => 10
     case _: Unsuback => 11
-    case Pingreq => 12
-    case Pingresp => 13
-    case Disconnect => 14
+    case _: Pingreq => 12
+    case _: Pingresp => 13
+    case _: Disconnect => 14
   }).toByte.bits.drop(4)
   
   val packetIdentifier: PacketFragment[Packet with PacketID] = (p: Packet with PacketID) => p.packetId.bits.drop(16)

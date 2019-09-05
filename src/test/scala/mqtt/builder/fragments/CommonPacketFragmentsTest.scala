@@ -62,9 +62,9 @@ class CommonPacketFragmentsTest extends FunSuite {
     Suback(1234, Seq()) -> Seq[Bit](1, 0, 0, 1),
     Unsubscribe(1234, Seq()) -> Seq[Bit](1, 0, 1, 0),
     Unsuback(1234) -> Seq[Bit](1, 0, 1, 1),
-    Pingreq -> Seq[Bit](1, 1, 0, 0),
-    Pingresp -> Seq[Bit](1, 1, 0, 1),
-    Disconnect -> Seq[Bit](1, 1, 1, 0),
+    Pingreq() -> Seq[Bit](1, 1, 0, 0),
+    Pingresp() -> Seq[Bit](1, 1, 0, 1),
+    Disconnect() -> Seq[Bit](1, 1, 1, 0),
   ) foreach {
     case (packet, bits) => {
       val binaryString = bits.toBinaryString

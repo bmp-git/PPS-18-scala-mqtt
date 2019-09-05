@@ -11,5 +11,6 @@ object MqttPacketBuilder extends PacketBuilder {
   override def build(input: Packet): Seq[Bit] = input match {
     case packet: Connect => ConnectStructure.build(packet)
     case packet: Connack => ConnackStructure.build(packet)
+    case packet: Disconnect => DisconnectStructure.build(packet)
   }
 }
