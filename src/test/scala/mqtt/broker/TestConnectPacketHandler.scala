@@ -3,14 +3,13 @@ package mqtt.broker
 import java.util.Calendar
 
 import mqtt.model.Packet.ConnectReturnCode.{ConnectionAccepted, IdentifierRejected, UnacceptableProtocolVersion}
-import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, ConnectReturnCode, Protocol}
+import mqtt.model.Packet._
 import mqtt.model.QoS.QoS0
 import mqtt.model.Types.TopicFilter
 import org.scalatest.{Assertion, FunSuite}
 
 import scala.concurrent.duration.Duration
 
-//TODO
 class TestConnectPacketHandler extends FunSuite {
   val bs0 = BrokerState(Map(), Map(), Map())
   
@@ -40,6 +39,9 @@ class TestConnectPacketHandler extends FunSuite {
     pendingTransmission = Seq(),
     persistent = false
   )
+  
+  //TODO add test for presistent flag
+  //TODO will message publication test?
   
   def checkConnectReturnCode(packet: Connect, returnCode: ConnectReturnCode, searchInPendingTransmission: Boolean): Assertion = {
     val bs1 = ConnectPacketHandler.handle(bs0, packet, sample_socket_0)

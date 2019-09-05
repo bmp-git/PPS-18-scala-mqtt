@@ -109,6 +109,6 @@ object Packet {
   case object Pingresp extends Packet
 
   /* 3.14 */
-  case object Disconnect extends Packet
+  case class Disconnect() extends Packet
 
 }

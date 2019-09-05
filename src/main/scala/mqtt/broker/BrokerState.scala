@@ -8,7 +8,9 @@ case class BrokerState(override val sessions: Map[ClientID, Session],
                        override val closing: Map[Socket, Seq[Packet]]) extends State {
   override def sessionFromClientID(clientID: ClientID): Option[Session] = sessions.get(clientID)
   
-  override def sessionFromSocket(socket: Socket): Option[Session] = sessions.collectFirst { case (_, s) if s.socket.fold(false)(_ == socket) => s }
+  override def sessionFromSocket(socket: Socket): Option[(ClientID, Session)] = {
+    sessions.collectFirst { case (id, s) if s.socket.fold(false)(_ == socket) => (id, s) }
+  }
   
   override def setSession(clientID: ClientID, session: Session): State = {
     val newSessions = sessions + ((clientID, session))
@@ -35,5 +37,10 @@ case class BrokerState(override val sessions: Map[ClientID, Session],
         val newSession = f(ses)
         this.setSession(clientID, newSession)
       })
+  }
+  
+  override def deleteUserSession(clientID: ClientID): State = {
+    val newSessions = sessions - clientID
+    this.copy(sessions = newSessions)
   }
 }

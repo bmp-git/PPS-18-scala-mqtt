@@ -37,6 +37,9 @@ class TestBrokerState extends FunSuite {
   
   val bs0 = BrokerState(Map(), Map(), Map())
   
+  //TODO addClosingChannel test
+  //TODO add tests for yet untested methods
+  
   test("An empty BrokerState should have sessions size 0") {
     assert(bs0.sessions.isEmpty)
   }
@@ -69,7 +72,7 @@ class TestBrokerState extends FunSuite {
     val bs1 = bs0.setSession(sample_id_1, sample_session_1)
     val bs2 = bs1.setSocket(sample_id_1, sample_socket_1)
     val s = bs2.sessionFromSocket(sample_socket_1)
-    s.fold(fail)(_.socket.fold(fail)(sk => assert(sk == sample_socket_1)))
+    s.fold(fail)(_._2.socket.fold(fail)(sk => assert(sk == sample_socket_1)))
   }
   
   test("Getting a session from a not present socket should return empty") {
@@ -92,8 +95,6 @@ class TestBrokerState extends FunSuite {
     val bs2 = bs1.setSocket(sample_id_1, sample_socket_1)
     val bs3 = bs2.setSocket(sample_id_1, sample_socket_2)
     val s = bs3.sessionFromSocket(sample_socket_2)
-    s.fold(fail)(_.socket.fold(fail)(sk => assert(sk == sample_socket_2)))
+    s.fold(fail)(_._2.socket.fold(fail)(sk => assert(sk == sample_socket_2)))
   }
-  
-  //TODO addClosingChannel test
 }

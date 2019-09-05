@@ -1,10 +1,10 @@
 package mqtt.broker
 
+import mqtt.broker.Common.closeSocket
 import mqtt.broker.StateImplicits.StateTransitionWithError_Implicit
 import mqtt.broker.Violation.{GenericViolation, InvalidIdentifier, InvalidProtocolVersion}
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, Protocol}
-import mqtt.broker.Common.closeSocket
 
 import scala.concurrent.duration.Duration
 
@@ -32,12 +32,6 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   
   //TODO publish will packet on protocol violation
   
-  //TODO move this in the upper layer
-  def checkSocketNotInClosing(socket: Socket): State => Either[Violation, (Unit, State)] = state => {
-    state.closing.get(socket).fold[Either[Violation, (Unit, State)]](Right((), state))(_ => {
-      Left(GenericViolation("Received a packet on a closing socket"))
-    })
-  }
   
   def checkNotFirstPacketOfSocket(socket: Socket): State => Either[Violation, (Unit, State)] = state => {
     // check duplicate connect 3.1.0-2
@@ -90,7 +84,7 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   }
   
   def setCleanSessionFlag(clientId: String, cleanSession: Boolean): State => Either[Violation, (Unit, State)] = state => {
-    Right((), state.updateUserSession(clientId, s => s.copy(persistent = true)))
+    Right((), state.updateUserSession(clientId, s => s.copy(persistent = !cleanSession)))
   }
   
   def updateSocket(clientId: String, socket: Socket): State => Either[Violation, (Unit, State)] = state => {

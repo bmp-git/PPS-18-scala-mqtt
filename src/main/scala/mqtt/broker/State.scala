@@ -15,11 +15,13 @@ trait State {
   
   def sessionFromClientID(clientID: ClientID): Option[Session]
   
-  def sessionFromSocket(socket: Socket): Option[Session]
+  def sessionFromSocket(socket: Socket): Option[(ClientID, Session)]
   
   def setSession(clientID: ClientID, session: Session): State
   
   def setSocket(clientID: ClientID, socket: Socket): State
   
   def updateUserSession(clientID: ClientID, f: Session => Session): State
+  
+  def deleteUserSession(clientID: ClientID): State
 }
