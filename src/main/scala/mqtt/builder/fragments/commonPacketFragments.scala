@@ -10,7 +10,7 @@ import mqtt.builder.fragments.packetFragmentImplicits._
 
 package object commonPacketFragments {
   //Need to be def because of equality check, to rethink if possible
-  def RemainingLength: PacketFragment[Packet] = new PacketFragment[Packet] {
+  def remainingLength: PacketFragment[Packet] = new PacketFragment[Packet] {
     override def build[R <: Packet](packet: R)(implicit context: Context[R]): Seq[Bit] = {
       VariableLengthInteger.encode(
         context.parent.fold(0)
@@ -20,7 +20,7 @@ package object commonPacketFragments {
     }
   }
   
-  val ControlPacketType: PacketFragment[Packet] = (p: Packet) => (p match {
+  val controlPacketType: PacketFragment[Packet] = (p: Packet) => (p match {
     case _: Connect => 1
     case _: Connack => 2
     case _: Publish => 3
@@ -37,11 +37,11 @@ package object commonPacketFragments {
     case Disconnect => 14
   }).toByte.bits.drop(4)
   
-  val PacketIdentifier: PacketFragment[Packet with PacketID] = (p: Packet with PacketID) => p.packetId.bits.drop(16)
+  val packetIdentifier: PacketFragment[Packet with PacketID] = (p: Packet with PacketID) => p.packetId.bits.drop(16)
   
-  val Zero: StaticPacketFragment = () => Seq(0)
+  val zero: StaticPacketFragment = () => Seq(0)
   
-  val One: StaticPacketFragment = () => Seq(1)
+  val one: StaticPacketFragment = () => Seq(1)
   
-  val Empty: StaticPacketFragment = () => Seq()
+  val empty: StaticPacketFragment = () => Seq()
 }

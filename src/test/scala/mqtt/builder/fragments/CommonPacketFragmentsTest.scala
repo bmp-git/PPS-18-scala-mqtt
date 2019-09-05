@@ -20,32 +20,32 @@ class CommonPacketFragmentsTest extends FunSuite {
   case object VoidPacket extends Packet
   
   test("Zero should build in 0") {
-    assert(Zero.build() == Seq[Bit](0))
+    assert(zero.build() == Seq[Bit](0))
   }
   test("One should build in 1") {
-    assert(One.build() == Seq[Bit](1))
+    assert(one.build() == Seq[Bit](1))
   }
   test("Empty should build in empty-seq") {
-    assert(Empty.build() == Seq[Bit]())
+    assert(empty.build() == Seq[Bit]())
   }
   test("Concat of One Zero Empty should build in 10") {
-    assert((One | Zero | Empty).build() == Seq[Bit](1, 0))
+    assert((one | zero | empty).build() == Seq[Bit](1, 0))
   }
   
   test("PacketIdentifier should always be 2 bytes") {
-    assert(PacketIdentifier.build(DummyPacket(70000)).length == 16)
+    assert(packetIdentifier.build(DummyPacket(70000)).length == 16)
   }
   
   test("PacketIdentifier of 65535 should be 11111111-11111111") {
-    assert(PacketIdentifier.build(DummyPacket(65535)) == Seq[Bit](1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))
+    assert(packetIdentifier.build(DummyPacket(65535)) == Seq[Bit](1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))
   }
   
   val OneByte: StaticPacketFragment = () => Seq(0, 0, 0, 0, 0, 0, 0, 0)
   
   test("Remaining length should be always the remaining length og the packet") {
-    assert((RemainingLength | OneByte | OneByte).build(VoidPacket).getValue(0, 8) == 2)
-    assert((RemainingLength | OneByte | OneByte | OneByte | OneByte | OneByte).build(VoidPacket).getValue(0, 8) == 5)
-    assert((RemainingLength | OneByte | RemainingLength | OneByte).build(VoidPacket).getValue(16, 8) == 1)
+    assert((remainingLength | OneByte | OneByte).build(VoidPacket).getValue(0, 8) == 2)
+    assert((remainingLength | OneByte | OneByte | OneByte | OneByte | OneByte).build(VoidPacket).getValue(0, 8) == 5)
+    assert((remainingLength | OneByte | remainingLength | OneByte).build(VoidPacket).getValue(16, 8) == 1)
     //For more need VariableLengthInteger.decode
   }
   
@@ -69,7 +69,7 @@ class CommonPacketFragmentsTest extends FunSuite {
     case (packet, bits) => {
       val binaryString = bits.toBinaryString
       test(s"$packet packet type should encode in $binaryString") {
-        assert(ControlPacketType.build(packet) == bits)
+        assert(controlPacketType.build(packet) == bits)
       }
     }
   }

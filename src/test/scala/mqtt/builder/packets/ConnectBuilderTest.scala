@@ -96,7 +96,7 @@ class ConnectBuilderTest extends FunSuite {
       val build = MqttPacketBuilder.build(connect)
       val buildString = build.toBinaryString
       test(s"$connect should be builded in $buildString") {
-        assert(build.toBinaryString == bits.toBinaryString)
+        assert(build == bits)
       }
     }
   }
