@@ -1,9 +1,10 @@
 package mqtt.broker
 
-trait Channel[T[_], K] {
-  def send(m: T[K])
-}
+import mqtt.model.Packet.ApplicationMessage
 
-case class Socket(id: Int) extends Channel[Seq, Byte] {
+case class Socket(id: Int, willMessage: Option[ApplicationMessage]) extends Channel[Seq, Byte] {
   override def send(m: Seq[Byte]): Unit = ()
+  def setWillMessage(willMessage: Option[ApplicationMessage]): Socket = {
+    this.copy(willMessage = willMessage)
+  }
 }

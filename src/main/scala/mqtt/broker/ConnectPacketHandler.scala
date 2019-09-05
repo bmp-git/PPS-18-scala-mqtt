@@ -90,25 +90,26 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   }
   
   def setWillMessage(clientId: String, willMessage: Option[ApplicationMessage]): State => Either[Violation, (Unit, State)] = state => {
-    state.sessionFromClientID(clientId)
-      .fold[Either[Violation, (Unit, State)]](Left(GenericViolation("Session not found during will set")))(s => {
-        Right((), state.setSession(clientId, s.copy(willMessage = willMessage)))
-      })
+    val newState = state.updateUserSession(clientId, s => {
+      val new_socket = s.socket.map(_.setWillMessage(willMessage))
+      s.copy(socket = new_socket)
+    })
+    Right((), newState)
   }
   
   def setKeepAlive(clientId: String, keepAlive: Duration): State => Either[Violation, (Unit, State)] = state => {
-    state.sessionFromClientID(clientId)
-      .fold[Either[Violation, (Unit, State)]](Left(GenericViolation("Session not found during keep alive set")))(s => {
-        Right((), state.setSession(clientId, s.copy(keepAlive = keepAlive)))
-      })
+    val newState = state.updateUserSession(clientId, s => {
+      s.copy(keepAlive = keepAlive)
+    })
+    Right((), newState)
   }
   
   def replyWithACK(clientId: String, sessionPresent: Boolean): State => Either[Violation, (Unit, State)] = state => {
-    state.sessionFromClientID(clientId)
-      .fold[Either[Violation, (Unit, State)]](Left(GenericViolation("Session not found for ACK")))(s => {
-        val new_pending = s.pendingTransmission ++ Seq(Connack(sessionPresent, ConnectionAccepted))
-        Right((), state.setSession(clientId, s.copy(pendingTransmission = new_pending)))
-      })
+    val newState = state.updateUserSession(clientId, s => {
+      val new_pending = s.pendingTransmission ++ Seq(Connack(sessionPresent, ConnectionAccepted))
+      s.copy(pendingTransmission = new_pending)
+    })
+    Right((), newState)
   }
   
 }

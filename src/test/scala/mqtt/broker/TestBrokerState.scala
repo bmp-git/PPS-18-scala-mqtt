@@ -9,7 +9,6 @@ import scala.concurrent.duration.Duration
 class TestBrokerState extends FunSuite {
   val sample_session_1 = Session(
     socket = Option.empty,
-    willMessage = Option.empty,
     keepAlive = Duration(0, "millis"),
     lastContact = Calendar.getInstance().getTime,
     subscriptions = Map(),
@@ -21,7 +20,6 @@ class TestBrokerState extends FunSuite {
   
   val sample_session_2 = Session(
     socket = Option.empty,
-    willMessage = Option.empty,
     keepAlive = Duration(10, "minutes"),
     lastContact = Calendar.getInstance().getTime,
     subscriptions = Map(),
@@ -34,8 +32,8 @@ class TestBrokerState extends FunSuite {
   val sample_id_1 = "123"
   val sample_id_2 = "456"
   
-  val sample_socket_1 = Socket(1)
-  val sample_socket_2 = Socket(2)
+  val sample_socket_1 = Socket(1, Option.empty)
+  val sample_socket_2 = Socket(2, Option.empty)
   
   val bs0 = BrokerState(Map(), Map(), Map())
   

@@ -11,7 +11,6 @@ import scala.concurrent.duration.Duration
 //TODO Add credentials to session?
 case class Session(
                     socket: Option[Socket],
-                    willMessage: Option[ApplicationMessage],
                     keepAlive: Duration,
                     lastContact: Date,
                     subscriptions: Map[TopicFilter, QoS],
@@ -24,7 +23,6 @@ case class Session(
 object Session {
   def createEmptySession(): Session = Session(
     socket = Option.empty,
-    willMessage = Option.empty,
     keepAlive = Duration(0, "millis"),
     lastContact = Calendar.getInstance().getTime,
     subscriptions = Map(),

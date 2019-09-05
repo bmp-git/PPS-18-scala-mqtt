@@ -20,4 +20,6 @@ trait State {
   def setSession(clientID: ClientID, session: Session): State
   
   def setSocket(clientID: ClientID, socket: Socket): State
+  
+  def updateUserSession(clientID: ClientID, f: Session => Session): State
 }

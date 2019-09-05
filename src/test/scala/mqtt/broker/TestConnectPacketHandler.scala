@@ -18,8 +18,8 @@ class TestConnectPacketHandler extends FunSuite {
   
   val sample_topic_0 = "abc"
   
-  val sample_socket_0 = Socket(0)
-  val sample_socket_1 = Socket(1)
+  val sample_socket_0 = Socket(0, Option.empty)
+  val sample_socket_1 = Socket(1, Option.empty)
   
   val sample_connect_packet_0 =  Connect(
                                          protocol = Protocol("MQTT", 4),
@@ -32,7 +32,6 @@ class TestConnectPacketHandler extends FunSuite {
   
   val sample_session_0 = Session(
     socket = Option.empty,
-    willMessage = Option.empty,
     keepAlive = Duration(0, "millis"),
     lastContact = Calendar.getInstance().getTime,
     subscriptions = Map((TopicFilter(sample_topic_0), QoS0)),
@@ -117,7 +116,7 @@ class TestConnectPacketHandler extends FunSuite {
     val packet = sample_connect_packet_0.copy(willMessage = Option(ApplicationMessage(retain = false, QoS0, sample_topic_0, Seq())))
     val bs1 = ConnectPacketHandler.handle(bs0, packet, sample_socket_0)
     bs1.sessionFromClientID(sample_id_0).fold(fail)(s => {
-      s.willMessage.fold(fail)(m => assert(m.topic == sample_topic_0))
+      s.socket.fold(fail)(sk => sk.willMessage.fold(fail)(m => assert(m.topic == sample_topic_0)))
     })
   }
   
