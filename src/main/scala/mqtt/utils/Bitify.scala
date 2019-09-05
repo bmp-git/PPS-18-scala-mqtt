@@ -33,8 +33,8 @@ object BitImplicits {
 
     def getValue(from: Int, length: Int): BigInt = {
       BigInt((Seq(0.toByte) ++
-        bits.slice(from, from + (length / 8 + (if (length % 8 == 0) 0 else 1)) * 8).grouped(8).map(_.zip(0 until 8).map { case (b, p) => {
-          (if (b) 1 else 0) * math.pow(2, 7 - p).toInt
+        bits.slice(from, from + (length / 8 + (if (length % 8 == 0) 0 else 1)) * 8).grouped(8).map(_.reverse).map(_.zip(0 until 8).map { case (b, p) => {
+          (if (b) 1 else 0) * math.pow(2, p).toInt
         }
         }.sum.toByte)).toArray)
     }
