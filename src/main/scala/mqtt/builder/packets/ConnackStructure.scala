@@ -7,6 +7,7 @@ import mqtt.builder.fragments.PacketFragment
 import mqtt.model.Packet.Connack
 import mqtt.utils.BitImplicits._
 
+
 case object ConnackStructure extends PacketStructure[Connack] {
   override def fixedHeader: PacketFragment[Connack] =
     ControlPacketType | Zero | Zero | Zero | Zero |

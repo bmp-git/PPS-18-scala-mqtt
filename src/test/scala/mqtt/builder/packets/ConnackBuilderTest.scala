@@ -7,6 +7,7 @@ import mqtt.utils.Bit
 import org.scalatest.FunSuite
 import mqtt.utils.BitImplicits._
 
+
 class ConnackBuilderTest extends FunSuite {
   
   Map[Connack, Seq[Bit]](
@@ -59,7 +60,7 @@ class ConnackBuilderTest extends FunSuite {
         0, 0, 0, 0, 0, 0, 0, 1,
         0, 0, 0, 0, 0, 1, 0, 1
       )) foreach {
-    case(connack, bits) => {
+    case (connack, bits) => {
       val build = MqttPacketBuilder.build(connack)
       val buildString = build.toBinaryString
       test(s"$connack should be builded in $buildString") {

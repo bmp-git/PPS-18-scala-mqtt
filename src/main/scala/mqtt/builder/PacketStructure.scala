@@ -5,6 +5,7 @@ import mqtt.utils.Bit
 import mqtt.builder.fragments.CommonPacketFragments.Empty
 import mqtt.builder.fragments.PacketFragment
 
+
 trait PacketStructure[T <: Packet] {
   def fixedHeader: PacketFragment[T]
   
