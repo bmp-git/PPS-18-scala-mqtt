@@ -16,6 +16,8 @@ trait StaticPacketFragment extends PacketFragment[Packet] {
   override def build[R <: Packet](packet: R, context: BuildContext[R]): Seq[Bit] = build()
   
   def build(): Seq[Bit]
+  
+  def |(packetFragment: StaticPacketFragment): StaticPacketFragment = () => this.build() ++ packetFragment.build()
 }
 
 trait DynamicPacketFragment[-P] extends PacketFragment[P] {

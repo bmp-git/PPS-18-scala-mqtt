@@ -30,6 +30,9 @@ class CommonPacketFragmentsTest extends FunSuite {
   test("Empty should build in empty-seq") {
     assert(Empty.build() == Seq[Bit]())
   }
+  test("Concat of One Zero Empty should build in 10") {
+    assert((One | Zero | Empty).build() == Seq[Bit](1, 0))
+  }
   
   test("PacketIdentifier should always be 2 bytes") {
     assert(PacketIdentifier.build(DummyPacket(70000)).length == 16)
@@ -44,6 +47,7 @@ class CommonPacketFragmentsTest extends FunSuite {
   test("Remaining length should be always the remaining length og the packet") {
     assert((RemainingLength | OneByte | OneByte).build(VoidPacket).getValue(0, 8) == 2)
     assert((RemainingLength | OneByte | OneByte | OneByte | OneByte | OneByte).build(VoidPacket).getValue(0, 8) == 5)
+    assert((RemainingLength | OneByte | RemainingLength | OneByte).build(VoidPacket).getValue(16, 8) == 1)
     //For more need VariableLengthInteger.decode
   }
   
