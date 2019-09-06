@@ -1,9 +1,9 @@
 package mqtt.parser
 
-import org.scalatest.{FunSuite, Matchers}
 import mqtt.parser.BitParsers._
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
+import org.scalatest.{FunSuite, Matchers}
 
 class BitParsersTest extends FunSuite with Matchers {
   val zero: Bit = Bit(false)

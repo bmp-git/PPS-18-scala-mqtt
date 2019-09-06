@@ -12,6 +12,7 @@ import mqtt.utils.Bit
 object MqttPacketParser extends PacketParser {
   /**
    * Parse a sequence of bits and return the corresponding MQTT packet.
+   *
    * @param input the packet in bits
    * @return the parsed packet
    */

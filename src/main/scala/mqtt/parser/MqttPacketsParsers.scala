@@ -1,11 +1,12 @@
 package mqtt.parser
 
-import Monad._
 import mqtt.model.Packet
 import mqtt.model.Packet.{Connack, Connect, Disconnect, Protocol}
-import mqtt.parser.MqttFragmentsParsers._
 import mqtt.parser.BitParsers._
+import mqtt.parser.Monad._
+import mqtt.parser.MqttFragmentsParsers._
 import mqtt.parser.Parsers.{Parser, or}
+
 import scala.concurrent.duration._
 
 /**
@@ -14,7 +15,15 @@ import scala.concurrent.duration._
 object MqttPacketsParsers {
   
   /**
+   * Parser of all MQTT 3.1.1 packets.
+   *
+   * @return the MQTT 3.1.1 packets parser
+   */
+  def mqttParser(): Parser[Packet] = or(disconnectParser(), connectParser(), connackParser())
+  
+  /**
    * Parser of the MQTT 3.1.1 connect packet.
+   *
    * @return the MQTT 3.1.1 connect packet
    */
   def connectParser(): Parser[Packet] = for {
@@ -32,16 +41,18 @@ object MqttPacketsParsers {
   
   /**
    * Parser of the MQTT 3.1.1 disconnect packet.
+   *
    * @return the MQTT 3.1.1 disconnect packet
    */
   def disconnectParser(): Parser[Packet] = for {
     _ <- disconnectPacketType()
     _ <- reserved()
     _ <- bytes(1)
-  } yield Disconnect
+  } yield Disconnect()
   
   /**
    * Parser of the MQTT 3.1.1 connack packet.
+   *
    * @return the MQTT 3.1.1 connack packet
    */
   def connackParser(): Parser[Packet] = for {
@@ -51,10 +62,4 @@ object MqttPacketsParsers {
     session <- sessionPresent()
     code <- connectReturnCode()
   } yield Connack(session, code)
-  
-  /**
-   * Parser of all MQTT 3.1.1 packets.
-   * @return the MQTT 3.1.1 packets parser
-   */
-  def mqttParser(): Parser[Packet] = or(disconnectParser(), connectParser(), connackParser())
 }

@@ -1,9 +1,9 @@
 package mqtt.parser
 
-import org.scalatest.{FunSuite, Matchers}
-import mqtt.parser.Parsers._
 import mqtt.parser.BitParsers._
+import mqtt.parser.Parsers._
 import mqtt.utils.Bit
+import org.scalatest.{FunSuite, Matchers}
 
 class ParsersTest extends FunSuite with Matchers {
   val zero: Bit = Bit(false)
@@ -22,6 +22,6 @@ class ParsersTest extends FunSuite with Matchers {
     assert(or(BitParsers.zero(), BitParsers.one(), BitParsers.one()).run(Seq(zero)) == List((zero, Seq())))
   }
   test("An Or parser SHOULD parse and consume input and return more values if two parser are used") {
-    assert(or(BitParsers.zero(), BitParsers.one(), BitParsers.one()).run(Seq(one)) == List((one, Seq()),(one, Seq())))
+    assert(or(BitParsers.zero(), BitParsers.one(), BitParsers.one()).run(Seq(one)) == List((one, Seq()), (one, Seq())))
   }
 }

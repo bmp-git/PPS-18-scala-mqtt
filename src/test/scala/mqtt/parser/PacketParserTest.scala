@@ -2,11 +2,12 @@ package mqtt.parser
 
 import mqtt.model.ErrorPacket.MalformedPacket
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
-import mqtt.utils.Bit
-import org.scalatest.{FunSuite, Matchers}
-import mqtt.utils.BitImplicits._
-import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, Credential, Disconnect, Protocol}
+import mqtt.model.Packet._
 import mqtt.model.QoS.QoS2
+import mqtt.utils.Bit
+import mqtt.utils.BitImplicits._
+import org.scalatest.{FunSuite, Matchers}
+
 import scala.concurrent.duration._
 
 class PacketParserTest extends FunSuite with Matchers {
@@ -60,13 +61,13 @@ class PacketParserTest extends FunSuite with Matchers {
   }
   
   test("An MQTT packet parser should parse a disconnect message") {
-    MqttPacketParser parse disconnect shouldBe Disconnect
+    MqttPacketParser parse disconnect shouldBe Disconnect()
   }
   
   test("An MQTT packet parser should parse a connack message") {
     MqttPacketParser parse connack shouldBe Connack(sessionPresent = false, returnCode = ConnectionAccepted)
   }
-
+  
   test("An MQTT packet parser should not parse an incomplete packet") {
     MqttPacketParser parse byte shouldBe MalformedPacket
   }

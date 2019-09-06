@@ -7,12 +7,14 @@ trait Monad[F[_]] {
 }
 
 object Monad {
+  
   implicit class RichMonad[F[_] : Monad, A](ma: F[A]) {
     val monad = implicitly[Monad[F]]
     
-    def flatMap[B](f: A => F[B]): F[B] = monad.flatMap[A, B](ma)(f)
-    
     def map[B](f: A => B): F[B] = ma.flatMap(a => monad.unit(f(a)))
+    
+    def flatMap[B](f: A => F[B]): F[B] = monad.flatMap[A, B](ma)(f)
   }
+  
 }
 

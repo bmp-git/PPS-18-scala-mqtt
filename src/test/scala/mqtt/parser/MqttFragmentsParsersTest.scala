@@ -3,8 +3,8 @@ package mqtt.parser
 import mqtt.model.Packet.ConnectReturnCode._
 import mqtt.model.QoS
 import mqtt.parser.MqttFragmentsParsers._
-import org.scalatest.{FunSuite, Matchers}
 import mqtt.utils.BitImplicits._
+import org.scalatest.{FunSuite, Matchers}
 
 class MqttFragmentsParsersTest extends FunSuite with Matchers {
   //Qos parser
