@@ -7,11 +7,11 @@ import mqtt.model.Packet._
 import mqtt.utils.Bit
 
 /**
- * Provide a packet builder for MQTT 3.1.1
+ * Provides a packet builder for MQTT 3.1.1
  */
 object MqttPacketBuilder extends PacketBuilder {
   /**
-   * Transform an input packet to sequence of bits.
+   * Transforms an input packet to sequence of bits.
    *
    * @param input a MQTT 3.1.1 packet, it can be:
    *              Connect, Connack, Disconnect

@@ -1,7 +1,6 @@
 package mqtt.builder.fragments
 
 import mqtt.builder.buildContext.Context
-import mqtt.model.Packet
 import mqtt.utils.Bit
 
 /**
@@ -17,5 +16,10 @@ trait StaticPacketFragment extends PacketFragment[Any] {
    */
   def build(): Seq[Bit]
   
+  /**
+   * Chain two StaticPacketFragment and return a new one
+   * @param packetFragment the StaticPacketFragment to chain
+   * @return a new StaticPacketFragment
+   */
   def ::(packetFragment: StaticPacketFragment): StaticPacketFragment = () => packetFragment.build() ++ this.build()
 }
