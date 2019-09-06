@@ -9,6 +9,9 @@ import mqtt.parser.Parsers.{Parser, conditional, ifConditionFails, or}
 import mqtt.utils.{Bit, MqttUFT8}
 import mqtt.utils.BitImplicits._
 
+/**
+ * A container of MQTT packet fragments parsers.
+ */
 object MqttFragmentsParsers {
   
   def packetType(mask: PacketMask): Parser[Seq[Bit]] = for {
@@ -29,21 +32,21 @@ object MqttFragmentsParsers {
   def protocolLevel(): Parser[Int] = for {byte <- bytes(1)} yield byte.head.toInt
   
   def qos(): Parser[QoS] = for {
-    most <- item()
-    least <- or(conditional(item())(_ => !most), conditional(zero())(_ => most))
+    most <- bit()
+    least <- or(conditional(bit())(_ => !most), conditional(zero())(_ => most))
   } yield QoS(Seq[Bit](most, least).getValue(0, 2).toInt)
   
   def willFlags(): Parser[Option[WillFlags]] = for {
-    willRetain <- item()
+    willRetain <- bit()
     willQos <- qos()
     willFlag <- or(conditional(zero())(_ => !willRetain && willQos == QoS(0)), conditional(one())(_ => true))
   } yield if (willFlag) Option(WillFlags(willRetain, willQos)) else Option.empty
   
   def connectFlags(): Parser[ConnectFlags] = for {
-    username <- item()
-    password <- or(conditional(zero())(_ => !username), conditional(item())(_ => username))
+    username <- bit()
+    password <- or(conditional(zero())(_ => !username), conditional(bit())(_ => username))
     willFlags <- willFlags()
-    cleanSession <- item()
+    cleanSession <- bit()
     _ <- zero()
   } yield ConnectFlags(CredentialFlags(username, password), willFlags, cleanSession)
   
@@ -72,7 +75,7 @@ object MqttFragmentsParsers {
   
   def sessionPresent(): Parser[Boolean] = for {
     _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero();
-    session <- item()
+    session <- bit()
   } yield session
   
   def connectReturnCode(): Parser[ConnectReturnCode] = for {

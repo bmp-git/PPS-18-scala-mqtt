@@ -11,31 +11,31 @@ class BitParsersTest extends FunSuite with Matchers {
   val some: Seq[Bit] = Seq(0, 1, 0, 1, 1)
   val byte: Seq[Bit] = Seq(1, 1, 1, 1, 1, 1, 1, 1)
   
-  //Item parser
-  test("An item parser SHOULD parse a single zero bit") {
-    assert(item().run(Seq(zero)) == List((zero, Seq())))
+  //Bit parser
+  test("A Bit parser SHOULD parse a single zero bit") {
+    assert(bit().run(Seq(zero)) == List((zero, Seq())))
   }
-  test("An item parser SHOULD parse a single one bit") {
-    assert(item().run(Seq(one)) == List((one, Seq())))
+  test("A Bit parser SHOULD parse a single one bit") {
+    assert(bit().run(Seq(one)) == List((one, Seq())))
   }
-  test("An item parser SHOULD parse the first bit of a sequence and return the remaining") {
-    assert(item().run(some) == List((some.head, some.tail)))
+  test("A Bit parser SHOULD parse the first bit of a sequence and return the remaining") {
+    assert(bit().run(some) == List((some.head, some.tail)))
   }
-  test("A item parser SHOULD NOT parse an empty sequence") {
-    assert(item().run(Seq()) == List())
+  test("A Bit parser SHOULD NOT parse an empty sequence") {
+    assert(bit().run(Seq()) == List())
   }
   
-  //Bit parser
-  test("A Bit parser SHOULD parse a single specific zero bit") {
+  //Bit(which) parser
+  test("A Bit(0) parser SHOULD parse a single specific zero bit") {
     assert(bit(zero).run(Seq(zero)) == List((zero, Seq())))
   }
-  test("A Bit parser SHOULD parse a single specific one bit") {
+  test("A Bit(1) parser SHOULD parse a single specific one bit") {
     assert(bit(one).run(Seq(one)) == List((one, Seq())))
   }
-  test("A Bit parser SHOULD parse a single specific zero bit in a sequence and return the remaining") {
+  test("A Bit(0) parser SHOULD parse a single specific zero bit in a sequence and return the remaining") {
     assert(bit(zero).run(some) == List((zero, some.tail)))
   }
-  test("A Bit parser SHOULD NOT parse a different bit") {
+  test("A Bit(0) parser SHOULD NOT parse a different bit") {
     assert(bit(zero).run(Seq(one)) == List())
   }
   
