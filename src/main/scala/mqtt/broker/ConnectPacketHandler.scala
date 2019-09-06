@@ -87,7 +87,7 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   }
   
   def setCleanSessionFlag(clientId: String, cleanSession: Boolean): State => Either[Violation, (Unit, State)] = state => {
-    Right((), state.updateUserSession(clientId, s => s.copy(persistent = !cleanSession)))
+    Right((), state.updateSession(clientId, s => s.copy(persistent = !cleanSession)))
   }
   
   def updateSocket(clientId: String, socket: Socket): State => Either[Violation, (Unit, State)] = state => {
@@ -95,7 +95,7 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   }
   
   def setWillMessage(clientId: String, willMessage: Option[ApplicationMessage]): State => Either[Violation, (Unit, State)] = state => {
-    val newState = state.updateUserSession(clientId, s => {
+    val newState = state.updateSession(clientId, s => {
       val newSocket = s.socket.map(_.setWillMessage(willMessage))
       s.copy(socket = newSocket)
     })
@@ -103,14 +103,14 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   }
   
   def setKeepAlive(clientId: String, keepAlive: Duration): State => Either[Violation, (Unit, State)] = state => {
-    val newState = state.updateUserSession(clientId, s => {
+    val newState = state.updateSession(clientId, s => {
       s.copy(keepAlive = keepAlive)
     })
     Right((), newState)
   }
   
   def replyWithACK(clientId: String, sessionPresent: Boolean): State => Either[Violation, (Unit, State)] = state => {
-    val newState = state.updateUserSession(clientId, s => {
+    val newState = state.updateSession(clientId, s => {
       val newPending = s.pendingTransmission ++ Seq(Connack(sessionPresent, ConnectionAccepted))
       s.copy(pendingTransmission = newPending)
     })

@@ -30,9 +30,9 @@ object Common {
     state.sessionFromSocket(socket).fold(state) { case (id, sess) => {
       if (sess.persistent) {
         val newSess = sess.copy(socket = Option.empty)
-        state.updateUserSession(id, _ => newSess)
+        state.updateSession(id, _ => newSess)
       } else {
-        state.deleteUserSession(id)
+        state.deleteSession(id)
       }
     }
     }

@@ -73,14 +73,14 @@ class TestBrokerState extends FunSuite {
   
   test("BrokerState can delete a user session") {
     val bs1 = bs0.setSession(sample_id_1, sample_session_1)
-    val bs2 = bs1.deleteUserSession(sample_id_1)
+    val bs2 = bs1.deleteSession(sample_id_1)
     assert(bs2.sessionFromClientID(sample_id_1).isEmpty)
   }
   
   test("BrokerState can update a field of a session") {
     val bs1 = bs0.setSession(sample_id_1, sample_session_1)
     val newKeepAlive = Duration(100, "minutes")
-    val bs2 = bs1.updateUserSession(sample_id_1, s => {
+    val bs2 = bs1.updateSession(sample_id_1, s => {
       s.copy(keepAlive = newKeepAlive)
     })
     bs2.sessionFromClientID(sample_id_1).fold(fail)(s => assert(s.keepAlive == newKeepAlive))
