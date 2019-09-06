@@ -9,14 +9,10 @@ import mqtt.builder.fragments.packetFragmentImplicits._
 
 
 package object commonPacketFragments {
-  //Need to be def because of equality check, to rethink if possible
-  def remainingLength: PacketFragment[Packet] = new PacketFragment[Packet] {
+  val remainingLength: PacketFragment[Packet] = new PacketFragment[Packet] {
     override def build[R <: Packet](packet: R)(implicit context: Context[R]): Seq[Bit] = {
-      VariableLengthInteger.encode(
-        context.parent.fold(0)
-        (parent =>
-          PacketFragmentList(parent.packetFragments.dropWhile(!_.eq(this)).drop(1)).build(packet)(context).length / 8
-        )).toBitsSeq
+      val data = context.parent.fold(Seq[Bit]())(_.right.build(packet)(context))
+      VariableLengthInteger.encode(data.length / 8).toBitsSeq
     }
   }
   

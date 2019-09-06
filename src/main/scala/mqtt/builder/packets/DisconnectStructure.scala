@@ -7,5 +7,5 @@ import mqtt.model.Packet.Disconnect
 
 
 case object DisconnectStructure extends PacketStructure[Disconnect] {
-  override val fixedHeader: PacketFragment[Disconnect] = controlPacketType | zero | zero | zero | zero | remainingLength
+  override val fixedHeader: PacketFragment[Disconnect] = controlPacketType :: zero :: zero :: zero :: zero :: remainingLength
 }

@@ -6,7 +6,10 @@ import mqtt.utils.Bit
 
 
 trait PacketFragment[-P] {
-  def |[R <: P](packetFragment: PacketFragment[R]): PacketFragment[R] = PacketFragmentList(Seq(this, packetFragment))
+  def ::[R <: P](packetFragment: PacketFragment[R]): PacketFragment[R] = packetFragment match {
+    case pfp:PacketFragmentPair[P] => pfp.left :: pfp.right :: this //unpack pairs to respect (x,(x,(x,...))) structure
+    case _ => PacketFragmentPair(packetFragment, this)
+  }
   
   def build[R <: P](packet: R)(implicit context: Context[R]): Seq[Bit]
 }
@@ -16,13 +19,10 @@ trait StaticPacketFragment extends PacketFragment[Packet] {
   
   def build(): Seq[Bit]
   
-  def |(packetFragment: StaticPacketFragment): StaticPacketFragment = () => this.build() ++ packetFragment.build()
+  def ::(packetFragment: StaticPacketFragment): StaticPacketFragment = () => packetFragment.build() ++ this.build()
 }
 
-case class PacketFragmentList[-P](packetFragments: Seq[PacketFragment[P]]) extends PacketFragment[P] {
-  override def |[R <: P](packetFragment: PacketFragment[R]): PacketFragment[R] = PacketFragmentList(packetFragments :+ packetFragment)
-  
-  override def build[R <: P](packet: R)(implicit context: Context[R]): Seq[Bit] = packetFragments.flatMap(_.build(packet)(Context(Option(this))))
+case class PacketFragmentPair[-P](left: PacketFragment[P], right:PacketFragment[P]) extends PacketFragment[P] {
+  override def build[R <: P](packet: R)(implicit context: Context[R]): Seq[Bit] =
+    left.build(packet)(Context(Option(this))) ++ right.build(packet)(Context(Option(this)))
 }
-
-

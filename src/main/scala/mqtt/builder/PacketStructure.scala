@@ -13,5 +13,5 @@ trait PacketStructure[T <: Packet] {
   
   def payload: PacketFragment[T] = empty
   
-  def build(packet: T): Seq[Bit] = (fixedHeader | variableHeader | payload).build(packet)
+  def build(packet: T): Seq[Bit] = (fixedHeader :: variableHeader :: payload).build(packet)
 }

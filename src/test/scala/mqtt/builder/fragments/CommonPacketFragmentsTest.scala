@@ -29,7 +29,8 @@ class CommonPacketFragmentsTest extends FunSuite {
     assert(empty.build() == Seq[Bit]())
   }
   test("Concat of One Zero Empty should build in 10") {
-    assert((one | zero | empty).build() == Seq[Bit](1, 0))
+    val asd = (one :: zero :: empty)
+    assert((one :: zero :: empty).build() == Seq[Bit](1, 0))
   }
   
   test("PacketIdentifier should always be 2 bytes") {
@@ -43,9 +44,9 @@ class CommonPacketFragmentsTest extends FunSuite {
   val OneByte: StaticPacketFragment = () => Seq(0, 0, 0, 0, 0, 0, 0, 0)
   
   test("Remaining length should be always the remaining length og the packet") {
-    assert((remainingLength | OneByte | OneByte).build(VoidPacket).getValue(0, 8) == 2)
-    assert((remainingLength | OneByte | OneByte | OneByte | OneByte | OneByte).build(VoidPacket).getValue(0, 8) == 5)
-    assert((remainingLength | OneByte | remainingLength | OneByte).build(VoidPacket).getValue(16, 8) == 1)
+    assert((remainingLength :: OneByte :: OneByte).build(VoidPacket).getValue(0, 8) == 2)
+    assert((remainingLength :: OneByte :: OneByte :: OneByte :: OneByte :: OneByte).build(VoidPacket).getValue(0, 8) == 5)
+    assert((remainingLength :: OneByte :: remainingLength :: OneByte).build(VoidPacket).getValue(16, 8) == 1)
     //For more need VariableLengthInteger.decode
   }
   
