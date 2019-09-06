@@ -3,6 +3,13 @@ package mqtt.broker
 import mqtt.model.Types.ClientID
 import mqtt.model.{Packet, Types}
 
+/**
+ * Represents the internal state of the server/broker.
+ *
+ * @param sessions the client sessions to be initialized with.
+ * @param retains  the retain messages to be initialized with.
+ * @param closing  the closing sockets to be initialized with.
+ */
 case class BrokerState(override val sessions: Map[ClientID, Session],
                        override val retains: Map[Types.Topic, Packet.ApplicationMessage],
                        override val closing: Map[Socket, Seq[Packet]]) extends State {
