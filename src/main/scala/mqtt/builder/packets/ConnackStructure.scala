@@ -7,7 +7,9 @@ import mqtt.builder.fragments.PacketFragment
 import mqtt.model.Packet.Connack
 import mqtt.utils.BitImplicits._
 
-
+/**
+ * Provide the structure of Connack packet as referred in chapter 3.2.
+ */
 case object ConnackStructure extends PacketStructure[Connack] {
   private val returnCode = (p: Connack) => p.returnCode.value.toByte.bits
   private val sessionPresent = zero :: zero :: zero :: zero :: zero :: zero :: zero :: ((p: Connack) => p.sessionPresent)

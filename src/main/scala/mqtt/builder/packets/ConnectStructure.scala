@@ -8,7 +8,9 @@ import mqtt.model.Packet.Connect
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
 
-
+/**
+ * Provide the structure of Connect packet as referred in chapter 3.1
+ */
 case object ConnectStructure extends PacketStructure[Connect] {
   private val protocolName = (p: Connect) => p.protocol.name
   private val protocolLevel = (p: Connect) => p.protocol.level.bits.drop(24)

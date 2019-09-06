@@ -5,7 +5,11 @@ import mqtt.utils.Bit
 import mqtt.builder.fragments.commonPacketFragments.empty
 import mqtt.builder.fragments.PacketFragment
 
-
+/**
+ * Provides an abstraction for a MQTT 3.1.1 packet structure.
+ *
+ * @tparam T the type of the packet for which to specify the structure
+ */
 trait PacketStructure[T <: Packet] {
   def fixedHeader: PacketFragment[T]
   

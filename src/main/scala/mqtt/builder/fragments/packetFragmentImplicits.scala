@@ -5,7 +5,11 @@ import mqtt.model.{Packet, QoS}
 import mqtt.utils.{Bit, MqttBytes, MqttString}
 import mqtt.utils.BitImplicits._
 
-
+/**
+ * Provides some implicits in order to facilitate the definition of MQTT 3.1.1 packet structures.
+ * Example: a packet fragment for a certain string field can be defined as: "(p: YourPacket) => p.myStringField";
+ *          when this builds it will produce an encoded string as specified at 1.5.3.
+ */
 package object packetFragmentImplicits {
   implicit def fromBooleanExtractorToPacketFragment[T <: Packet](f: T => Boolean): PacketFragment[T] = new PacketFragment[T] {
     override def build[R <: T](packet: R)(implicit context: Context[R]): Seq[Bit] = Seq(f(packet))
