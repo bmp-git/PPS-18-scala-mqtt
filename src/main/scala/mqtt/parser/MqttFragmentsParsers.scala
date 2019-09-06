@@ -25,7 +25,8 @@ object MqttFragmentsParsers {
   
   def reserved(): Parser[Seq[Bit]] = for {_ <- zero(); _ <- zero(); _ <- zero(); _ <- zero()} yield Seq(0, 0, 0, 0)
   
-  def utf8(): Parser[String] = Parser(s => List((MqttUFT8.decode(s.toBytes), s.toBytes.drop(MqttUFT8.size(s.toBytes) + 2).toBitsSeq)))
+  def utf8(): Parser[String] =
+    Parser(s => List((MqttUFT8.decode(s.toBytes), s.toBytes.drop(MqttUFT8.size(s.toBytes) + 2).toBitsSeq)))
   
   def protocolName(): Parser[String] = conditional(utf8())(_ == "MQTT")
   
@@ -74,7 +75,7 @@ object MqttFragmentsParsers {
   } yield if (flags.username) Option(Credential(username, Option(flags.password) collect { case true => password })) else Option.empty
   
   def sessionPresent(): Parser[Boolean] = for {
-    _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero();
+    _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero()
     session <- bit()
   } yield session
   

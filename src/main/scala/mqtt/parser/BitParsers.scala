@@ -9,7 +9,7 @@ import mqtt.utils.BitImplicits._
  * A container of bit/byte parsers.
  */
 object BitParsers {
-  def bit(): Parser[Bit] = Parser(s => if (s.isEmpty) List() else List((s.head, s.tail)))
+  def bit(): Parser[Bit] = Parser(s => if (s.isEmpty) List() else List((s.head, s.drop(1))))
   
   def bit(which: Bit): Parser[Bit] = conditional(bit())(_ == which)
   

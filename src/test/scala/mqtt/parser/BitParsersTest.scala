@@ -19,7 +19,7 @@ class BitParsersTest extends FunSuite with Matchers {
     assert(bit().run(Seq(one)) == List((one, Seq())))
   }
   test("A Bit parser SHOULD parse the first bit of a sequence and return the remaining") {
-    assert(bit().run(some) == List((some.head, some.tail)))
+    assert(bit().run(some) == List((some.head, some.drop(1))))
   }
   test("A Bit parser SHOULD NOT parse an empty sequence") {
     assert(bit().run(Seq()) == List())
@@ -33,7 +33,7 @@ class BitParsersTest extends FunSuite with Matchers {
     assert(bit(one).run(Seq(one)) == List((one, Seq())))
   }
   test("A Bit(0) parser SHOULD parse a single specific zero bit in a sequence and return the remaining") {
-    assert(bit(zero).run(some) == List((zero, some.tail)))
+    assert(bit(zero).run(some) == List((zero, some.drop(1))))
   }
   test("A Bit(0) parser SHOULD NOT parse a different bit") {
     assert(bit(zero).run(Seq(one)) == List())
@@ -41,7 +41,7 @@ class BitParsersTest extends FunSuite with Matchers {
   
   //Zero parser
   test("A Zero parser SHOULD parse a zero bit in a sequence and return the remaining") {
-    assert(BitParsers.zero().run(some) == List((zero, some.tail)))
+    assert(BitParsers.zero().run(some) == List((zero, some.drop(1))))
   }
   test("A Zero parser SHOULD NOT parse a one") {
     assert(BitParsers.zero().run(Seq(one)) == List())
@@ -76,12 +76,4 @@ class BitParsersTest extends FunSuite with Matchers {
   test("A Byte parser SHOULD NOT parse a byte if sequence is less then a byte") {
     assert(bytes(1).run(Seq()) == List())
   }
-  
-  //defaultIfNot parser
-  /*test("A DefaultIfNot parser SHOULD parse and consume input if condition=true") {
-    assert(ifConditionFails(zero, item())(true).run(Seq(1,1)) == List((one, Seq(one))))
-  }
-  test("A DefaultIfNot parser SHOULD NOT parse and consume input if condition=false") {
-    assert(ifConditionFails(zero, item())(false).run(Seq(0)) == List((zero, Seq(zero))))
-  }*/
 }

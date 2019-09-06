@@ -21,7 +21,7 @@ object Parsers {
     
     override def unit[A](a: => A): Parser[A] = Parser(s => List((a, s)))
     
-    override def flatMap[A, B](ma: Parser[A])(f: (A) => Parser[B]): Parser[B] =
+    override def flatMap[A, B](ma: Parser[A])(f: A => Parser[B]): Parser[B] =
       Parser(s => ma.run(s) flatMap { case (a, rest) => f(a).run(rest)})
   }
   
@@ -61,7 +61,6 @@ object Parsers {
    */
   def or[A, B <: A, C <: A](p1: Parser[B], p2: Parser[C]): Parser[A] = Parser(s => p1.run(s) ++ p2.run(s))
   
-  //to test
   /**
    * A parser that combine the result of many different parsers with the same result type B.
    * @param p1 the parsers
@@ -70,7 +69,7 @@ object Parsers {
    * @return the new parser
    */
   def or[A, B <: A](p1: Parser[B]*): Parser[A] = {
-    if (p1.size == 2) or(p1.head, p1(1)) else Parser(s => p1.head.run(s) ++ or(p1.tail:_*).run(s))
+    if (p1.size == 2) or(p1.head, p1(1)) else Parser(s => p1.head.run(s) ++ or(p1.drop(1):_*).run(s))
   }
   
   /**
