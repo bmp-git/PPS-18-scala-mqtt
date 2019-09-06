@@ -7,7 +7,6 @@ import org.scalatest.{FunSuite, Matchers}
 import mqtt.utils.BitImplicits._
 import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, Credential, Disconnect, Protocol}
 import mqtt.model.QoS.QoS2
-
 import scala.concurrent.duration._
 
 class PacketParserTest extends FunSuite with Matchers {
