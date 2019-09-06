@@ -11,7 +11,8 @@ import scala.concurrent.duration.Duration
 /**
  * Represents the session of a client.
  *
- * @param socket                        the communication channel associated with this session. Could be empty if the client is disconnected but his session is persistent.
+ * @param socket                        the communication channel associated with this session.
+ *                                      Could be empty if the client is disconnected but his session is persistent.
  * @param keepAlive                     2/3 of the time after that the client should be forcibly disconnected if no messages arrived.
  * @param lastContact                   the datetime of the last message reception.
  * @param subscriptions                 the client subscriptions.

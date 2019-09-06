@@ -109,7 +109,6 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
     })))
   }
   
-  //Boolean true if session was present
   /**
    * Decides if the session must be cleared or recovered, given the cleanSession flag.
    *
