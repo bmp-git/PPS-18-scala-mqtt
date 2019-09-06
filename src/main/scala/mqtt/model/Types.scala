@@ -1,5 +1,9 @@
 package mqtt.model
 
+import mqtt.utils.Bit
+import mqtt.utils.BitImplicits._
+
+
 sealed trait QoS
 
 object QoS {
@@ -14,6 +18,15 @@ object QoS {
     case 0 => QoS0
     case 1 => QoS1
     case 2 => QoS2
+  }
+  
+  implicit class QoSExtensions(qos: QoS){
+    def value:Int = qos match {
+      case QoS0 => 0
+      case QoS1 => 1
+      case QoS2 => 2
+    }
+    def bits:Seq[Bit] = value.bits.drop(30)
   }
 }
 
