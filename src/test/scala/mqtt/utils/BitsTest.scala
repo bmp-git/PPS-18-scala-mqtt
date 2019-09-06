@@ -52,6 +52,7 @@ class BitsTest extends FunSuite {
     (Seq[Bit](1, 0, 0, 0, 0, 0, 0, 0, 0, 0), 0, 10) -> 512,
     (Seq[Bit](1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0), 1, 9) -> 257,
     (Seq[Bit](1, 0, 0, 0, 0, 0, 0, 0, 0), 0, 2) -> 2,
+    (Seq[Bit](1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0), 1, 9) -> 129,
   ) foreach {
     case (key, result) => key match {
       case (bits: Seq[Bit], from: Int, to: Int) => {

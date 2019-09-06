@@ -25,14 +25,21 @@ object BitImplicits {
       .mkString("-")
     
     def getValue(from: Int, length: Int): BigInt = {
+      def bitsToByte(bits: Seq[Bit]): Byte =
+        bits.zipWithIndex.map {
+          case (bit, place) => {
+            (if (bit) 1 else 0) * (1 << (7 - place))
+          }
+        }.sum.toByte
+      
+      //example: 10100000010
       BigInt((Seq(0.toByte) ++
-        value.slice(from, from + length).reverse
-          .grouped(8).map(_.padTo(8, Bit(false)).reverse).toSeq.reverse
-          .map(_.zipWithIndex.map {
-            case (b, p) => {
-              (if (b) 1 else 0) * math.pow(2, 7 - p).toInt
-            }
-          }.sum.toByte)).toArray)
+        value.slice(from, from + length) //from: 1, length: 9 => 010000011 == 131
+          .reverse //110000010
+          .grouped(8) //11000001-0
+          .map(_.padTo(8, Bit(false)).reverse) //11000001-00000000 => 10000011-00000000
+          .toSeq.reverse //00000000-10000011
+          .map(bitsToByte)).toArray) //0x00 0x83 == 131
     }
     
     def toBytes: Seq[Byte] = {
