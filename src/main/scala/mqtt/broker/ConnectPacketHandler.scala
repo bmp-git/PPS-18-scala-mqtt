@@ -2,7 +2,7 @@ package mqtt.broker
 
 import mqtt.broker.Common.closeSocket
 import mqtt.broker.StateImplicits.StateTransitionWithError_Implicit
-import mqtt.broker.Violation.{GenericViolation, InvalidIdentifier, InvalidProtocolName, InvalidProtocolVersion, MultipleConnectPacketsOnSameSocket}
+import mqtt.broker.Violation.{InvalidIdentifier, InvalidProtocolName, InvalidProtocolVersion, MultipleConnectPacketsOnSameSocket}
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, Protocol}
 
@@ -96,8 +96,8 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   
   def setWillMessage(clientId: String, willMessage: Option[ApplicationMessage]): State => Either[Violation, (Unit, State)] = state => {
     val newState = state.updateUserSession(clientId, s => {
-      val new_socket = s.socket.map(_.setWillMessage(willMessage))
-      s.copy(socket = new_socket)
+      val newSocket = s.socket.map(_.setWillMessage(willMessage))
+      s.copy(socket = newSocket)
     })
     Right((), newState)
   }
@@ -111,8 +111,8 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   
   def replyWithACK(clientId: String, sessionPresent: Boolean): State => Either[Violation, (Unit, State)] = state => {
     val newState = state.updateUserSession(clientId, s => {
-      val new_pending = s.pendingTransmission ++ Seq(Connack(sessionPresent, ConnectionAccepted))
-      s.copy(pendingTransmission = new_pending)
+      val newPending = s.pendingTransmission ++ Seq(Connack(sessionPresent, ConnectionAccepted))
+      s.copy(pendingTransmission = newPending)
     })
     Right((), newState)
   }

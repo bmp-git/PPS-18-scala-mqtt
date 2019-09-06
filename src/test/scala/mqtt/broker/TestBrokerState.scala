@@ -7,10 +7,6 @@ import scala.concurrent.duration.Duration
 
 class TestBrokerState extends FunSuite {
   
-  
-  //TODO addClosingChannel test
-  //TODO add tests for yet untested methods
-  
   test("An empty BrokerState should have sessions size 0") {
     assert(bs0.sessions.isEmpty)
   }

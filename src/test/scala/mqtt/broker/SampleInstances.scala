@@ -21,10 +21,13 @@ object SampleInstances {
   val sample_socket_1 = Socket(1, Option.empty)
   val sample_socket_2 = Socket(2, Option.empty)
   
+  val sample_duration_0 = Duration(0, "millis")
+  val sample_duration_1 = Duration(10, "minutes")
+  
   val sample_connect_packet_0 = Connect(
     protocol = Protocol("MQTT", 4),
     cleanSession = false,
-    keepAlive = Duration(0, "millis"),
+    keepAlive = sample_duration_0,
     clientId = sample_id_0,
     credential = Option.empty,
     willMessage = Option.empty
@@ -34,7 +37,7 @@ object SampleInstances {
   
   val sample_session_0 = Session(
     socket = Option.empty,
-    keepAlive = Duration(0, "millis"),
+    keepAlive = sample_duration_0,
     lastContact = Calendar.getInstance().getTime,
     subscriptions = Map((TopicFilter(sample_topic_0), QoS0)),
     notYetAcknowledged = Map(),
@@ -46,7 +49,7 @@ object SampleInstances {
   
   val sample_session_1 = Session(
     socket = Option.empty,
-    keepAlive = Duration(0, "millis"),
+    keepAlive = sample_duration_0,
     lastContact = Calendar.getInstance().getTime,
     subscriptions = Map(),
     notYetAcknowledged = Map(),
@@ -57,7 +60,7 @@ object SampleInstances {
   
   val sample_session_2 = Session(
     socket = Option.empty,
-    keepAlive = Duration(10, "minutes"),
+    keepAlive = sample_duration_1,
     lastContact = Calendar.getInstance().getTime,
     subscriptions = Map(),
     notYetAcknowledged = Map(),

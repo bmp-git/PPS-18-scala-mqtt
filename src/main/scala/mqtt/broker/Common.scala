@@ -29,8 +29,8 @@ object Common {
   def updateSession(socket: Socket): State => State = state => {
     state.sessionFromSocket(socket).fold(state) { case (id, sess) => {
       if (sess.persistent) {
-        val new_sess = sess.copy(socket = Option.empty)
-        state.updateUserSession(id, _ => new_sess)
+        val newSess = sess.copy(socket = Option.empty)
+        state.updateUserSession(id, _ => newSess)
       } else {
         state.deleteUserSession(id)
       }
