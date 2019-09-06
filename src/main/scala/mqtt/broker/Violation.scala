@@ -13,20 +13,23 @@ trait Violation {
     closeSocketWithPackets(socket, closePackets())(state)
   }
   def closePackets(): Seq[Packet]
+  override def toString: String = msg
 }
 
 object Violation {
-  case class GenericViolation(msg: String) extends Violation {
+  class GenericViolation(override val msg: String) extends Violation {
     override val closePackets: Seq[Connack] = Seq()
   }
   
-  case class InvalidProtocolVersion() extends Violation {
-    override val msg: String = "InvalidProtocolVersion"
+  case class InvalidProtocolName() extends GenericViolation("InvalidProtocolName")
+  
+  case class InvalidProtocolVersion() extends GenericViolation("InvalidProtocolVersion") {
     override val closePackets: Seq[Connack] = Seq(Connack(sessionPresent = false, UnacceptableProtocolVersion))
   }
   
-  case class InvalidIdentifier() extends Violation {
-    override val msg: String = "InvalidIdentifier"
+  case class InvalidIdentifier() extends GenericViolation("InvalidIdentifier") {
     override val closePackets: Seq[Connack] = Seq(Connack(sessionPresent = false, IdentifierRejected))
   }
+  
+  case class MultipleConnectPacketsOnSameSocket() extends GenericViolation("MultipleConnectPacketsOnSameSocket")
 }

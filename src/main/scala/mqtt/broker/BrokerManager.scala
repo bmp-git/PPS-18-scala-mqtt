@@ -4,7 +4,7 @@ import mqtt.model.Packet
 import mqtt.model.Packet.{Connect, Disconnect}
 
 
-class BrokerManager extends ProtocolManager {
+object BrokerManager extends ProtocolManager {
   override def handle(state: State, packet: Packet, socket: Socket): State = {
     //TODO refactor
     //if the socket is closing the packet cannot be accepted

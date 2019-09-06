@@ -2,7 +2,7 @@ package mqtt.broker
 
 import mqtt.broker.Common.closeSocket
 import mqtt.broker.StateImplicits.StateTransitionWithError_Implicit
-import mqtt.broker.Violation.{GenericViolation, InvalidIdentifier, InvalidProtocolVersion}
+import mqtt.broker.Violation.{GenericViolation, InvalidIdentifier, InvalidProtocolName, InvalidProtocolVersion, MultipleConnectPacketsOnSameSocket}
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, Protocol}
 
@@ -25,7 +25,8 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
     } yield ()
     
     f.run(state) match {
-      case Left(v) => println(v.msg); v.handle(socket)(state) //close connection in case of error
+      //TODO remove println, use a logger
+      case Left(v) => println(v.toString); v.handle(socket)(state) //close connection in case of error
       case Right((_, s)) => s
     }
   }
@@ -36,7 +37,8 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   def checkNotFirstPacketOfSocket(socket: Socket): State => Either[Violation, (Unit, State)] = state => {
     // check duplicate connect 3.1.0-2
     state.sessionFromSocket(socket).fold[Either[Violation, (Unit, State)]](Right((), state))(_ => {
-      Left(GenericViolation("Received two connect packets on same socket"))
+      //there is already a session with this socket
+      Left(MultipleConnectPacketsOnSameSocket())
     })
   }
   
@@ -50,7 +52,7 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   }
   
   def checkProtocolName(name: String): State => Either[Violation, (Unit, State)] = state => {
-    if (name != "MQTT") Left(InvalidProtocolVersion()) else Right((), state)
+    if (name != "MQTT") Left(InvalidProtocolName()) else Right((), state)
   }
   
   def checkProtocolVersion(version: Int): State => Either[Violation, (Unit, State)] = state => {
@@ -63,6 +65,7 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   
   def disconnectOtherConnected(clientId: String): State => Either[Violation, (Unit, State)] = state => {
     //disconnect if already connected
+    //there is a session with the same clientID and a non-empty socket.
     Right((), state.sessionFromClientID(clientId).fold(state)(sess => sess.socket.fold(state)(sk => {
       closeSocket(sk)(state)
     })))
