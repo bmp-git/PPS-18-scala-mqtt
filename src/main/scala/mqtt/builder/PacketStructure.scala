@@ -2,7 +2,7 @@ package mqtt.builder
 
 import mqtt.model.Packet
 import mqtt.utils.Bit
-import mqtt.builder.fragments.commonPacketFragments.empty
+import mqtt.builder.fragments.CommonPacketFragments.empty
 import mqtt.builder.fragments.PacketFragment
 
 /**

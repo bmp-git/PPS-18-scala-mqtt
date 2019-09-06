@@ -1,6 +1,6 @@
 package mqtt.builder.fragments
 
-import mqtt.builder.fragments.commonPacketFragments._
+import mqtt.builder.fragments.CommonPacketFragments._
 import mqtt.model.Packet._
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.QoS.QoS1
@@ -10,7 +10,7 @@ import org.scalatest.FunSuite
 import mqtt.utils.BitImplicits._
 import mqtt.model.Types._
 import scala.concurrent.duration._
-import mqtt.builder.buildContext._
+import mqtt.builder.BuildContext._
 
 
 class CommonPacketFragmentsTest extends FunSuite {

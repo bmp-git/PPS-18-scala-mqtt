@@ -1,6 +1,6 @@
 package mqtt.builder.fragments
 
-import mqtt.builder.buildContext._
+import mqtt.builder.BuildContext._
 import mqtt.utils.Bit
 
 /**

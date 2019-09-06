@@ -1,16 +1,16 @@
 package mqtt.builder.fragments
 
-import mqtt.builder.buildContext._
+import mqtt.builder.BuildContext._
 import mqtt.model.Packet._
 import mqtt.model.{Packet, PacketID}
 import mqtt.utils.{Bit, VariableLengthInteger}
 import mqtt.utils.BitImplicits._
-import mqtt.builder.fragments.packetFragmentImplicits._
+import mqtt.builder.fragments.PacketFragmentImplicits._
 
 /**
  * Provides some basic packet fragments to be used in the definition of a MQTT 3.1.1 packet structure.
  */
-package object commonPacketFragments {
+object CommonPacketFragments {
   
   /**
    * Builds in a variable length integer representing the remaining length of the packet as specified in 2.2.3.

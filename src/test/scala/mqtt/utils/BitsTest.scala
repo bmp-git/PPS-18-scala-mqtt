@@ -63,4 +63,6 @@ class BitsTest extends FunSuite {
       }
     }
   }
+  
+  //TODO: tests Bitify and other methods related to bits
 }

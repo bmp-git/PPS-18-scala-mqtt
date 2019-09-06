@@ -7,7 +7,7 @@ import mqtt.model.Packet._
 import mqtt.utils.Bit
 
 /**
- * Provides a packet builder for MQTT 3.1.1
+ * Provides a packet builder for MQTT 3.1.1.
  */
 object MqttPacketBuilder extends PacketBuilder {
   /**
@@ -21,5 +21,6 @@ object MqttPacketBuilder extends PacketBuilder {
     case packet: Connect => ConnectStructure.build(packet)
     case packet: Connack => ConnackStructure.build(packet)
     case packet: Disconnect => DisconnectStructure.build(packet)
+    //TODO: complete on next sprints
   }
 }

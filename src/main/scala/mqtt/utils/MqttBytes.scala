@@ -7,5 +7,5 @@ object MqttBytes {
     value.length.bits.drop(16).toBytes ++ value
   }
   
-  def decode(data: Seq[Byte]): Option[String] = ???
+  def decode(data: Seq[Byte]): Option[String] = ??? //TODO
 }

@@ -1,6 +1,6 @@
 package mqtt.utils
 
-//2.2.3, copied step by step, to refactor
+//2.2.3, copied step by step, TODO functional refactor
 object VariableLengthInteger {
   def encode(value: Int): Seq[Byte] = {
     var list = Seq[Byte]()

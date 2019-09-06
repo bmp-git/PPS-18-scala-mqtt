@@ -1,7 +1,7 @@
 package mqtt.utils
 
-//TODO: rename to bitImplicits
-package object BitImplicits {
+
+object BitImplicits {
   
   implicit class RichBitwiseInt(value: Int) {
     private val BYTE_MASK = Seq(0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF)

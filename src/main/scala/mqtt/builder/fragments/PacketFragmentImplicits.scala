@@ -1,7 +1,7 @@
 package mqtt.builder.fragments
 
-import mqtt.builder.buildContext.Context
-import mqtt.model.{Packet, QoS}
+import mqtt.builder.BuildContext.Context
+import mqtt.model.Packet
 import mqtt.utils.{Bit, MqttBytes, MqttString}
 import mqtt.utils.BitImplicits._
 
@@ -10,7 +10,7 @@ import mqtt.utils.BitImplicits._
  * Example: a packet fragment for a certain string field can be defined as: "(p: YourPacket) => p.myStringField";
  *          when this builds it will produce an encoded string as specified at 1.5.3.
  */
-package object packetFragmentImplicits {
+object PacketFragmentImplicits {
   implicit def fromBooleanExtractorToPacketFragment[T <: Packet](f: T => Boolean): PacketFragment[T] = new PacketFragment[T] {
     override def build[R <: T](packet: R)(implicit context: Context[R]): Seq[Bit] = Seq(f(packet))
   }

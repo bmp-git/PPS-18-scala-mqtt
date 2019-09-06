@@ -1,11 +1,11 @@
 package mqtt.builder
 
-import mqtt.builder.fragments.{PacketFragmentPair}
+import mqtt.builder.fragments.PacketFragmentPair
 
 
-package object buildContext {
+object BuildContext {
   /**
-   * The context of packet fragments build
+   * The context of packet fragments build.
    * @param parent if present, represent the parent PacketFragmentPair
    * @tparam P the type of the object that the parent refers to
    */
