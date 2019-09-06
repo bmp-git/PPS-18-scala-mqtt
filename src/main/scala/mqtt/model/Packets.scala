@@ -28,22 +28,30 @@ object Packet {
   case class ApplicationMessage(retain: Boolean, qos: QoS, topic: String, payload: Payload)
 
   /* 3.2.2.3 */
-  sealed trait ConnectReturnCode
-
+  sealed abstract class ConnectReturnCode(val value: Int)
+  
   object ConnectReturnCode {
-
-    case object ConnectionAccepted extends ConnectReturnCode
-
-    case object UnacceptableProtocolVersion extends ConnectReturnCode
-
-    case object IdentifierRejected extends ConnectReturnCode
-
-    case object ServerUnavailable extends ConnectReturnCode
-
-    case object BadUsernameOrPassword extends ConnectReturnCode
-
-    case object NotAuthorized extends ConnectReturnCode
-
+    
+    case object ConnectionAccepted extends ConnectReturnCode(0)
+    
+    case object UnacceptableProtocolVersion extends ConnectReturnCode(1)
+    
+    case object IdentifierRejected extends ConnectReturnCode(2)
+    
+    case object ServerUnavailable extends ConnectReturnCode(3)
+    
+    case object BadUsernameOrPassword extends ConnectReturnCode(4)
+    
+    case object NotAuthorized extends ConnectReturnCode(5)
+  
+    def apply(value: Int): ConnectReturnCode = value match {
+      case 0 => ConnectionAccepted
+      case 1 => UnacceptableProtocolVersion
+      case 2 => IdentifierRejected
+      case 3 => ServerUnavailable
+      case 4 => BadUsernameOrPassword
+      case 5 => NotAuthorized
+    }
   }
 
   /* 3.1 */
