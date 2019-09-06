@@ -1,17 +1,15 @@
 package mqtt.builder.packets
 
-import mqtt.builder.MqttPacketBuilder
 import mqtt.model.Packet.{ApplicationMessage, Connect, Credential, Protocol}
 import mqtt.model.QoS.{QoS1, QoS2}
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
-import org.scalatest.FunSuite
-
 import scala.concurrent.duration._
 
-class ConnectBuilderTest extends FunSuite {
+
+class ConnectBuilderTest extends PacketBuilderTester {
   
-  Map[Connect, Seq[Bit]](
+  assertBuild(Map[Connect, Seq[Bit]](
     Connect(Protocol("MQTT", 4), cleanSession = false, 10 seconds, "a", Option.empty, Option.empty) ->
       Seq(
         0, 0, 0, 1, 0, 0, 0, 0, //id and reserved
@@ -91,13 +89,5 @@ class ConnectBuilderTest extends FunSuite {
         0, 0, 0, 0, 0, 0, 0, 1, //length LSB password
         0, 0, 0, 0, 1, 1, 0, 0, //12
       )
-  ) foreach {
-    case (connect, bits) => {
-      val build = MqttPacketBuilder.build(connect)
-      val buildString = build.toBinaryString
-      test(s"$connect should be builded in $buildString") {
-        assert(build == bits)
-      }
-    }
-  }
+  ))
 }

@@ -7,5 +7,5 @@ import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
 
 class PacketBuilderTest extends FunSuite {
-
+  //wait for parser
 }

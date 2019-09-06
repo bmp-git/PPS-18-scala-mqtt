@@ -14,7 +14,9 @@ class MqttStringTest extends FunSuite {
   ) foreach {
     case (value, encoded) => {
       val encodedString = encoded.map(_.toByte).toBitsSeq.toBinaryString
-      test(s"$value should be encoded in $encodedString") {
+      val encodedStr = encodedString.take(40) + (if (encodedString.length > 40) "..." else "")
+      val valueStr = value.take(40) + (if (value.length > 40) "..." else "")
+      test(s"$valueStr should be encoded in $encodedStr") {
         val data = MqttString.encode(value)
         assert(encoded.map(_.toByte) == data)
       }
