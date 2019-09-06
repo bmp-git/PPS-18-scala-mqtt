@@ -1,11 +1,12 @@
 import java.net.{ServerSocket, Socket}
 import java.util.concurrent.Executors
 
-import mqtt.{PacketParser, ProtocolManager}
+import mqtt.PacketParser
 import rx.lang.scala.Observable
 import rx.lang.scala.schedulers._
 import java.net._
 
+import mqtt.broker.ProtocolManager
 import mqtt.model.Packet
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._

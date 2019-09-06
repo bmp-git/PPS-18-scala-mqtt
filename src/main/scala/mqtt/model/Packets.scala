@@ -119,5 +119,4 @@ object Packet {
   
   /* 3.14 */
   case class Disconnect() extends Packet
-  
 }

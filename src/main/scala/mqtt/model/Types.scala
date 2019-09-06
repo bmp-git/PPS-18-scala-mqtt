@@ -44,9 +44,11 @@ object Types {
     def matching(topic: Topic): Boolean = topic matching this
   }
 
+  /*
   object TopicFilter {
     def apply(value: String): Option[TopicFilter] = ???
   }
+  */
 
   type Payload = Seq[Byte]
   type Password = Seq[Byte]
