@@ -1,45 +1,15 @@
 package mqtt.broker
 
-import java.util.Calendar
-
+import mqtt.broker.SampleInstances._
 import mqtt.model.Packet.ConnectReturnCode.{ConnectionAccepted, IdentifierRejected, UnacceptableProtocolVersion}
 import mqtt.model.Packet._
 import mqtt.model.QoS.QoS0
-import mqtt.model.Types.TopicFilter
 import org.scalatest.{Assertion, FunSuite}
 
 import scala.concurrent.duration.Duration
 
+
 class TestConnectPacketHandler extends FunSuite {
-  val bs0 = BrokerState(Map(), Map(), Map())
-  
-  val sample_id_0 = "123"
-  
-  val sample_topic_0 = "abc"
-  
-  val sample_socket_0 = Socket(0, Option.empty)
-  val sample_socket_1 = Socket(1, Option.empty)
-  
-  val sample_connect_packet_0 =  Connect(
-                                         protocol = Protocol("MQTT", 4),
-                                         cleanSession = false,
-                                         keepAlive = Duration(0, "millis"),
-                                         clientId = sample_id_0,
-                                         credential = Option.empty,
-                                         willMessage = Option.empty
-                                       )
-  
-  val sample_session_0 = Session(
-    socket = Option.empty,
-    keepAlive = Duration(0, "millis"),
-    lastContact = Calendar.getInstance().getTime,
-    subscriptions = Map((TopicFilter(sample_topic_0), QoS0)),
-    notYetAcknowledged = Map(),
-    receivedButNotYetAcknowledged = Map(),
-    pendingTransmission = Seq(),
-    persistent = false
-  )
-  
   //TODO add test for presistent flag
   //TODO will message publication test?
   

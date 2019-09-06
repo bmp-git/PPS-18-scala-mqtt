@@ -3,7 +3,6 @@ package mqtt.broker
 import mqtt.model.Packet
 import mqtt.model.Packet.Connack
 import mqtt.model.Packet.ConnectReturnCode._
-import mqtt.broker.StateImplicits.StateTransitionWithError_Implicit
 
 
 import mqtt.broker.Common.closeSocketWithPackets
