@@ -1,9 +1,9 @@
 package mqtt.utils
 
 import mqtt.utils.BitImplicits._
-import org.scalatest.FunSuite
+import org.scalatest.{FunSuite, Matchers}
 
-class MqttStringTest extends FunSuite {
+class MqttStringTest extends FunSuite with Matchers {
   Map[String, Seq[Char]](
     "" -> Seq(0x00, 0x00),
     "☺" -> Seq(0x00, 0x03, 0xE2, 0x98, 0xBA),
@@ -21,5 +21,11 @@ class MqttStringTest extends FunSuite {
         assert(encoded.map(_.toByte) == data)
       }
     }
+  }
+  
+  test("An MqttUTF-8 encoder should encode and decode MQTT string") {
+    val mqtt = "MQTT"
+    val encoded: Seq[Byte] = MqttString.encode(mqtt)
+    mqtt shouldBe MqttString.decode(encoded)
   }
 }

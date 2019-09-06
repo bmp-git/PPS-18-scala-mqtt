@@ -1,7 +1,6 @@
 package mqtt.utils
 
-import BitImplicits._
-
+import mqtt.utils.BitImplicits._
 
 class Bitify(data: Seq[Byte]) extends Seq[Bit] {
   val BIT_MASK: Seq[Char] = Seq(0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01)

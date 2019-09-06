@@ -1,7 +1,8 @@
 package mqtt.model
 
+import mqtt.model.Types._
+
 import scala.concurrent.duration.Duration
-import Types._
 
 trait Packet
 
@@ -43,7 +44,15 @@ object Packet {
     case object BadUsernameOrPassword extends ConnectReturnCode(4)
     
     case object NotAuthorized extends ConnectReturnCode(5)
-    
+  
+    def apply(value: Int): ConnectReturnCode = value match {
+      case 0 => ConnectionAccepted
+      case 1 => UnacceptableProtocolVersion
+      case 2 => IdentifierRejected
+      case 3 => ServerUnavailable
+      case 4 => BadUsernameOrPassword
+      case 5 => NotAuthorized
+    }
   }
   
   /* 3.1 */
