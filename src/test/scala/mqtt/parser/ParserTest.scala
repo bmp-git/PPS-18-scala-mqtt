@@ -69,9 +69,9 @@ class ParserTest extends FunSuite with Matchers {
   
   //defaultIfNot parser
   test("defaultIfNot should not consume input if condition is false") {
-    assert(defaultIfNot(zero, item())(false).run(Seq(0)) == List((zero, Seq(zero))))
+    assert(ifConditionFails(zero, item())(false).run(Seq(0)) == List((zero, Seq(zero))))
   }
   test("defaultIfNot should consume input if condition is true") {
-    assert(defaultIfNot(zero, item())(true).run(Seq(0)) == List((zero, Seq())))
+    assert(ifConditionFails(zero, item())(true).run(Seq(0)) == List((zero, Seq())))
   }
 }

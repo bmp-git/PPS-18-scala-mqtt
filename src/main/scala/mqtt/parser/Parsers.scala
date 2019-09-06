@@ -2,7 +2,7 @@ package mqtt.parser
 import Monad._
 import mqtt.model.ErrorPacket.MalformedPacket
 import mqtt.model.{Packet, QoS}
-import mqtt.model.Packet.{ApplicationMessage, Connect, Credential, Disconnect, Protocol, Puback}
+import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, ConnectReturnCode, Credential, Disconnect, Protocol, Puback}
 import mqtt.model.Types.{Password, Payload}
 import mqtt.utils.{Bit, MqttUFT8}
 import mqtt.utils.BitImplicits._
@@ -29,7 +29,7 @@ object Parsers {
   
   def failure[A]: Parser[A] = Parser(s => List())
   
-  def defaultIfNot[A](default: A, p: Parser[A])(predicate: Boolean): Parser[A] = if (predicate) p else Parser(s => List((default, s)))
+  def ifConditionFails[A](default: A, p: Parser[A])(predicate: Boolean): Parser[A] = if (predicate) p else Parser(s => List((default, s)))
   
   def or[A, B <: A, C <: A](p1: Parser[B], p2: Parser[C]): Parser[A] = Parser(s => p1.run(s) ++ p2.run(s))
   
@@ -44,7 +44,11 @@ object Parsers {
   // gets symbol bit
   def bit(bit: Bit): Parser[Bit] = conditional(item())(_ == bit)
   
+  def byte(byte: Byte): Parser[Byte] = Parser(bits =>
+    if (bits.size < 8 || bits.take(8).toBytes.head != byte) List() else List((bits.take(8).toBytes.head, bits.drop(8))))
+  
   def zero(): Parser[Bit] = bit(0)
+  
   def one(): Parser[Bit] = bit(1)
   
   //[Nil or List()?]
@@ -97,7 +101,7 @@ object Parsers {
     
     def binaryData(): Parser[Seq[Byte]] = for {
       length <- twoBytesInt();
-      payload <- defaultIfNot(Seq(), bytes(length))(length > 0)
+      payload <- ifConditionFails(Seq(), bytes(length))(length > 0)
     } yield payload
     
     def message(): Parser[Payload] = binaryData()
@@ -105,14 +109,23 @@ object Parsers {
     def password(): Parser[Password] = binaryData()
     
     def willPayload(willFlags: Option[WillFlags]): Parser[Option[ApplicationMessage]] = for {
-      willTopic <- defaultIfNot("", utf8())(willFlags.isDefined)
-      willMessage <- defaultIfNot(Seq(), message())(willFlags.isDefined)
+      willTopic <- ifConditionFails("", utf8())(willFlags.isDefined)
+      willMessage <- ifConditionFails(Seq(), message())(willFlags.isDefined)
     } yield willFlags.map(f => Option(ApplicationMessage(f.retain, f.qos, willTopic, willMessage))).head
     
     def credentials(flags: CredentialFlags): Parser[Option[Credential]] = for {
-      username <- defaultIfNot("", utf8())(flags.username)
-      password <- defaultIfNot(Seq(), password())(flags.password)
+      username <- ifConditionFails("", utf8())(flags.username)
+      password <- ifConditionFails(Seq(), password())(flags.password)
     } yield if(flags.username) Option(Credential(username, Option(flags.password) collect {case true => password} )) else Option.empty
+    
+    def sessionPresent(): Parser[Boolean] = for {
+      _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero();
+      session <- item()
+    } yield session
+    
+    def connectReturnCode(): Parser[ConnectReturnCode] = for {
+      code <- or(byte(0), byte(2), byte(3), byte(4), byte(5))
+    } yield ConnectReturnCode(code)
     
     def connectParser(): Parser[Packet] = for {
       _ <- packetType(ConnectMask)
@@ -123,7 +136,6 @@ object Parsers {
       flags <- connectFlags()
       keepAlive <- keepAlive()
       clientId <- utf8() //check length and chars?  [MQTT-3.1.3-5]
-                         //MAY feature zero bytes clientID [MQTT-3.1.3-6]
       willMessage <- willPayload(flags.willFlags)
       credentials <- credentials(flags.credentials)
     } yield Connect(Protocol("MQTT", version), flags.cleanSession, keepAlive seconds, clientId, credentials, willMessage)
@@ -133,14 +145,15 @@ object Parsers {
       _ <- reserved()
       _ <- bytes(1)
     } yield Disconnect
-  
-    def pubackParser(): Parser[Packet] = for {
-      _ <- packetType(PubackMask)
+    
+    def connackParser(): Parser[Packet] = for {
+      _ <- packetType(ConnackMask)
       _ <- reserved()
       _ <- bytes(1)
-      packet_id <- bytes(2)
-    } yield Puback(0)
+      session <- sessionPresent()
+      code <- connectReturnCode()
+    } yield Connack(session, code)
     
-    def mqttParser(): Parser[Packet] = or(disconnectParser(), pubackParser(), connectParser())
+    def mqttParser(): Parser[Packet] = or(disconnectParser(), connectParser(), connackParser())
   }
 }
