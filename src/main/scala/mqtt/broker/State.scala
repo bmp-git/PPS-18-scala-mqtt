@@ -96,4 +96,7 @@ trait State {
    * @return the new State.
    */
   def deleteWillMessage(socket: Socket): State
+
+  def takeAllPendingTransmission:(State, Map[Socket, Seq[Packet]])
+
 }

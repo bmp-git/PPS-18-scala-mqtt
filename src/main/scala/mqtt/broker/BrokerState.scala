@@ -54,6 +54,7 @@ case class BrokerState(override val sessions: Map[ClientID, Session],
     this.copy(sessions = newSessions)
   }
   
+  
   //TODO add tests for these last two methods
   
   override def setWillMessage(socket: Socket, willMessage: Packet.ApplicationMessage): State = {
@@ -64,5 +65,15 @@ case class BrokerState(override val sessions: Map[ClientID, Session],
   override def deleteWillMessage(socket: Socket): State = {
     val newWills = wills - socket
     this.copy(wills = newWills)
+  }
+  
+  override def takeAllPendingTransmission: (State, Map[Socket, Seq[Packet]]) = {
+    //TODO: Refactor
+    val pt = sessions.filter(_._2.socket.isDefined).map(a => (a._2.socket.head, a._2.pendingTransmission))
+    
+    val ns = this.copy(sessions = sessions.filter(_._2.socket.isDefined).map(a => a._1 -> a._2.copy(pendingTransmission = Seq())) ++
+      sessions.filter(_._2.socket.isEmpty))
+    
+    (ns, pt)
   }
 }
