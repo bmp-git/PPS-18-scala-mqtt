@@ -9,17 +9,17 @@ import mqtt.model.{Packet, Types}
  *
  * @param sessions the client sessions to be initialized with.
  * @param retains  the retain messages to be initialized with.
- * @param closing  the closing sockets to be initialized with.
+ * @param closing  the closing channels to be initialized with.
  * @param wills    the will messages to be initialized with.
  */
 case class BrokerState(override val sessions: Map[ClientID, Session],
                        override val retains: Map[Types.Topic, Packet.ApplicationMessage],
-                       override val closing: Map[Socket, Seq[Packet]],
-                       override val wills: Map[Socket, ApplicationMessage]) extends State {
+                       override val closing: Map[Channel, Seq[Packet]],
+                       override val wills: Map[Channel, ApplicationMessage]) extends State {
   override def sessionFromClientID(clientID: ClientID): Option[Session] = sessions.get(clientID)
   
-  override def sessionFromSocket(socket: Socket): Option[(ClientID, Session)] = {
-    sessions.collectFirst { case (id, s) if s.socket.fold(false)(_ == socket) => (id, s) }
+  override def sessionFromChannel(channel: Channel): Option[(ClientID, Session)] = {
+    sessions.collectFirst { case (id, s) if s.channel.fold(false)(_ == channel) => (id, s) }
   }
   
   override def setSession(clientID: ClientID, session: Session): State = {
@@ -27,17 +27,17 @@ case class BrokerState(override val sessions: Map[ClientID, Session],
     this.copy(sessions = newSessions)
   }
   
-  override def setSocket(clientID: ClientID, socket: Socket): State = {
+  override def setChannel(clientID: ClientID, channel: Channel): State = {
     val state = for {
       s <- sessionFromClientID(clientID)
-      newSession = s.copy(socket = Some(socket))
+      newSession = s.copy(channel = Some(channel))
       newState = setSession(clientID, newSession)
     } yield newState
     state.getOrElse(this)
   }
   
-  override def addClosingChannel(socket: Socket, packets: Seq[Packet]): State = {
-    val newClosing = closing + ((socket, packets))
+  override def addClosingChannel(channel: Channel, packets: Seq[Packet]): State = {
+    val newClosing = closing + ((channel, packets))
     this.copy(closing = newClosing)
   }
   
@@ -57,22 +57,22 @@ case class BrokerState(override val sessions: Map[ClientID, Session],
   
   //TODO add tests for these last two methods
   
-  override def setWillMessage(socket: Socket, willMessage: Packet.ApplicationMessage): State = {
-    val newWills = wills + ((socket, willMessage))
+  override def setWillMessage(channel: Channel, willMessage: Packet.ApplicationMessage): State = {
+    val newWills = wills + ((channel, willMessage))
     this.copy(wills = newWills)
   }
   
-  override def deleteWillMessage(socket: Socket): State = {
-    val newWills = wills - socket
+  override def deleteWillMessage(channel: Channel): State = {
+    val newWills = wills - channel
     this.copy(wills = newWills)
   }
   
-  override def takeAllPendingTransmission: (State, Map[Socket, Seq[Packet]]) = {
+  override def takeAllPendingTransmission: (State, Map[Channel, Seq[Packet]]) = {
     //TODO: Refactor
-    val pt = sessions.filter(_._2.socket.isDefined).map(a => (a._2.socket.head, a._2.pendingTransmission))
+    val pt = sessions.filter(_._2.channel.isDefined).map(a => (a._2.channel.head, a._2.pendingTransmission))
     
-    val ns = this.copy(sessions = sessions.filter(_._2.socket.isDefined).map(a => a._1 -> a._2.copy(pendingTransmission = Seq())) ++
-      sessions.filter(_._2.socket.isEmpty))
+    val ns = this.copy(sessions = sessions.filter(_._2.channel.isDefined).map(a => a._1 -> a._2.copy(pendingTransmission = Seq())) ++
+      sessions.filter(_._2.channel.isEmpty))
     
     (ns, pt)
   }

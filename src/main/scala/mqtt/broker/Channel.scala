@@ -1,17 +1,13 @@
 package mqtt.broker
 
-//TODO this is a draft to be refined
 /**
  * Represents a communication channel.
- *
- * @tparam T the wrapper type of the data
- * @tparam K the data type of the data to be sent
  */
-trait Channel[T[_], K] {
+trait Channel {
   /**
-   * Send a message on the channel.
+   * The id to identify the channel.
    *
-   * @param m the message to send.
+   * @return the identifier.
    */
-  def send(m: T[K])
+  def id: Int
 }

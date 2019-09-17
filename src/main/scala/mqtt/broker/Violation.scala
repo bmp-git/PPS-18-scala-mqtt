@@ -1,6 +1,6 @@
 package mqtt.broker
 
-import mqtt.broker.Common.closeSocketWithPackets
+import mqtt.broker.Common.closeChannelWithPackets
 import mqtt.model.Packet
 import mqtt.model.Packet.Connack
 import mqtt.model.Packet.ConnectReturnCode._
@@ -17,14 +17,14 @@ trait Violation {
   def msg: String
   
   /**
-   * Handles the violation, disconnecting the client related to the socket specified.
-   * Optionally, before closing the socket, a sequence of packets will be sent.
+   * Handles the violation, disconnecting the client related to the channel specified.
+   * Optionally, before closing the channel, a sequence of packets will be sent.
    *
-   * @param socket the socket on which the violation has happened.
+   * @param channel the channel on which the violation has happened.
    * @return a function that maps the old server state in the new one.
    */
-  def handle(socket: Socket): State => State = state =>  {
-    closeSocketWithPackets(socket, closePackets())(state)
+  def handle(channel: Channel): State => State = state => {
+    closeChannelWithPackets(channel, closePackets())(state)
   }
   
   /**
@@ -55,5 +55,5 @@ object Violation {
     override val closePackets: Seq[Connack] = Seq(Connack(sessionPresent = false, IdentifierRejected))
   }
   
-  case class MultipleConnectPacketsOnSameSocket() extends GenericViolation("MultipleConnectPacketsOnSameSocket")
+  case class MultipleConnectPacketsOnSameChannel() extends GenericViolation("MultipleConnectPacketsOnSameChannel")
 }

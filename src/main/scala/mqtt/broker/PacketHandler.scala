@@ -9,12 +9,12 @@ import mqtt.model.Packet
  */
 trait PacketHandler[T <: Packet] {
   /**
-   * Handles a packet of kind T received on a socket and modifies the server state properly.
+   * Handles a packet of kind T received on a channel and modifies the server state properly.
    *
-   * @param state  the old state of the server.
-   * @param packet the packet of kind T to be processed.
-   * @param socket the socket on which the packet has been received
+   * @param state   the old state of the server.
+   * @param packet  the packet of kind T to be processed.
+   * @param channel the channel on which the packet has been received
    * @return the new state of the server.
    */
-  def handle(state: State, packet: T, socket: Socket): State
+  def handle(state: State, packet: T, channel: Channel): State
 }

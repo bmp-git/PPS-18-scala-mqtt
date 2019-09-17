@@ -17,9 +17,9 @@ object SampleInstances {
   
   val sample_topic_0 = "abc"
   
-  val sample_socket_0 = Socket(0)
-  val sample_socket_1 = Socket(1)
-  val sample_socket_2 = Socket(2)
+  val sample_channel_0 = MQTTChannel(0)
+  val sample_channel_1 = MQTTChannel(1)
+  val sample_channel_2 = MQTTChannel(2)
   
   val sample_duration_0 = Duration(0, "millis")
   val sample_duration_1 = Duration(10, "minutes")
@@ -36,7 +36,7 @@ object SampleInstances {
   val sample_disconnect_packet_0 = Disconnect()
   
   val sample_session_0 = Session(
-    socket = Option.empty,
+    channel = Option.empty,
     keepAlive = sample_duration_0,
     lastContact = Calendar.getInstance().getTime,
     subscriptions = Map((TopicFilter(sample_topic_0), QoS0)),
@@ -48,7 +48,7 @@ object SampleInstances {
   
   
   val sample_session_1 = Session(
-    socket = Option.empty,
+    channel = Option.empty,
     keepAlive = sample_duration_0,
     lastContact = Calendar.getInstance().getTime,
     subscriptions = Map(),
@@ -59,7 +59,7 @@ object SampleInstances {
   )
   
   val sample_session_2 = Session(
-    socket = Option.empty,
+    channel = Option.empty,
     keepAlive = sample_duration_1,
     lastContact = Calendar.getInstance().getTime,
     subscriptions = Map(),

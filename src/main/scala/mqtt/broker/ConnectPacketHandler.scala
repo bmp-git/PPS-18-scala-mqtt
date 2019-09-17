@@ -1,8 +1,8 @@
 package mqtt.broker
 
-import mqtt.broker.Common.closeSocket
+import mqtt.broker.Common.closeChannel
 import mqtt.broker.StateImplicits.StateTransitionWithError_Implicit
-import mqtt.broker.Violation.{InvalidIdentifier, InvalidProtocolName, InvalidProtocolVersion, MultipleConnectPacketsOnSameSocket}
+import mqtt.broker.Violation.{InvalidIdentifier, InvalidProtocolName, InvalidProtocolVersion, MultipleConnectPacketsOnSameChannel}
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, Protocol}
 
@@ -13,40 +13,40 @@ import scala.concurrent.duration.Duration
  */
 object ConnectPacketHandler extends PacketHandler[Connect] {
   
-  override def handle(state: State, packet: Connect, socket: Socket): State = {
+  override def handle(state: State, packet: Connect, channel: Channel): State = {
     {
       for {
-        _ <- checkNotFirstPacketOfSocket(socket)
+        _ <- checkNotFirstPacketOfChannel(channel)
         _ <- checkProtocol(packet.protocol)
         _ <- checkClientId(packet.clientId)
         _ <- disconnectOtherConnected(packet.clientId)
         sessionPresent <- manageSession(packet.clientId, packet.cleanSession)
         _ <- setCleanSessionFlag(packet.clientId, cleanSession = packet.cleanSession)
-        _ <- updateSocket(packet.clientId, socket)
-        _ <- setWillMessage(socket, packet.willMessage)
+        _ <- updateChannel(packet.clientId, channel)
+        _ <- setWillMessage(channel, packet.willMessage)
         _ <- setKeepAlive(packet.clientId, packet.keepAlive)
         _ <- replyWithACK(packet.clientId, sessionPresent)
       } yield ()
     } run state match {
       //TODO remove println, use a logger
-      case Left(v) => println(v.toString); v.handle(socket)(state) //close connection in case of error
+      case Left(v) => println(v.toString); v.handle(channel)(state) //close connection in case of error
       case Right((_, s)) => s
     }
   }
   
   
   /**
-   * Checks if there is already a session bound with a socket.
-   * If there is, this is not the first connect packet received on the socket.
+   * Checks if there is already a session bound with a channel.
+   * If there is, this is not the first connect packet received on the channel.
    *
-   * @param socket the socket to check.
+   * @param channel the channel to check.
    * @return a function that maps a state to a violation or to a new state.
    */
-  def checkNotFirstPacketOfSocket(socket: Socket): State => Either[Violation, (Unit, State)] = state => {
+  def checkNotFirstPacketOfChannel(channel: Channel): State => Either[Violation, (Unit, State)] = state => {
     // check duplicate connect 3.1.0-2
-    state.sessionFromSocket(socket).fold[Either[Violation, (Unit, State)]](Right((), state))(_ => {
-      //there is already a session with this socket
-      Left(MultipleConnectPacketsOnSameSocket())
+    state.sessionFromChannel(channel).fold[Either[Violation, (Unit, State)]](Right((), state))(_ => {
+      //there is already a session with this channel
+      Left(MultipleConnectPacketsOnSameChannel())
     })
   }
   
@@ -95,7 +95,7 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   }
   
   /**
-   * Checks if the session bound to a client identifier, if present, has a bounded socket.
+   * Checks if the session bound to a client identifier, if present, has a bounded channel.
    * If it has, there is another client connected with the same client identifier that must be disconnected.
    *
    * @param clientId the client identifier.
@@ -103,9 +103,9 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
    */
   def disconnectOtherConnected(clientId: String): State => Either[Violation, (Unit, State)] = state => {
     //disconnect if already connected
-    //there is a session with the same clientID and a non-empty socket.
-    Right((), state.sessionFromClientID(clientId).fold(state)(sess => sess.socket.fold(state)(sk => {
-      closeSocket(sk)(state)
+    //there is a session with the same clientID and a non-empty channel.
+    Right((), state.sessionFromClientID(clientId).fold(state)(sess => sess.channel.fold(state)(sk => {
+      closeChannel(sk)(state)
     })))
   }
   
@@ -157,25 +157,26 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   }
   
   /**
-   * Sets the socket of the session identified by the client identifier.
+   * Sets the channel of the session identified by the client identifier.
    * After this call the session will be considered as connected.
    *
    * @param clientId the client identifier.
-   * @param socket   the socket to be bound.
+   * @param channel  the channel to be bound.
    * @return a function that maps a state to a violation or to a new state.
    */
-  def updateSocket(clientId: String, socket: Socket): State => Either[Violation, (Unit, State)] = state => {
-    Right((), state.setSocket(clientId, socket))
+  def updateChannel(clientId: String, channel: Channel): State => Either[Violation, (Unit, State)] = state => {
+    Right((), state.setChannel(clientId, channel))
   }
   
   /**
    * Associates a will message to the channel.
-   * @param socket    the channel.
+   *
+   * @param channel     the channel.
    * @param willMessage the will message.
    * @return a function that maps a state to a violation or to a new state.
    */
-  def setWillMessage(socket: Socket, willMessage: Option[ApplicationMessage]): State => Either[Violation, (Unit, State)] = state => {
-    Right((), willMessage.fold(state)(m => state.setWillMessage(socket, m)))
+  def setWillMessage(channel: Channel, willMessage: Option[ApplicationMessage]): State => Either[Violation, (Unit, State)] = state => {
+    Right((), willMessage.fold(state)(m => state.setWillMessage(channel, m)))
   }
   
   /**

@@ -92,7 +92,7 @@ object RxMain extends App {
     .flatMap { case (idSocket, packet) => Observable[(IdSocket, Packet)](s => {
     println("handling " + packet + " " + Thread.currentThread())
     
-    state = BrokerManager.handle(state, packet, mqtt.broker.Socket(idSocket.id))
+    state = BrokerManager.handle(state, packet, mqtt.broker.MQTTChannel(idSocket.id))
     state.takeAllPendingTransmission match {
       case (newState, pendingTransmissions) =>
         state = newState
