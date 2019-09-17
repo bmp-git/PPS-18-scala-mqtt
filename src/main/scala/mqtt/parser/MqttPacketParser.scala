@@ -16,5 +16,5 @@ object MqttPacketParser extends PacketParser {
    * @param input the packet in bits
    * @return the parsed packet
    */
-  override def parse(input: Seq[Bit]): Packet = Parsers.parse(mqttParser(), input) getOrElse MalformedPacket
+  override def parse(input: Seq[Bit]): Packet = Parsers.parse(mqttParser(), input) getOrElse MalformedPacket()
 }

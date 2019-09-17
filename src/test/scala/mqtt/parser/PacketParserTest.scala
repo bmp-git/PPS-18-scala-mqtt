@@ -69,10 +69,10 @@ class PacketParserTest extends FunSuite with Matchers {
   }
   
   test("An MQTT packet parser should not parse an incomplete packet") {
-    MqttPacketParser parse byte shouldBe MalformedPacket
+    MqttPacketParser parse byte shouldBe MalformedPacket()
   }
   
   test("An MQTT packet parser should not parse superabundant packet") {
-    MqttPacketParser parse (disconnect ++ disconnect) shouldBe MalformedPacket
+    MqttPacketParser parse (disconnect ++ disconnect) shouldBe MalformedPacket()
   }
 }
