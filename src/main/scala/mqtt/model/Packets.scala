@@ -14,9 +14,9 @@ object ErrorPacket { //is this ok?
   
   trait CloseConnection extends Packet
   
-  case object ProtocolError extends CloseConnection
+  case class ProtocolError() extends CloseConnection
   
-  case object MalformedPacket extends CloseConnection
+  case class MalformedPacket() extends CloseConnection
   
 }
 

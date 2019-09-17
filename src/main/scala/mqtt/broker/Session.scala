@@ -11,7 +11,7 @@ import scala.concurrent.duration.Duration
 /**
  * Represents the session of a client.
  *
- * @param socket                        the communication channel associated with this session.
+ * @param channel                       the communication channel associated with this session.
  *                                      Could be empty if the client is disconnected but his session is persistent.
  * @param keepAlive                     2/3 of the time after that the client should be forcibly disconnected if no messages arrived.
  * @param lastContact                   the datetime of the last message reception.
@@ -22,7 +22,7 @@ import scala.concurrent.duration.Duration
  * @param persistent                    tells if the session must be deleted after the client disconnection.
  */
 case class Session(
-                    socket: Option[Socket],
+                    channel: Option[Channel],
                     keepAlive: Duration,
                     lastContact: Date,
                     subscriptions: Map[TopicFilter, QoS],
@@ -39,7 +39,7 @@ object Session {
    * @return the session created.
    */
   def createEmptySession(): Session = Session(
-    socket = Option.empty,
+    channel = Option.empty,
     keepAlive = Duration(0, "millis"),
     lastContact = Calendar.getInstance().getTime,
     subscriptions = Map(),

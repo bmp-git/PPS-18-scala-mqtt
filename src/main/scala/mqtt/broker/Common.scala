@@ -8,48 +8,49 @@ import mqtt.model.Packet.ApplicationMessage
  */
 object Common {
   /**
-   * Closes a socket, publishes the will message if present and updates or deletes the client session.
+   * Closes a channel, publishes the will message if present and updates or deletes the client session.
    *
-   * @param socket the socket to be closed.
+   * @param channel the channel to be closed.
    * @return a function that maps the old server state in the new one.
    */
-  def closeSocket(socket: Socket): State => State = state => {
-    closeSocketWithPackets(socket, Seq())(state)
+  def closeChannel(channel: Channel): State => State = state => {
+    closeChannelWithPackets(channel, Seq())(state)
   }
   
   /**
-   * Closes a socket, publishes the will message if present and updates or deletes the client session.
+   * Closes a channel, publishes the will message if present and updates or deletes the client session.
    *
-   * @param socket       the socket to be closed.
+   * @param channel      the channel to be closed.
    * @param closePackets the packets to be sent before closing.
    * @return a function that maps the old server state in the new one.
    */
-  def closeSocketWithPackets(socket: Socket, closePackets: Seq[Packet]): State => State = state => {
-    (publishWillMessage(socket) andThen closeSocketNoWillPublish(socket, closePackets)) (state)
+  def closeChannelWithPackets(channel: Channel, closePackets: Seq[Packet]): State => State = state => {
+    (publishWillMessage(channel) andThen closeChannelNoWillPublish(channel, closePackets)) (state)
   }
   
   /**
-   * Closes a socket and updates or deletes the client session
+   * Closes a channel and updates or deletes the client session.
+   * Removes the will message if present.
    *
-   * @param socket       the socket to be closed.
+   * @param channel      the channel to be closed.
    * @param closePackets the packets to be sent before closing.
    * @return a function that maps the old server state in the new one.
    */
-  def closeSocketNoWillPublish(socket: Socket, closePackets: Seq[Packet]): State => State = state => {
-    updateSessionAfterSocketDisconnection(socket)(state).addClosingChannel(socket.setWillMessage(Option.empty), closePackets)
+  def closeChannelNoWillPublish(channel: Channel, closePackets: Seq[Packet]): State => State = state => {
+    (updateSessionAfterChannelDisconnection(channel) andThen deleteWillMessage(channel)) (state).addClosingChannel(channel, closePackets)
   }
   
   /**
-   * Updates or deletes the client session relative to the socket, if present.
-   * If the session is persistent, the session is updated removing the socket.
+   * Updates or deletes the client session relative to the channel, if present.
+   * If the session is persistent, the session is updated removing the channel.
    * If the session is not persistent, the session is removed from the server state.
    *
    * @return a function that maps the old server state in the new one.
    */
-  def updateSessionAfterSocketDisconnection(socket: Socket): State => State = state => {
-    state.sessionFromSocket(socket).fold(state) { case (id, sess) => {
+  def updateSessionAfterChannelDisconnection(channel: Channel): State => State = state => {
+    state.sessionFromChannel(channel).fold(state) { case (id, sess) => {
       if (sess.persistent) {
-        val newSess = sess.copy(socket = Option.empty)
+        val newSess = sess.copy(channel = Option.empty)
         state.updateSession(id, _ => newSess)
       } else {
         state.deleteSession(id)
@@ -59,12 +60,21 @@ object Common {
   }
   
   /**
-   * Publishes the will message related to a channel if present.
+   * Deletes the will message related to a channel.
    *
+   * @param channel the channel.
    * @return a function that maps the old server state in the new one.
    */
-  def publishWillMessage(socket: Socket): State => State = state => {
-    socket.willMessage.fold[State](state)(publishMessage(_)(state))
+  def deleteWillMessage(channel: Channel): State => State = _.deleteWillMessage(channel)
+  
+  /**
+   * Publishes the will message related to a channel if present.
+   *
+   * @param channel the channel
+   * @return a function that maps the old server state in the new one.
+   */
+  def publishWillMessage(channel: Channel): State => State = state => {
+    state.wills.get(channel).fold[State](state)(publishMessage(_)(state))
   }
   
   /**

@@ -20,17 +20,23 @@ trait State {
   def retains: Map[Topic, ApplicationMessage]
   
   /**
-   * @return a map containing the sockets that need to be closed, optionally sending some packets before closing.
+   * @return a map containing the channels that need to be closed, optionally sending some packets before closing.
    */
-  def closing: Map[Socket, Seq[Packet]]
+  def closing: Map[Channel, Seq[Packet]]
   
   /**
-   *  Adds a socket to the Map containing the sockets that need to be closed.
-   * @param socket the socket that needs to be closed.
-   * @param packets the packets to send on the socket before closing it.
+   * @return a map containing the will message associated to a specific channel.
+   */
+  def wills: Map[Channel, ApplicationMessage]
+  
+  /**
+   * Adds a channel to the Map containing the channels that need to be closed.
+   *
+   * @param channel the channel that needs to be closed.
+   * @param packets the packets to send on the channel before closing it.
    * @return the new State.
    */
-  def addClosingChannel(socket: Socket, packets: Seq[Packet]): State
+  def addClosingChannel(channel: Channel, packets: Seq[Packet]): State
   
   /**
    * Gets a session of a client from his client identifier.
@@ -40,11 +46,12 @@ trait State {
   def sessionFromClientID(clientID: ClientID): Option[Session]
   
   /**
-   * Gets a session of a client from his socket, if present.
-   * @param socket the socket associated to the client session.
+   * Gets a session of a client from his channel, if present.
+   *
+   * @param channel the channel associated to the client session.
    * @return the session and the relative client identifier if found.
    */
-  def sessionFromSocket(socket: Socket): Option[(ClientID, Session)]
+  def sessionFromChannel(channel: Channel): Option[(ClientID, Session)]
   
   /**
    * Sets a session of a client.
@@ -55,12 +62,13 @@ trait State {
   def setSession(clientID: ClientID, session: Session): State
   
   /**
-   * Sets the socket relative to a session of a client.
+   * Sets the channel relative to a session of a client.
+   *
    * @param clientID the client identifier to identify the session.
-   * @param socket the socket to be set.
+   * @param channel  the channel to be set.
    * @return the new State.
    */
-  def setSocket(clientID: ClientID, socket: Socket): State
+  def setChannel(clientID: ClientID, channel: Channel): State
   
   /**
    * Updates a session of a client, given the mapping function.
@@ -77,5 +85,29 @@ trait State {
    */
   def deleteSession(clientID: ClientID): State
   
-  def takeAllPendingTransmission:(State, Map[Socket, Seq[Packet]])
+  /**
+   * Sets the will message relative to a specified channel.
+   *
+   * @param channel     the channel to which associate the will message.
+   * @param willMessage the will message associated to the channel.
+   * @return the new State.
+   */
+  def setWillMessage(channel: Channel, willMessage: ApplicationMessage): State
+  
+  /**
+   * Deletes the will message associated to a specified channel
+   *
+   * @param channel the channel to which the will message is associated.
+   * @return the new State.
+   */
+  def deleteWillMessage(channel: Channel): State
+  
+  /**
+   * Takes the pending transmissions from all the currently active client sessions.
+   * The pending messages are removed from the client sessions.
+   *
+   * @return a map containing the packets to send for each channel.
+   */
+  def takeAllPendingTransmission: (State, Map[Channel, Seq[Packet]])
+
 }

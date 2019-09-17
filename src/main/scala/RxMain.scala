@@ -85,14 +85,14 @@ object RxMain extends App {
     }
   }))
   
-  var state: State = BrokerState(Map(), Map(), Map())
+  var state: State = BrokerState(Map(), Map(), Map(), Map())
   
   
   val toSendStream = packetsStream.merge(errorStream).observeOn(packetHandlerScheduler)
     .flatMap { case (idSocket, packet) => Observable[(IdSocket, Packet)](s => {
     println("handling " + packet + " " + Thread.currentThread())
     
-    state = BrokerManager.handle(state, packet, mqtt.broker.Socket(idSocket.id, Option.empty))
+    state = BrokerManager.handle(state, packet, mqtt.broker.MQTTChannel(idSocket.id))
     state.takeAllPendingTransmission match {
       case (newState, pendingTransmissions) =>
         state = newState
