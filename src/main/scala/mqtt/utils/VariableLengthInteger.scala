@@ -1,23 +1,29 @@
 package mqtt.utils
 
-//2.2.3, copied step by step, TODO functional refactor
+import mqtt.utils.IterableImplicits._
+
+import scala.annotation.tailrec
+
+//2.2.3
 object VariableLengthInteger {
   def encode(value: Int): Seq[Byte] = {
-    var list = Seq[Byte]()
-    var X = value
-    do {
-      var encodedByte: Byte = (X % 128).toByte
-      X = X / 128
-      if (X > 0) {
-        encodedByte = (encodedByte | 128).toByte
-      }
-      list = list :+ encodedByte
-    } while (X > 0)
-    
-    list
+    @tailrec def process(value: Int, data: Seq[Int]): Seq[Int] = value / 128 match {
+      case 0 => data :+ value % 128
+      case v: Int => process(v, data :+ (value % 128 | 128))
+    }
+    process(value, Seq()).map(_.toByte)
   }
   
-  def decode(value: Seq[Byte]): Int = {
-    ???
+  def decode(stream: Iterable[Byte]): (Option[Int], Iterable[Byte]) = {
+    stream.spanUntil(_ < 0) match {
+      case (included, excluded) => {
+        (included.zipWithIndex.grouped(4).toSeq match {
+          case a: Seq[Iterable[(Byte, Int)]] if a.length != 1 => Option.empty
+          case a: Seq[Iterable[(Byte, Int)]] => a.flatten.map {
+            case (b, p) => (b & 0x7F) * Math.pow(128, p).toInt
+          }.reduceOption(_ + _)
+        }, excluded)
+      }
+    }
   }
 }
