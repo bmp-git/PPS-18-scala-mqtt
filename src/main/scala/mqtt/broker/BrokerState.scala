@@ -1,5 +1,6 @@
 package mqtt.broker
 
+import mqtt.model.Packet.ApplicationMessage
 import mqtt.model.Types.ClientID
 import mqtt.model.{Packet, Types}
 
@@ -9,10 +10,12 @@ import mqtt.model.{Packet, Types}
  * @param sessions the client sessions to be initialized with.
  * @param retains  the retain messages to be initialized with.
  * @param closing  the closing sockets to be initialized with.
+ * @param wills    the will messages to be initialized with.
  */
 case class BrokerState(override val sessions: Map[ClientID, Session],
                        override val retains: Map[Types.Topic, Packet.ApplicationMessage],
-                       override val closing: Map[Socket, Seq[Packet]]) extends State {
+                       override val closing: Map[Socket, Seq[Packet]],
+                       override val wills: Map[Socket, ApplicationMessage]) extends State {
   override def sessionFromClientID(clientID: ClientID): Option[Session] = sessions.get(clientID)
   
   override def sessionFromSocket(socket: Socket): Option[(ClientID, Session)] = {
@@ -49,5 +52,17 @@ case class BrokerState(override val sessions: Map[ClientID, Session],
   override def deleteSession(clientID: ClientID): State = {
     val newSessions = sessions - clientID
     this.copy(sessions = newSessions)
+  }
+  
+  //TODO add tests for these last two methods
+  
+  override def setWillMessage(socket: Socket, willMessage: Packet.ApplicationMessage): State = {
+    val newWills = wills + ((socket, willMessage))
+    this.copy(wills = newWills)
+  }
+  
+  override def deleteWillMessage(socket: Socket): State = {
+    val newWills = wills - socket
+    this.copy(wills = newWills)
   }
 }

@@ -23,7 +23,7 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
         sessionPresent <- manageSession(packet.clientId, packet.cleanSession)
         _ <- setCleanSessionFlag(packet.clientId, cleanSession = packet.cleanSession)
         _ <- updateSocket(packet.clientId, socket)
-        _ <- setWillMessage(packet.clientId, packet.willMessage)
+        _ <- setWillMessage(socket, packet.willMessage)
         _ <- setKeepAlive(packet.clientId, packet.keepAlive)
         _ <- replyWithACK(packet.clientId, sessionPresent)
       } yield ()
@@ -169,18 +169,13 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
   }
   
   /**
-   * Associates a will message to the socket relative to the session identified by the client identifier.
-   *
-   * @param clientId    the client identifier.
+   * Associates a will message to the channel.
+   * @param socket    the channel.
    * @param willMessage the will message.
    * @return a function that maps a state to a violation or to a new state.
    */
-  def setWillMessage(clientId: String, willMessage: Option[ApplicationMessage]): State => Either[Violation, (Unit, State)] = state => {
-    val newState = state.updateSession(clientId, s => {
-      val newSocket = s.socket.map(_.setWillMessage(willMessage))
-      s.copy(socket = newSocket)
-    })
-    Right((), newState)
+  def setWillMessage(socket: Socket, willMessage: Option[ApplicationMessage]): State => Either[Violation, (Unit, State)] = state => {
+    Right((), willMessage.fold(state)(m => state.setWillMessage(socket, m)))
   }
   
   /**

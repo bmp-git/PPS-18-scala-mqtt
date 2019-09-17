@@ -29,14 +29,15 @@ object Common {
   }
   
   /**
-   * Closes a socket and updates or deletes the client session
+   * Closes a socket and updates or deletes the client session.
+   * Removes the will message if present.
    *
    * @param socket       the socket to be closed.
    * @param closePackets the packets to be sent before closing.
    * @return a function that maps the old server state in the new one.
    */
   def closeSocketNoWillPublish(socket: Socket, closePackets: Seq[Packet]): State => State = state => {
-    updateSessionAfterSocketDisconnection(socket)(state).addClosingChannel(socket.setWillMessage(Option.empty), closePackets)
+    (updateSessionAfterSocketDisconnection(socket) andThen deleteWillMessage(socket))(state).addClosingChannel(socket, closePackets)
   }
   
   /**
@@ -64,8 +65,15 @@ object Common {
    * @return a function that maps the old server state in the new one.
    */
   def publishWillMessage(socket: Socket): State => State = state => {
-    socket.willMessage.fold[State](state)(publishMessage(_)(state))
+    state.wills.get(socket).fold[State](state)(publishMessage(_)(state))
   }
+  
+  /**
+   * Deletes the will message related to a channel.
+   * @param socket the channel.
+   * @return a function that maps the old server state in the new one.
+   */
+  def deleteWillMessage(socket: Socket): State => State = _.deleteWillMessage(socket)
   
   /**
    * Publishes a message.

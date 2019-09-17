@@ -106,9 +106,7 @@ class TestConnect(ConnectPacketHandler: (State, Connect, Socket) => State) exten
   test("The will message should be saved") {
     val packet = sample_connect_packet_0.copy(willMessage = Option(ApplicationMessage(retain = false, QoS0, sample_topic_0, Seq())))
     val bs1 = ConnectPacketHandler(bs0, packet, sample_socket_0)
-    bs1.sessionFromClientID(sample_id_0).fold(fail)(s => {
-      s.socket.fold(fail)(sk => sk.willMessage.fold(fail)(m => assert(m.topic == sample_topic_0)))
-    })
+    bs1.wills.get(sample_socket_0).fold(fail)(m => assert(m.topic == sample_topic_0))
   }
   
   test("The keep alive should be saved") {

@@ -25,6 +25,11 @@ trait State {
   def closing: Map[Socket, Seq[Packet]]
   
   /**
+   * @return a map containing the will message associated to a specific channel.
+   */
+  def wills: Map[Socket, ApplicationMessage]
+  
+  /**
    *  Adds a socket to the Map containing the sockets that need to be closed.
    * @param socket the socket that needs to be closed.
    * @param packets the packets to send on the socket before closing it.
@@ -76,4 +81,19 @@ trait State {
    * @return the new State.
    */
   def deleteSession(clientID: ClientID): State
+  
+  /**
+   * Sets the will message relative to a specified channel.
+   * @param socket the channel to which associate the will message.
+   * @param willMessage the will message associated to the channel.
+   * @return the new State.
+   */
+  def setWillMessage(socket: Socket, willMessage: ApplicationMessage): State
+  
+  /**
+   * Deletes the will message associated to a specified channel
+   * @param socket the channel to which the will message is associated.
+   * @return the new State.
+   */
+  def deleteWillMessage(socket: Socket): State
 }

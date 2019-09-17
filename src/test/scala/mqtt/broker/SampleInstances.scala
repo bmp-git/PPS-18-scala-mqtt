@@ -9,7 +9,7 @@ import mqtt.model.Types.TopicFilter
 import scala.concurrent.duration.Duration
 
 object SampleInstances {
-  val bs0 = BrokerState(Map(), Map(), Map())
+  val bs0 = BrokerState(Map(), Map(), Map(), Map())
   
   val sample_id_0 = "123"
   val sample_id_1 = "456"
@@ -17,9 +17,9 @@ object SampleInstances {
   
   val sample_topic_0 = "abc"
   
-  val sample_socket_0 = Socket(0, Option.empty)
-  val sample_socket_1 = Socket(1, Option.empty)
-  val sample_socket_2 = Socket(2, Option.empty)
+  val sample_socket_0 = Socket(0)
+  val sample_socket_1 = Socket(1)
+  val sample_socket_2 = Socket(2)
   
   val sample_duration_0 = Duration(0, "millis")
   val sample_duration_1 = Duration(10, "minutes")
