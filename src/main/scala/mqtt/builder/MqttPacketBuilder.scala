@@ -3,13 +3,19 @@ package mqtt.builder
 import mqtt.PacketBuilder
 import mqtt.builder.packets._
 import mqtt.model.Packet
-import mqtt.model.Packet._
 import mqtt.utils.Bit
 
 /**
  * Provides a packet builder for MQTT 3.1.1.
  */
 object MqttPacketBuilder extends PacketBuilder {
+  
+  //TODO: complete on next sprints
+  /**
+   * All possible packet's structures
+   */
+  private val structures = Seq(ConnectStructure, ConnackStructure, DisconnectStructure)
+  
   /**
    * Transforms an input packet to sequence of bits.
    *
@@ -17,10 +23,7 @@ object MqttPacketBuilder extends PacketBuilder {
    *              Connect, Connack, Disconnect
    * @return The sequence of bits that encode the specified input
    */
-  override def build(input: Packet): Seq[Bit] = input match {
-    case packet: Connect => ConnectStructure.build(packet)
-    case packet: Connack => ConnackStructure.build(packet)
-    case packet: Disconnect => DisconnectStructure.build(packet)
-    //TODO: complete on next sprints
-  }
+  override def build(input: Packet): Seq[Bit] = {
+    for (ps <- structures; bits <- ps.build(input)) yield bits
+    }.flatten
 }
