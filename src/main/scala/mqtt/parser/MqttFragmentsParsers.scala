@@ -53,7 +53,7 @@ object MqttFragmentsParsers {
   def willPayload(willFlags: Option[WillFlags]): Parser[Option[ApplicationMessage]] = for {
     willTopic <- ifConditionFails("", utf8())(willFlags.isDefined)
     willMessage <- ifConditionFails(Seq(), message())(willFlags.isDefined)
-  } yield willFlags.map(f => Option(ApplicationMessage(f.retain, f.qos, willTopic, willMessage))).head
+  } yield willFlags.map(f => ApplicationMessage(f.retain, f.qos, willTopic, willMessage))
   
   def utf8(): Parser[String] =
     Parser(s => List((MqttString.decode(s.toBytes), s.toBytes.drop(MqttString.size(s.toBytes) + 2).toBitsSeq)))
