@@ -109,5 +109,6 @@ trait State {
    * @return a map containing the packets to send for each channel.
    */
   def takeAllPendingTransmission: (State, Map[Channel, Seq[Packet]])
-
+  
+  def takeClosing: (State, Map[Channel, Seq[Packet]])
 }

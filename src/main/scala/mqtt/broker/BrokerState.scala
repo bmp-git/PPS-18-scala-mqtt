@@ -81,4 +81,6 @@ case class BrokerState(override val sessions: Map[ClientID, Session],
   
     (newState, pending)
   }
+  
+  override def takeClosing: (State, Map[Channel, Seq[Packet]]) = (this.copy(closing = Map()), this.closing)
 }
