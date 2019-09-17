@@ -47,31 +47,7 @@ class CommonPacketFragmentsTest extends FunSuite {
     assert((remainingLength :: OneByte :: OneByte).build(VoidPacket).getValue(0, 8) == 2)
     assert((remainingLength :: OneByte :: OneByte :: OneByte :: OneByte :: OneByte).build(VoidPacket).getValue(0, 8) == 5)
     assert((remainingLength :: OneByte :: remainingLength :: OneByte).build(VoidPacket).getValue(16, 8) == 1)
+    assert((remainingLength :: OneByte :: remainingLength).build(()).getValue(16, 8) == 0)
     //For more need VariableLengthInteger.decode
-  }
-  
-  
-  Map[Packet, Seq[Bit]](
-    Connect(Protocol("MQTT", 4), cleanSession = true, 5 seconds, "", Option.empty, Option.empty) -> Seq[Bit](0, 0, 0, 1),
-    Connack(sessionPresent = false, ConnectionAccepted) -> Seq[Bit](0, 0, 1, 0),
-    Publish(duplicate = false, 1234, ApplicationMessage(retain = false, QoS1, "", Seq())) -> Seq[Bit](0, 0, 1, 1),
-    Puback(1234) -> Seq[Bit](0, 1, 0, 0),
-    Pubrec(1234) -> Seq[Bit](0, 1, 0, 1),
-    Pubrel(1234) -> Seq[Bit](0, 1, 1, 0),
-    Pubcomp(1234) -> Seq[Bit](0, 1, 1, 1),
-    Subscribe(1234, Seq()) -> Seq[Bit](1, 0, 0, 0),
-    Suback(1234, Seq()) -> Seq[Bit](1, 0, 0, 1),
-    Unsubscribe(1234, Seq()) -> Seq[Bit](1, 0, 1, 0),
-    Unsuback(1234) -> Seq[Bit](1, 0, 1, 1),
-    Pingreq() -> Seq[Bit](1, 1, 0, 0),
-    Pingresp() -> Seq[Bit](1, 1, 0, 1),
-    Disconnect() -> Seq[Bit](1, 1, 1, 0),
-  ) foreach {
-    case (packet, bits) => {
-      val binaryString = bits.toBinaryString
-      test(s"$packet packet type should encode in $binaryString") {
-        assert(controlPacketType.build(packet) == bits)
-      }
-    }
   }
 }

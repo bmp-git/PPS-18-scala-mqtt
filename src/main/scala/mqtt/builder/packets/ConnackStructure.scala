@@ -12,9 +12,9 @@ import mqtt.utils.BitImplicits._
  */
 case object ConnackStructure extends PacketStructure[Connack] {
   private val returnCode = (p: Connack) => p.returnCode.value.toByte.bits //Reference table 3.1
-  private val sessionPresent = zero :: zero :: zero :: zero :: zero :: zero :: zero :: ((p: Connack) => p.sessionPresent) //3.2.2.2
+  private val sessionPresent = (7 zeros) :: ((p: Connack) => p.sessionPresent) //3.2.2.2
   
-  override val fixedHeader: PacketFragment[Connack] = controlPacketType :: zero :: zero :: zero :: zero :: remainingLength //3.2.1
+  override val fixedHeader: PacketFragment[Connack] = controlPacketType(2) :: (4 zeros) :: remainingLength //3.2.1
   
   override val variableHeader: PacketFragment[Connack] = sessionPresent :: returnCode //3.2.2
 }

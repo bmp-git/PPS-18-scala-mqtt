@@ -28,7 +28,7 @@ case object ConnectStructure extends PacketStructure[Connect] {
   private val username = (p: Connect) => p.credential.map(_.username) //3.1.3.4
   private val password = (p: Connect) => p.credential.flatMap(_.password) //3.1.3.5
   
-  override val fixedHeader: PacketFragment[Connect] = controlPacketType :: zero :: zero :: zero :: zero :: remainingLength //3.1.1
+  override val fixedHeader: PacketFragment[Connect] = controlPacketType(1) :: (4 zeros):: remainingLength //3.1.1
   
   override val variableHeader: PacketFragment[Connect] = protocolName :: protocolLevel :: flags :: keepAlive //3.1.2
   
