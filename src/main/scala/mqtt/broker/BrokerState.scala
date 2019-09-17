@@ -55,8 +55,6 @@ case class BrokerState(override val sessions: Map[ClientID, Session],
   }
   
   
-  //TODO add tests for these last two methods
-  
   override def setWillMessage(channel: Channel, willMessage: Packet.ApplicationMessage): State = {
     val newWills = wills + ((channel, willMessage))
     this.copy(wills = newWills)
@@ -68,12 +66,19 @@ case class BrokerState(override val sessions: Map[ClientID, Session],
   }
   
   override def takeAllPendingTransmission: (State, Map[Channel, Seq[Packet]]) = {
-    //TODO: Refactor
-    val pt = sessions.filter(_._2.channel.isDefined).map(a => (a._2.channel.head, a._2.pendingTransmission))
-    
-    val ns = this.copy(sessions = sessions.filter(_._2.channel.isDefined).map(a => a._1 -> a._2.copy(pendingTransmission = Seq())) ++
-      sessions.filter(_._2.channel.isEmpty))
-    
-    (ns, pt)
+    object ActiveSession {
+      def unapply(session: Session): Option[Channel] = session.channel
+    }
+  
+    val pending = sessions.collect { case (_, s @ ActiveSession(channel)) => (channel, s.pendingTransmission) }
+  
+    val newSessions = sessions.map {
+      case (id, s @ ActiveSession(_)) => id -> s.copy(pendingTransmission = Seq())
+      case (id, s) => id -> s
+    }
+  
+    val newState = this.copy(sessions = newSessions)
+  
+    (newState, pending)
   }
 }
