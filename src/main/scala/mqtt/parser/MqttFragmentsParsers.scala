@@ -5,9 +5,9 @@ import mqtt.model.QoS
 import mqtt.model.Types.{Password, Payload}
 import mqtt.parser.BitParsers._
 import mqtt.parser.Monad._
-import mqtt.parser.Parsers.{Parser, conditional, ifConditionFails, or}
+import mqtt.parser.Parsers.{Parser, conditional, ifConditionFails, or, fail, assure}
 import mqtt.utils.BitImplicits._
-import mqtt.utils.{Bit, MqttString}
+import mqtt.utils.{Bit, MqttString, VariableLengthInteger}
 
 /**
  * A container of MQTT packet fragments parsers.
@@ -25,13 +25,15 @@ object MqttFragmentsParsers {
   
   def reserved(): Parser[Seq[Bit]] = for {_ <- zero(); _ <- zero(); _ <- zero(); _ <- zero()} yield Seq(0, 0, 0, 0)
   
+  def variableLength(): Parser[Int] = for {_ <- bytes(1)} yield 0
+  
   def protocolName(): Parser[String] = conditional(utf8())(_ == "MQTT")
   
   def protocolLevel(): Parser[Int] = for {byte <- bytes(1)} yield byte.head.toInt
   
   def connectFlags(): Parser[ConnectFlags] = for {
     username <- bit()
-    password <- or(conditional(zero())(_ => !username), conditional(bit())(_ => username))
+    password <- bit(); _ <- fail(!username && password)
     willFlags <- willFlags()
     cleanSession <- bit()
     _ <- zero()
@@ -40,12 +42,12 @@ object MqttFragmentsParsers {
   def willFlags(): Parser[Option[WillFlags]] = for {
     willRetain <- bit()
     willQos <- qos()
-    willFlag <- or(conditional(zero())(_ => !willRetain && willQos == QoS(0)), conditional(one())(_ => true))
+    willFlag <- bit(); _ <- assure(willFlag || (!willFlag && !willRetain && willQos == QoS(0)))
   } yield if (willFlag) Option(WillFlags(willRetain, willQos)) else Option.empty
   
   def qos(): Parser[QoS] = for {
     most <- bit()
-    least <- or(conditional(bit())(_ => !most), conditional(zero())(_ => most))
+    least <- bit(); _ <- fail(most && least)
   } yield QoS(Seq[Bit](most, least).getValue(0, 2).toInt)
   
   def keepAlive(): Parser[Int] = twoBytesInt()

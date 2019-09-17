@@ -48,6 +48,21 @@ object Parsers {
     if (condition) p else Parser(s => List((default, s)))
   
   /**
+   * A parser that assure if a condition hold.
+   * @param condition the condition that must be evaluated
+   * @return nothing, fails and breaks the parsing chain if the condition is false
+   */
+  def assure(condition: Boolean): Parser[Unit] = if (condition) parserMonad.unit(()) else failure
+  
+  /**
+   * A parser that fails if a condition hold.
+   * @param condition the condition that must be evaluated
+   * @return nothing, fails and breaks the parsing chain if the condition is true
+   */
+  def fail(condition: Boolean): Parser[Unit] = assure(!condition)
+  
+  
+  /**
    * A parser that combine the result of two different parsers.
    *
    * @param p1 the first parser

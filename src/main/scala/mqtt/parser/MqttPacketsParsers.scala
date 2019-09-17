@@ -29,7 +29,7 @@ object MqttPacketsParsers {
   def connectParser(): Parser[Packet] = for {
     _ <- packetType(ConnectMask)
     _ <- reserved()
-    _ <- bytes(1)
+    _ <- variableLength()
     _ <- protocolName()
     version <- protocolLevel()
     flags <- connectFlags()
@@ -47,7 +47,7 @@ object MqttPacketsParsers {
   def disconnectParser(): Parser[Packet] = for {
     _ <- disconnectPacketType()
     _ <- reserved()
-    _ <- bytes(1)
+    _ <- variableLength()
   } yield Disconnect()
   
   /**
@@ -58,7 +58,7 @@ object MqttPacketsParsers {
   def connackParser(): Parser[Packet] = for {
     _ <- packetType(ConnackMask)
     _ <- reserved()
-    _ <- bytes(1)
+    _ <- variableLength()
     session <- sessionPresent()
     code <- connectReturnCode()
   } yield Connack(session, code)
