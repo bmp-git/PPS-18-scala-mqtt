@@ -1,6 +1,7 @@
 package mqtt.broker
 
 import mqtt.broker.SampleInstances._
+import mqtt.model.Packet.Connack
 import org.scalatest.FunSuite
 
 import scala.concurrent.duration.Duration
@@ -84,5 +85,50 @@ class TestBrokerState extends FunSuite {
       s.copy(keepAlive = newKeepAlive)
     })
     bs2.sessionFromClientID(sample_id_1).fold(fail)(s => assert(s.keepAlive == newKeepAlive))
+  }
+  
+  test("BrokerState can save a will message") {
+    val bs1 = bs0.setWillMessage(sample_channel_0, sample_application_message_0)
+    bs1.wills.get(sample_channel_0).fold(fail)(m => assert(m == sample_application_message_0))
+  }
+  
+  test("BrokerState can update a will message") {
+    val bs1 = bs0.setWillMessage(sample_channel_0, sample_application_message_0)
+    val bs2 = bs1.setWillMessage(sample_channel_0, sample_application_message_1)
+    bs2.wills.get(sample_channel_0).fold(fail)(m => assert(m == sample_application_message_1))
+  }
+  
+  test("BrokerState can delete a will message") {
+    val bs1 = bs0.setWillMessage(sample_channel_0, sample_application_message_0)
+    val bs2 = bs1.deleteWillMessage(sample_channel_0)
+    assert(bs2.wills.isEmpty)
+  }
+  
+  test("BrokerState can take a pending transmission") {
+    val s1 = sample_session_0.copy(channel = Option(sample_channel_0), pendingTransmission = Seq(sample_connack_packet_0))
+    val bs1 = bs0.setSession(sample_id_0, s1)
+    val (_, packets) = bs1.takeAllPendingTransmission
+    packets.get(sample_channel_0).fold(fail)(seq => assert(seq.contains(sample_connack_packet_0)))
+  }
+  
+  test("After a take the pending transmissions are removed from the session.") {
+    val s1 = sample_session_0.copy(channel = Option(sample_channel_0), pendingTransmission = Seq(sample_connack_packet_0))
+    val bs1 = bs0.setSession(sample_id_0, s1)
+    val (bs2, _) = bs1.takeAllPendingTransmission
+    bs2.sessionFromChannel(sample_channel_0).fold(fail){case (_, s) => assert(s.pendingTransmission.isEmpty)}
+  }
+  
+  test("Pending transmissions of a non active session are not taken.") {
+    val s1 = sample_session_0.copy(pendingTransmission = Seq(sample_connack_packet_0))
+    val bs1 = bs0.setSession(sample_id_0, s1)
+    val (_, packets) = bs1.takeAllPendingTransmission
+    assert(packets.isEmpty)
+  }
+  
+  test("Pending transmissions of a non active session are not deleted.") {
+    val s1 = sample_session_0.copy(pendingTransmission = Seq(sample_connack_packet_0))
+    val bs1 = bs0.setSession(sample_id_0, s1)
+    val (bs2, _) = bs1.takeAllPendingTransmission
+    bs2.sessionFromClientID(sample_id_0).fold(fail)(s => assert(s.pendingTransmission.contains(sample_connack_packet_0)))
   }
 }

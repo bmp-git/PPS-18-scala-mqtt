@@ -1,7 +1,7 @@
 package mqtt.broker
 
 import mqtt.broker.Common.closeChannel
-import mqtt.broker.StateImplicits.StateTransitionWithError_Implicit
+import mqtt.broker.StateImplicits.functionToStateTransitionWithError
 import mqtt.broker.Violation.{InvalidIdentifier, InvalidProtocolName, InvalidProtocolVersion, MultipleConnectPacketsOnSameChannel}
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, Protocol}

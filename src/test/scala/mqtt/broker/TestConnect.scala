@@ -104,7 +104,7 @@ class TestConnect(ConnectPacketHandler: (State, Connect, Channel) => State) exte
   }
   
   test("The will message should be saved") {
-    val packet = sample_connect_packet_0.copy(willMessage = Option(ApplicationMessage(retain = false, QoS0, sample_topic_0, Seq())))
+    val packet = sample_connect_packet_0.copy(willMessage = Option(sample_application_message_0))
     val bs1 = ConnectPacketHandler(bs0, packet, sample_channel_0)
     bs1.wills.get(sample_channel_0).fold(fail)(m => assert(m.topic == sample_topic_0))
   }

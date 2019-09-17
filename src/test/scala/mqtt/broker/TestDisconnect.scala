@@ -1,8 +1,7 @@
 package mqtt.broker
 
 import mqtt.broker.SampleInstances._
-import mqtt.model.Packet.{ApplicationMessage, Connect, Disconnect}
-import mqtt.model.QoS.QoS0
+import mqtt.model.Packet.{Connect, Disconnect}
 import org.scalatest.FunSuite
 
 class TestDisconnect(ConnectPacketHandler: (State, Connect, Channel) => State,
@@ -26,7 +25,7 @@ class TestDisconnect(ConnectPacketHandler: (State, Connect, Channel) => State,
   }
   
   test("A disconnection through a disconnect packet should not publish the will message") {
-    val packet = sample_connect_packet_0.copy(willMessage = Option(ApplicationMessage(retain = false, QoS0, sample_topic_0, Seq())))
+    val packet = sample_connect_packet_0.copy(willMessage = Option(sample_application_message_0))
     val bs1 = ConnectPacketHandler(bs0, packet, sample_channel_0)
     
     //TODO refactor, workaround to check a publish through println
