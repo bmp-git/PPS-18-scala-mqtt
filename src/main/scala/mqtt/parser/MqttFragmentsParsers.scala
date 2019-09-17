@@ -25,7 +25,12 @@ object MqttFragmentsParsers {
   
   def reserved(): Parser[Seq[Bit]] = for {_ <- zero(); _ <- zero(); _ <- zero(); _ <- zero()} yield Seq(0, 0, 0, 0)
   
-  def variableLength(): Parser[Int] = for {_ <- bytes(1)} yield 0
+  def variableLength(): Parser[Int] = Parser(s => {
+    VariableLengthInteger.decode(s.toBytes) match {
+      case (length, bytes) => length.fold[List[(Int, Seq[Bit])]](List())(l =>
+        if (bytes.size == l) List((l, bytes.toSeq.toBitsSeq)) else List())
+    }
+  })
   
   def protocolName(): Parser[String] = conditional(utf8())(_ == "MQTT")
   
