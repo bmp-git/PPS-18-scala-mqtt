@@ -1,7 +1,7 @@
 package mqtt.broker
 
 import mqtt.broker.Common.closeChannel
-import mqtt.model.ErrorPacket.MalformedPacket
+import mqtt.model.ErrorPacket.{ChannelClosed, MalformedPacket}
 import mqtt.model.Packet
 import mqtt.model.Packet.{Connect, Disconnect}
 
@@ -15,8 +15,11 @@ object BrokerManager extends ProtocolManager {
         case p: Connect => ConnectPacketHandler.handle(state, p, channel)
         case p: Disconnect => DisconnectPacketHandler.handle(state, p, channel)
         case _: MalformedPacket => println("Received malformed packet from ".concat(channel.toString)); closeChannel(channel)(state)
+        case _: ChannelClosed => closeChannel(channel)(state)
         case _ => println("Packet not supported"); state
       }
     })(_ => state)
   }
+  
+  override def tick(state: State): State = state //TODO
 }

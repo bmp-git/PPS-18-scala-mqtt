@@ -1,16 +1,12 @@
 package mqtt.builder.fragments
 
+import mqtt.builder.BuildContext._
 import mqtt.builder.fragments.CommonPacketFragments._
-import mqtt.model.Packet._
-import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
-import mqtt.model.QoS.QoS1
+import mqtt.model.Types._
 import mqtt.model.{Packet, PacketID}
 import mqtt.utils.Bit
-import org.scalatest.FunSuite
 import mqtt.utils.BitImplicits._
-import mqtt.model.Types._
-import scala.concurrent.duration._
-import mqtt.builder.BuildContext._
+import org.scalatest.FunSuite
 
 
 class CommonPacketFragmentsTest extends FunSuite {
@@ -24,6 +20,12 @@ class CommonPacketFragmentsTest extends FunSuite {
   }
   test("One should build in 1") {
     assert(one.build() == Seq[Bit](1))
+  }
+  test("5 zeros should build in 00000") {
+    assert((5 zeros).build() == Seq[Bit](0, 0, 0, 0, 0))
+  }
+  test("5 ones should build in 11111") {
+    assert((5 ones).build() == Seq[Bit](1, 1, 1, 1, 1))
   }
   test("Empty should build in empty-seq") {
     assert(empty.build() == Seq[Bit]())
