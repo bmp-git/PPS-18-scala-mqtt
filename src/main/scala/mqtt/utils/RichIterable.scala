@@ -18,5 +18,15 @@ object IterableImplicits {
     def spanUntil(f: T => Boolean): (Iterable[T], Iterable[T]) = iterable.span(f) match {
       case (included, excluded) => (included ++ excluded.take(1), excluded.drop(1))
     }
+  
+    //TODO: doc
+    def bendLeft[A](acc: A)(f: (A, T) => A): Unit = {
+      def internalBendLeft[A](acc: A, it: Iterable[T])(f: (A, T) => A): Unit = {
+        if (it.nonEmpty) {
+          internalBendLeft(f(acc, it.head), it.tail)(f)
+        }
+      }
+      internalBendLeft(acc, iterable)(f)
+    }
   }
 }

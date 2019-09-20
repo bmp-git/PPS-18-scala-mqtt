@@ -12,12 +12,9 @@ trait PacketID {
 
 object ErrorPacket { //is this ok?
   
-  trait CloseConnection extends Packet
+  case class MalformedPacket() extends Packet
   
-  case class ProtocolError() extends CloseConnection
-  
-  case class MalformedPacket() extends CloseConnection
-  
+  case class ChannelClosed() extends Packet
 }
 
 object Packet {

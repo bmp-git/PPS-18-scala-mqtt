@@ -15,4 +15,7 @@ trait ProtocolManager {
    * @return the new state of the server.
    */
   def handle(state: State, packet: Packet, channel: Channel): State
+  
+  //TODO: doc
+  def tick(state: State): State
 }
