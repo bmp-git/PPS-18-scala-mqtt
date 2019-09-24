@@ -10,6 +10,6 @@ object Topic {
   }
   
   def valid(value: String): Boolean = {
-    !(value.isEmpty || value.contains("#") || value.contains("?") || value.contains("\u0000"))
+    !(value.isEmpty || value.contains("#") || value.contains("+") || value.contains("\u0000"))
   }
 }

@@ -12,11 +12,10 @@ class TopicFilterTest[T](build: String => Option[T])(implicit m: ClassTag[T]) ex
   }
   
   def assertObjects(assertion: (T, T) => Boolean): (Option[T], Option[T]) => Unit = (topic1, topic2) => {
-    for {
+    (for {
       t1 <- topic1
       t2 <- topic2
-      _ = assert(assertion(t1, t2))
-    } yield ()
+    } yield (t1, t2)).fold(fail)(r => assert(assertion(r._1, r._2)))
   }
   
   def assertEqual: (Option[T], Option[T]) => Unit = assertObjects((t1, t2) => t1 == t2)

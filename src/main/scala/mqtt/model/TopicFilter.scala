@@ -10,7 +10,7 @@ object TopicFilter {
   }
   
   def valid(value: String): Boolean = {
-    //TODO check wildcards are in the right position
-    !(value.isEmpty || value.contains("\u0000"))
+    val regex = "^((([^#\\+]*|\\+)?(\\/([^#\\+]*|\\+))*(\\/(\\+|#))?)|#)$"
+    !(value.isEmpty || value.contains("\u0000") || !value.matches(regex))
   }
 }
