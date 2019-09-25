@@ -15,7 +15,7 @@ class TopicFilterTest[T](build: String => Option[T])(implicit m: ClassTag[T]) ex
     (for {
       t1 <- topic1
       t2 <- topic2
-    } yield (t1, t2)).fold(fail)(r => assert(assertion(r._1, r._2)))
+    } yield (t1, t2)).fold[Unit](fail)(r => assert(assertion(r._1, r._2)))
   }
   
   def assertEqual: (Option[T], Option[T]) => Unit = assertObjects((t1, t2) => t1 == t2)
@@ -56,6 +56,6 @@ class TopicFilterTest[T](build: String => Option[T])(implicit m: ClassTag[T]) ex
   }
   
   test(s"A $name with a null character is invalid.") {
-    assert(build("sport/ten\0nis").isEmpty)
+    assert(build("sport/ten\u0000nis").isEmpty)
   }
 }

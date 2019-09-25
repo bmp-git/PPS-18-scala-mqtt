@@ -10,7 +10,7 @@ object TopicFilter {
   }
   
   def valid(value: String): Boolean = {
-    val regex = "^((([^#\\+]*|\\+)?(\\/([^#\\+]*|\\+))*(\\/(\\+|#))?)|#)$"
+    val regex = "^\\/?(([^#\\+]*|\\+)\\/)*([^#\\+]*|\\+|#)?$"
     !(value.isEmpty || value.contains("\u0000") || !value.matches(regex))
   }
 }
