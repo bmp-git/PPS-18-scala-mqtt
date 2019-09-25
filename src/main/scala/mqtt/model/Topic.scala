@@ -1,7 +1,7 @@
 package mqtt.model
 
 case class Topic(value: String) {
-  def matching(filter: TopicFilter): Boolean = ??? //TODO
+  def matching(filter: TopicFilter): Boolean = filter.matching(this)
 }
 
 object Topic {

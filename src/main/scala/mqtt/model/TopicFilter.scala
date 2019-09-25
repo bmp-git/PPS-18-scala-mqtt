@@ -1,7 +1,17 @@
 package mqtt.model
 
 case class TopicFilter(value: String) {
-  def matching(topic: Topic): Boolean = topic matching this
+  val regex: String = {
+    "^\\Q" +
+      value
+        .replace("\\E", """\E\\E\Q""") //Needed for security issue, in case \E is inside topic filter.
+        .replace("/#", "\\E.*\\Q")
+        .replace("#", "\\E[^\\$].*\\Q")
+        .replace("/+", "/\\E[^\\/]*\\Q")
+        .replace("+", "\\E([^\\$\\/][^\\/]*)?\\Q") + "\\E$"
+  }
+  
+  def matching(topic: Topic): Boolean = topic.value.matches(regex)
 }
 
 object TopicFilter {
