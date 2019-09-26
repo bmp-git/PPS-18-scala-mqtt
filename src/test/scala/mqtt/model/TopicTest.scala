@@ -7,7 +7,7 @@ class TopicTest extends TopicFilterTest[Topic](Topic.apply) {
     assert(Topic("sport/#").isEmpty)
   }
   
-  test("A topic with a ? wildcard is invalid.") {
+  test("A topic with a + wildcard is invalid.") {
     assert(Topic("+/tennis").isEmpty)
   }
 }
