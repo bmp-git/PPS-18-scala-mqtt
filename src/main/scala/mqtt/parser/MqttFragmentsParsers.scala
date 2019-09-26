@@ -2,10 +2,10 @@ package mqtt.parser
 
 import mqtt.model.Packet.{ApplicationMessage, ConnectReturnCode, Credential}
 import mqtt.model.QoS
-import mqtt.model.Types.{Password, Payload}
+import mqtt.model.Types.{PackedID, Password, Payload}
 import mqtt.parser.BitParsers._
 import mqtt.parser.Monad._
-import mqtt.parser.Parsers.{Parser, conditional, ifConditionFails, first, fail, assure, timesN}
+import mqtt.parser.Parsers.{Parser, assure, conditional, fail, first, ifConditionFails, seqN, timesN}
 import mqtt.utils.BitImplicits._
 import mqtt.utils.{Bit, MqttString, VariableLengthInteger}
 
@@ -23,7 +23,8 @@ object MqttFragmentsParsers {
     d <- bit(mask code 3)
   } yield Seq(a, b, c, d)
   
-  def reserved(): Parser[Seq[Bit]] = for {reserved <- timesN(zero())(4)} yield reserved
+  def reserved(): Parser[Seq[Bit]] = timesN(zero())(4)
+  def reserved2(): Parser[Seq[Bit]] = seqN(List(zero(), zero(), one(), zero()):_*)
   
   def variableLength(): Parser[Int] = Parser(s => {
     VariableLengthInteger.decode(s.toBytes) match {
@@ -90,4 +91,14 @@ object MqttFragmentsParsers {
     code <- first(byte(0), byte(1), byte(2), byte(3), byte(4), byte(5))
   } yield ConnectReturnCode(code)
   
+  def subscriptionGrantedQoS(): Parser[Option[QoS]] = for {
+    code <- first(byte(0), byte(1), byte(2), byte(80))
+  } yield if (code == 80) Option.empty else Option(QoS(code))
+  
+  def packetIdentifier(): Parser[PackedID] = for {id <- twoBytesInt(); _ <- assure(id != 0)} yield id
+  
+  def subscription(): Parser[(String, QoS)] =
+    for {topic <- utf8(); _ <- timesN(zero())(6); qos <- qos()} yield (topic, qos)
+  
+  def unsubscription(): Parser[String] = utf8()
 }

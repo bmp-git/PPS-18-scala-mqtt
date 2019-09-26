@@ -21,6 +21,9 @@ class ParsersTest extends FunSuite with Matchers {
   test("A first parser SHOULD parse and consume input and return the first successful parsing result") {
     first(BitParsers.zero(),  BitParsers.one(), Parsers.success("asd")) run Seq(one) shouldBe result(one)
   }
+  test("A first parser SHOULD NOT parse if any parser succeeded") {
+    first(BitParsers.zero(),  BitParsers.zero()) run Seq(one) shouldBe failed
+  }
   
   //seqN parser
   test("A seqN parser SHOULD parse using more parsers") {

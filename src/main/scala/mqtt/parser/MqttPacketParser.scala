@@ -1,10 +1,10 @@
 package mqtt.parser
 
+import mqtt.utils.Bit
 import mqtt.PacketParser
 import mqtt.model.ErrorPacket.MalformedPacket
 import mqtt.model.Packet
-import mqtt.parser.MqttPacketsParsers._
-import mqtt.utils.Bit
+import mqtt.parser.MqttPacketsParsers.mqtt
 
 /**
  * An MQTT packet parser.
@@ -16,5 +16,5 @@ object MqttPacketParser extends PacketParser {
    * @param input the packet in bits
    * @return the parsed packet
    */
-  override def parse(input: Seq[Bit]): Packet = Parsers.parse(mqttParser(), input) getOrElse MalformedPacket()
+  override def parse(input: Seq[Bit]): Packet = Parsers.parse(mqtt(), input) getOrElse MalformedPacket()
 }
