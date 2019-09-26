@@ -27,8 +27,8 @@ object MqttFragmentsParsers {
   
   def variableLength(): Parser[Int] = Parser(s => {
     VariableLengthInteger.decode(s.toBytes) match {
-      case (length, bytes) => length.fold[List[(Int, Seq[Bit])]](List())(l =>
-        if (bytes.size == l) List((l, bytes.toSeq.toBitsSeq)) else List())
+      case (length, bytes) => length.fold[Option[(Int, Seq[Bit])]](Option.empty)(l =>
+        if (bytes.size == l) Option((l, bytes.toSeq.toBitsSeq)) else Option.empty)
     }
   })
   
@@ -63,7 +63,7 @@ object MqttFragmentsParsers {
   } yield willFlags.map(f => ApplicationMessage(f.retain, f.qos, willTopic, willMessage))
   
   def utf8(): Parser[String] =
-    Parser(s => List((MqttString.decode(s.toBytes), s.toBytes.drop(MqttString.size(s.toBytes) + 2).toBitsSeq)))
+    Parser(s => Option((MqttString.decode(s.toBytes), s.toBytes.drop(MqttString.size(s.toBytes) + 2).toBitsSeq)))
   
   def message(): Parser[Payload] = binaryData()
   

@@ -1,5 +1,6 @@
 package mqtt.parser
 
+import ParserUtils._
 import mqtt.model.ErrorPacket.MalformedPacket
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.Packet._
@@ -11,7 +12,6 @@ import org.scalatest.{FunSuite, Matchers}
 import scala.concurrent.duration._
 
 class PacketParserTest extends FunSuite with Matchers {
-  val byte: Seq[Bit] = Seq(1, 1, 1, 0, 0, 0, 0, 0)
   val disconnect: Seq[Bit] = Seq(
     1, 1, 1, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0,
@@ -52,7 +52,7 @@ class PacketParserTest extends FunSuite with Matchers {
     0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0
   )
-  
+
   test("An MQTT packet parser should parse a connect message") {
     MqttPacketParser parse connect shouldBe
       Connect(Protocol("MQTT", 4), true, 10 seconds, "a",
