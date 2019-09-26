@@ -14,16 +14,27 @@ object VariableLengthInteger {
     process(value, Seq()).map(_.toByte)
   }
   
+  private def parse(included: Iterable[Byte]):Option[Int] = {
+    included.zipWithIndex.grouped(4).toSeq match {
+      case a: Seq[Iterable[(Byte, Int)]] if a.length != 1 => Option.empty
+      case a: Seq[Iterable[(Byte, Int)]] => a.flatten.map {
+        case (b, p) => (b & 0x7F) * Math.pow(128, p).toInt
+      }.reduceOption(_ + _)
+    }
+  }
+  
   def decode(stream: Iterable[Byte]): (Option[Int], Iterable[Byte]) = {
     stream.spanUntil(_ < 0) match {
       case (included, excluded) => {
-        (included.zipWithIndex.grouped(4).toSeq match {
-          case a: Seq[Iterable[(Byte, Int)]] if a.length != 1 => Option.empty
-          case a: Seq[Iterable[(Byte, Int)]] => a.flatten.map {
-            case (b, p) => (b & 0x7F) * Math.pow(128, p).toInt
-          }.reduceOption(_ + _)
-        }, excluded)
+        (parse(included), excluded)
       }
     }
+  }
+  
+  def decode(stream: Iterator[Byte]): Option[Int] = {
+    val parts = stream.span(_ < 0)
+    val included = parts._1.toSeq
+    val excluded = parts._2.next()
+    parse(included :+ excluded)
   }
 }
