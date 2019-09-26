@@ -53,26 +53,26 @@ class PacketParserTest extends FunSuite with Matchers {
     0, 0, 0, 0, 0, 0, 0, 0
   )
 
-  test("An MQTT packet parser should parse a connect message") {
+  test("An MQTT packet parser SHOULD parse a connect message") {
     MqttPacketParser parse connect shouldBe
       Connect(Protocol("MQTT", 4), true, 10 seconds, "a",
         Option(Credential("c", Option(Seq[Byte](12)))),
         Option(ApplicationMessage(retain = true, QoS2, "b", Seq[Byte](10, 11))))
   }
   
-  test("An MQTT packet parser should parse a disconnect message") {
+  test("An MQTT packet parser SHOULD parse a disconnect message") {
     MqttPacketParser parse disconnect shouldBe Disconnect()
   }
   
-  test("An MQTT packet parser should parse a connack message") {
+  test("An MQTT packet parser SHOULD parse a connack message") {
     MqttPacketParser parse connack shouldBe Connack(sessionPresent = false, returnCode = ConnectionAccepted)
   }
   
-  test("An MQTT packet parser should not parse an incomplete packet") {
+  test("An MQTT packet parser SHOULD not parse an incomplete packet") {
     MqttPacketParser parse byte shouldBe MalformedPacket()
   }
   
-  test("An MQTT packet parser should not parse superabundant packet") {
+  test("An MQTT packet parser SHOULD not parse superabundant packet") {
     MqttPacketParser parse (disconnect ++ disconnect) shouldBe MalformedPacket()
   }
 }

@@ -61,7 +61,7 @@ class MqttFragmentsParsersTest extends FunSuite with Matchers {
   test("A ConnectReturnCode parser SHOULD parse a NotAuthorized") {
     connectReturnCode() run(5.toByte.bits) shouldBe result(NotAuthorized)
   }
-  test("A ConnectReturnCode parser SHOULD parse a byte > 5") {
+  test("A ConnectReturnCode parser SHOULD NOT parse a byte > 5") {
     connectReturnCode() run(31.toByte.bits) shouldBe failed
   }
 }

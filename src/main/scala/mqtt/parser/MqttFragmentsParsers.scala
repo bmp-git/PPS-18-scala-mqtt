@@ -5,7 +5,7 @@ import mqtt.model.QoS
 import mqtt.model.Types.{Password, Payload}
 import mqtt.parser.BitParsers._
 import mqtt.parser.Monad._
-import mqtt.parser.Parsers.{Parser, conditional, ifConditionFails, or, fail, assure}
+import mqtt.parser.Parsers.{Parser, conditional, ifConditionFails, first, fail, assure, timesN}
 import mqtt.utils.BitImplicits._
 import mqtt.utils.{Bit, MqttString, VariableLengthInteger}
 
@@ -23,7 +23,7 @@ object MqttFragmentsParsers {
     d <- bit(mask code 3)
   } yield Seq(a, b, c, d)
   
-  def reserved(): Parser[Seq[Bit]] = for {_ <- zero(); _ <- zero(); _ <- zero(); _ <- zero()} yield Seq(0, 0, 0, 0)
+  def reserved(): Parser[Seq[Bit]] = for {reserved <- timesN(zero())(4)} yield reserved
   
   def variableLength(): Parser[Int] = Parser(s => {
     VariableLengthInteger.decode(s.toBytes) match {
@@ -72,7 +72,7 @@ object MqttFragmentsParsers {
     payload <- ifConditionFails(Seq(), bytes(length))(length > 0)
   } yield payload
   
-  def twoBytesInt(): Parser[Int] = for {bytes <- bytes(2)} yield bytes.toBitsSeq.getValue(0, 16).toInt
+  def twoBytesInt(): Parser[Int] = for {bytes <- bytes(2)} yield bytes.toBitsSeq getValue(0, 16) toInt
   
   def credentials(flags: CredentialFlags): Parser[Option[Credential]] = for {
     username <- ifConditionFails("", utf8())(flags.username)
@@ -82,12 +82,12 @@ object MqttFragmentsParsers {
   def password(): Parser[Password] = binaryData()
   
   def sessionPresent(): Parser[Boolean] = for {
-    _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero(); _ <- zero()
+    _ <- timesN(zero())(7)
     session <- bit()
   } yield session
   
   def connectReturnCode(): Parser[ConnectReturnCode] = for {
-    code <- or(byte(0), byte(1), byte(2), byte(3), byte(4), byte(5))
+    code <- first(byte(0), byte(1), byte(2), byte(3), byte(4), byte(5))
   } yield ConnectReturnCode(code)
   
 }

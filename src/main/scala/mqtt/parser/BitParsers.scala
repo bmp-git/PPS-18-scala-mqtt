@@ -1,7 +1,7 @@
 package mqtt.parser
 
 import mqtt.parser.Monad._
-import mqtt.parser.Parsers.{Parser, conditional}
+import mqtt.parser.Parsers.{Parser, conditional, timesN, assure}
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
 
@@ -9,18 +9,21 @@ import mqtt.utils.BitImplicits._
  * A container of bit/byte parsers.
  */
 object BitParsers {
-  def byte(byte: Byte): Parser[Byte] = Parser(bits =>
-    if (bits.size < 8 || bits.take(8).toBytes.head != byte) Option.empty else Option((bits.take(8).toBytes.head, bits.drop(8))))
-  
-  def zero(): Parser[Bit] = bit(0)
+  def bit(): Parser[Bit] = Parser(s => if (s.isEmpty) Option.empty else Option((s.head, s.drop(1))))
+    //Parser(s => s.headOption.fold[Option[(Bit, Seq[Bit])]](Option.empty)(h => Option((h, s.tail))))
   
   def bit(which: Bit): Parser[Bit] = conditional(bit())(_ == which)
   
-  def bit(): Parser[Bit] = Parser(s => if (s.isEmpty) Option.empty else Option((s.head, s.drop(1))))
+  def zero(): Parser[Bit] = bit(0)
   
   def one(): Parser[Bit] = bit(1)
   
+  def bits(count: Int): Parser[Seq[Bit]] = for { bits <- timesN(bit())(count) } yield bits
+  
+  def byte(): Parser[Byte] = for { bits <- timesN(bit())(8)} yield bits.toBytes.head
+  
+  def byte(byte: Byte): Parser[Byte] = for { parsed <- this.byte(); _ <- assure(parsed == byte)} yield parsed
+  
   def bytes(count: Int): Parser[Seq[Byte]] = for {bytes <- bits(count * 8)} yield bytes.toBytes
   
-  def bits(count: Int): Parser[Seq[Bit]] = Parser(bits => if (bits.size < count) Option.empty else Option((bits.take(count), bits.drop(count))))
 }

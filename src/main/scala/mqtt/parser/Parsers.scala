@@ -58,20 +58,20 @@ object Parsers {
   /**
    * A parser that assure if a condition hold.
    * @param condition the condition that must be evaluated
-   * @return nothing, fails and breaks the parsing chain if the condition is false
+   * @return the new parser that fails and breaks the parsing chain if the condition is false
    */
   def assure(condition: Boolean): Parser[Unit] = if (condition) parserMonad.unit(()) else failure
   
   /**
    * A parser that fails if a condition hold.
    * @param condition the condition that must be evaluated
-   * @return nothing, fails and breaks the parsing chain if the condition is true
+   * @return the new parser that fails and breaks the parsing chain if the condition is true
    */
   def fail(condition: Boolean): Parser[Unit] = assure(!condition)
   
   
   /**
-   * An exclusive or parser that combine the result of two different parsers returning the first matching.
+   * A parser that represent the first successful parser execution of two parsers.
    *
    * @param p1 the first parser
    * @param p2 the second parser
@@ -80,28 +80,70 @@ object Parsers {
    * @tparam C the second parser result type
    * @return the new parser
    */
-  def or[A, B <: A, C <: A](p1: Parser[B], p2: Parser[C]): Parser[A] = Parser(s => p1.run(s) orElse p2.run(s))
+  def first[A, B <: A, C <: A](p1: Parser[B], p2: Parser[C]): Parser[A] = Parser(s => p1.run(s) orElse p2.run(s))
   
   /**
-   * An exclusive or parser that combine the result of many different parsers with the same result type B
-   * returning the first matching.
+   * A parser that represent the first successful parser execution
+   * of many different parsers with the same result type B
    *
-   * @param p1 the parsers
+   * @param ps the parsers
    * @tparam A the new parser result type
    * @tparam B the parsers result type
    * @return the new parser
    */
-  def or[A, B <: A](p1: Parser[B]*): Parser[A] = {
-    if (p1.size == 2) or(p1.head, p1(1)) else Parser(s => p1.head.run(s) orElse or(p1.drop(1): _*).run(s))
+  def first[A, B <: A](ps: Parser[B]*): Parser[A] = {
+    if (ps.size == 2) first(ps.head, ps(1)) else Parser(s => ps.head.run(s) orElse first(ps.drop(1): _*).run(s))
   }
   
   /**
-   * A parse method that parse to completion a sequence of bits using a parser and return the first result
+   * A parser that represent the sequential execution of a list of parsers.
+   * @param ps the parsers
+   * @tparam A the parsers result type
+   * @return the new parser
+   */
+  def seqN[A](ps : Parser[A]*): Parser[List[A]] = sequence(ps.toList)
+  
+  /**
+   * A parser that represent the sequential execution of a parser n times.
+   * @param p the parser
+   * @param n the number of execution
+   * @tparam A the parser result type
+   * @return the new parser
+   */
+  def timesN[A](p : Parser[A])(n: Int): Parser[List[A]] = sequence(List.fill(n)(p))
+  
+  /**
+   * An optional parser that parse like p or like a parser that return a default value without consuming input.
+   * @param default the default value
+   * @param p the parser
+   * @tparam A the parser result and default type
+   * @return the new parser
+   */
+  def optional[A](default: A , p: Parser[A]): Parser[A] = first(p, success[A](default))
+  
+  /**
+   * A parser that represent the sequential execution of a parser 0, 1 or many times.
+   * @param p the parser
+   * @tparam A the parser result type
+   * @return the new parser
+   */
+  def many[A](p : Parser[A]): Parser[List[A]] = optional(List[A](), many1(p))
+  
+  /**
+   * A parser that represent the sequential execution of a parser 1 or many times.
+   * @param p the parser
+   * @tparam A the result type
+   * @return the new parser
+   */
+  def many1[A](p: Parser[A]): Parser[List[A]] = map2(p)(many(p))(_::_)
+  
+  /**
+   * A parse method that parse to completion a sequence of bits using a parser and return the result.
    *
    * @param p the parser to use
    * @param s the input sequence of bits
    * @tparam A the parser return type
    * @return the parsing result if the sequence is completely parsed
    */
-  def parse[A](p: Parser[A], s: Seq[Bit]): Option[A] = p.run(s).collectFirst { case (a, Seq()) => a }
+  def parse[A](p: Parser[A], s: Seq[Bit]): Option[A] = p run s collect { case (a, Seq()) => a }
 }

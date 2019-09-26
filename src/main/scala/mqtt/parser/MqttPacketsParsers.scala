@@ -5,7 +5,7 @@ import mqtt.model.Packet.{Connack, Connect, Disconnect, Protocol}
 import mqtt.parser.BitParsers._
 import mqtt.parser.Monad._
 import mqtt.parser.MqttFragmentsParsers._
-import mqtt.parser.Parsers.{Parser, or}
+import mqtt.parser.Parsers.{Parser, first}
 
 import scala.concurrent.duration._
 
@@ -19,7 +19,7 @@ object MqttPacketsParsers {
    *
    * @return the MQTT 3.1.1 packets parser
    */
-  def mqttParser(): Parser[Packet] = or(disconnectParser(), connectParser(), connackParser())
+  def mqttParser(): Parser[Packet] = first(disconnectParser(), connectParser(), connackParser())
   
   /**
    * Parser of the MQTT 3.1.1 connect packet.
