@@ -2,8 +2,6 @@ package mqtt.builder.packets
 
 import mqtt.model.Packet.Subscribe
 import mqtt.model.QoS
-import mqtt.model.QoS.{QoS0, QoS2}
-import mqtt.model.Types.TopicFilter
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
 
@@ -17,7 +15,7 @@ class SubscribeBuilderTest extends PacketBuilderTester {
         0, 0, 0, 0, 0, 1, 0, 0, //Packet id MSB
         1, 1, 0, 1, 0, 0, 1, 0, //Packet id LSB
       ),
-    Subscribe(1234, Seq(("a/b", QoS2))) ->
+      Subscribe(1234, Seq(("a/b", QoS(2)))) ->
       Seq(
         1, 0, 0, 0, 0, 0, 1, 0,
         0, 0, 0, 0, 1, 0, 0, 0, //Remaining length
