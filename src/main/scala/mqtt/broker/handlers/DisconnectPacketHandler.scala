@@ -1,6 +1,7 @@
-package mqtt.broker
+package mqtt.broker.handlers
 
 import mqtt.broker.Common.closeChannelNoWillPublish
+import mqtt.broker.state.{Channel, State}
 import mqtt.model.Packet.Disconnect
 
 /**

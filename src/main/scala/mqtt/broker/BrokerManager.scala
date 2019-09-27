@@ -1,6 +1,8 @@
 package mqtt.broker
 
 import mqtt.broker.Common.closeChannel
+import mqtt.broker.handlers.{ConnectPacketHandler, DisconnectPacketHandler}
+import mqtt.broker.state.{Channel, State}
 import mqtt.model.ErrorPacket.{ChannelClosed, MalformedPacket}
 import mqtt.model.Packet
 import mqtt.model.Packet.{Connect, Disconnect}

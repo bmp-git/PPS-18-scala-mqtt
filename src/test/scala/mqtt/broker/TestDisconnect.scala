@@ -1,6 +1,7 @@
 package mqtt.broker
 
 import mqtt.broker.SampleInstances._
+import mqtt.broker.state.{Channel, State}
 import mqtt.model.Packet.{Connect, Disconnect}
 import org.scalatest.FunSuite
 

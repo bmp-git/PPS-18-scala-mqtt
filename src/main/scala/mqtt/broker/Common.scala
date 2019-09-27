@@ -1,5 +1,6 @@
 package mqtt.broker
 
+import mqtt.broker.state.{Channel, State}
 import mqtt.model.Packet
 import mqtt.model.Packet.ApplicationMessage
 

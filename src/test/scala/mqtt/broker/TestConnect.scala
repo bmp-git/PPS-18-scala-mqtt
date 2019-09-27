@@ -1,6 +1,7 @@
 package mqtt.broker
 
 import mqtt.broker.SampleInstances._
+import mqtt.broker.state.{Channel, State}
 import mqtt.model.Packet.ConnectReturnCode.{ConnectionAccepted, IdentifierRejected, UnacceptableProtocolVersion}
 import mqtt.model.Packet._
 import mqtt.model.QoS

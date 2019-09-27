@@ -1,4 +1,4 @@
-package mqtt.broker
+package mqtt.broker.state
 
 import mqtt.broker.Common.closeChannelWithPackets
 import mqtt.model.Packet

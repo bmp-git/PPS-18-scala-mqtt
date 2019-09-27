@@ -1,5 +1,6 @@
-package mqtt.broker
+package mqtt.broker.handlers
 
+import mqtt.broker.state.{Channel, State}
 import mqtt.model.Packet
 
 /**

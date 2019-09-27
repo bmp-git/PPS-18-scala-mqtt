@@ -1,6 +1,7 @@
 package mqtt.server
 
-import mqtt.broker.{BrokerManager, Channel, MQTTChannel, State}
+import mqtt.broker.state.{Channel, MQTTChannel, State}
+import mqtt.broker.BrokerManager
 import mqtt.model.Packet
 import rx.lang.scala.Observable
 
