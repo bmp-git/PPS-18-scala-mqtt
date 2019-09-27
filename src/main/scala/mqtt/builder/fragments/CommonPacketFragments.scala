@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets
 
 import mqtt.builder.BuildContext._
 import mqtt.builder.fragments.RichPacketFragment._
-import mqtt.model.QoS.{QoS0, QoS1, QoS2}
 import mqtt.model.{PacketID, QoS}
 import mqtt.utils.BitImplicits._
 import mqtt.utils.{Bit, VariableLengthInteger}
@@ -107,9 +106,9 @@ object CommonPacketFragments {
    * Builds in two bits indicating the specified qos.
    */
   val qosStructure: PacketFragment[QoS] = rawBits from ((qos: QoS) => (qos match {
-    case QoS0 => zero :: zero
-    case QoS1 => zero :: one
-    case QoS2 => one :: zero
+    case QoS(0) => zero :: zero
+    case QoS(1) => zero :: one
+    case QoS(2) => one :: zero
   }).build())
   
   /**

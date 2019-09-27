@@ -14,11 +14,11 @@ import mqtt.model.Types.TopicFilter
 case object SubscribeStructure extends PacketStructure[Subscribe] {
   
   //3.8.3
-  private val topicQoS: PacketFragment[(TopicFilter, QoS)] = qosStructure from {
+  private val topicQoS: PacketFragment[(String, QoS)] = qosStructure from {
     case (_, qos) => qos
   }
-  private val topicFilter: PacketFragment[(TopicFilter, QoS)] = stringStructure from {
-    case (filter, _) => filter.value
+  private val topicFilter: PacketFragment[(String, QoS)] = stringStructure from {
+    case (filter, _) => filter
   }
   
   
