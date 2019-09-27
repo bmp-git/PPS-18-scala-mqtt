@@ -90,7 +90,7 @@ object Packet {
   /* 3.8 */
   case class Subscribe(
                         packetId: PackedID,
-                        topics: Seq[(TopicFilter, QoS)]
+                        topics: Seq[(String, QoS)]
                       ) extends Packet with PacketID
   
   /* 3.9 */
@@ -102,7 +102,7 @@ object Packet {
   /* 3.10 */
   case class Unsubscribe(
                           packetId: PackedID,
-                          topics: Seq[TopicFilter]
+                          topics: Seq[String]
                         ) extends Packet with PacketID
   
   /* 3.11 */
