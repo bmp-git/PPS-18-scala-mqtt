@@ -2,11 +2,10 @@ package mqtt.parser
 
 import mqtt.model.{Packet, QoS}
 import mqtt.model.Packet._
-import mqtt.model.Types.TopicFilter
 import mqtt.parser.BitParsers._
 import mqtt.parser.Monad._
 import mqtt.parser.MqttFragmentsParsers._
-import mqtt.parser.Parsers.{Parser, first, ifConditionFails, many, many1}
+import mqtt.parser.Parsers.{Parser, first, ifConditionFails, many, many1, fail}
 import mqtt.utils.BitImplicits._
 
 import scala.concurrent.duration._
@@ -28,11 +27,6 @@ object MqttPacketsParsers {
     unsubscribe(), unsuback()
   )
   
-  /**
-   * Parser of the MQTT 3.1.1 connect packet.
-   *
-   * @return the MQTT 3.1.1 connect packet
-   */
   def connect(): Parser[Packet] = for {
     _ <- packetType(ConnectMask)
     _ <- reserved()
@@ -41,16 +35,11 @@ object MqttPacketsParsers {
     version <- protocolLevel()
     flags <- connectFlags()
     keepAlive <- keepAlive()
-    clientId <- utf8() //check length and chars?  [MQTT-3.1.3-5]
+    clientId <- utf8()
     willMessage <- willPayload(flags.willFlags)
     credentials <- credentials(flags.credentials)
   } yield Connect(Protocol("MQTT", version), flags cleanSession, keepAlive seconds, clientId, credentials, willMessage)
   
-  /**
-   * Parser of the MQTT 3.1.1 connack packet.
-   *
-   * @return the MQTT 3.1.1 connack packet
-   */
   def connack(): Parser[Packet] = for {
     _ <- packetType(ConnackMask)
     _ <- reserved()
@@ -59,11 +48,6 @@ object MqttPacketsParsers {
     code <- connectReturnCode()
   } yield Connack(session, code)
   
-  /**
-   * Parser of the MQTT 3.1.1 disconnect packet.
-   *
-   * @return the MQTT 3.1.1 disconnect packet
-   */
   def disconnect(): Parser[Packet] = for {
     _ <- disconnectPacketType()
     _ <- reserved()
@@ -73,7 +57,7 @@ object MqttPacketsParsers {
   def publish(): Parser[Packet] = for {
     _ <- packetType(PublishMask)
     dup <- bit()
-    qos <- qos() //assure dup 0 with qos 0
+    qos <- qos(); _ <- fail(!dup && qos != QoS(0))
     retain <- bit()
     _ <- variableLength()
     topic <- utf8()
@@ -115,7 +99,7 @@ object MqttPacketsParsers {
     _ <- variableLength()
     id <- packetIdentifier()
     subs <- many1(subscription())
-  } yield Subscribe(id, subs map { case (topic, qos) => (TopicFilter(topic), qos) }) //TODO: in subscribe strings?
+  } yield Subscribe(id, subs)
   
   def suback(): Parser[Packet] = for {
     _ <- packetType(SubackMask)
@@ -131,7 +115,7 @@ object MqttPacketsParsers {
     _ <- variableLength()
     id <- packetIdentifier()
     unsubs <- many1(unsubscription())
-  } yield Unsubscribe(id, unsubs.map(TopicFilter)) //TODO: in subscribe strings?
+  } yield Unsubscribe(id, unsubs)
   
   def unsuback(): Parser[Packet] = for {
     _ <- packetType(UnsubackMask)
