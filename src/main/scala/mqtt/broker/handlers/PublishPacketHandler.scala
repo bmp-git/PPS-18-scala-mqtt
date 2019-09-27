@@ -1,18 +1,29 @@
 package mqtt.broker.handlers
 
-import mqtt.broker.state.{Channel, State}
+import mqtt.broker.state.StateImplicits._
+import mqtt.broker.state.Violation.{InvalidQoSDupPair, InvalidTopicName}
+import mqtt.broker.state.{Channel, State, Violation}
 import mqtt.model.Packet.Publish
+import mqtt.model.{QoS, Topic}
 
-object PublishPacketHandler extends PacketHandler[Publish] {
-  /**
-   * Handles a publish packet received on a channel and modifies the server state properly.
-   *
-   * @param state   the old state of the server.
-   * @param packet  the publish packet to be processed.
-   * @param channel the channel on which the packet has been received
-   * @return the new state of the server.
-   */
-  override def handle(state: State, packet: Publish, channel: Channel): State = {
+
+case class PublishPacketHandler(override val packet: Publish, override val channel: Channel) extends PacketHandler[Publish] with AutoViolationHandler {
+  
+  override def handle: State => State = {
+    for {
+      topic <- checkValidTopic
+    } yield ()
+  }
+  
+  def checkValidQoSDupPair: State => Either[Violation, State] = state => {
+    if (packet.message.qos == QoS(0) && !packet.duplicate) Right(state) else Left(InvalidQoSDupPair())
+  }
+  
+  def checkValidTopic: State => Either[Violation, (Topic, State)] = state => {
+    Topic(packet.message.topic).fold[Either[Violation, (Topic, State)]](Left(InvalidTopicName()))(t => Right((t, state)))
+  }
+  
+  def handleRetain(retain: Boolean): State => Either[Violation, (Topic, State)] = state => {
     ???
   }
 }

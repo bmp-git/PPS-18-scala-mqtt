@@ -4,5 +4,9 @@ import mqtt.broker.handlers.{ConnectPacketHandler, DisconnectPacketHandler}
 
 
 class TestDisconnectPacketHandler extends TestDisconnect(
-  ConnectPacketHandler = ConnectPacketHandler.handle,
-  DisconnectPacketHandler = DisconnectPacketHandler.handle)
+  ConnectPacketHandler = {
+    (state, packet, channel) => ConnectPacketHandler(packet, channel).handle(state)
+  },
+  DisconnectPacketHandler = {
+    (state, packet, channel) => DisconnectPacketHandler(packet, channel).handle(state)
+  })

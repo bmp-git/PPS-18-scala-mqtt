@@ -56,4 +56,8 @@ object Violation {
   }
   
   case class MultipleConnectPacketsOnSameChannel() extends GenericViolation("MultipleConnectPacketsOnSameChannel")
+  
+  case class InvalidTopicName() extends GenericViolation("InvalidTopicName")
+  
+  case class InvalidQoSDupPair() extends GenericViolation("InvalidQoSDupPair")
 }
