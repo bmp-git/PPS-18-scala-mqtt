@@ -133,6 +133,6 @@ class TestConnect(ConnectPacketHandler: (State, Connect, Channel) => State) exte
     Console.withOut(stream) {
       val bs2 = ConnectPacketHandler(bs1, packet, sample_channel_0)
     }
-    assert(stream.toString.contains("Message published ApplicationMessage(false,QoS0,abc,List())"))
+    assert(stream.toString.contains(s"Message published ApplicationMessage(false,QoS0,$sample_topic_0,List())"))
   }
 }

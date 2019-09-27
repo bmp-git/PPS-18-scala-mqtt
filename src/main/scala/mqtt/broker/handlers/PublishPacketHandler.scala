@@ -1,6 +1,7 @@
 package mqtt.broker.handlers
 
 import mqtt.broker.state.StateImplicits._
+import mqtt.broker.Common.publishMessage
 import mqtt.broker.state.Violation.{InvalidQoSDupPair, InvalidTopicName}
 import mqtt.broker.state.{Channel, State, Violation}
 import mqtt.model.Packet.Publish
@@ -11,7 +12,9 @@ case class PublishPacketHandler(override val packet: Publish, override val chann
   
   override def handle: State => State = {
     for {
-      topic <- checkValidTopic
+      _ <- checkValidQoSDupPair
+      _ <- checkValidTopic
+      _ <- publishMessage(packet.message)
     } yield ()
   }
   
@@ -23,6 +26,7 @@ case class PublishPacketHandler(override val packet: Publish, override val chann
     Topic(packet.message.topic).fold[Either[Violation, (Topic, State)]](Left(InvalidTopicName()))(t => Right((t, state)))
   }
   
+  //TODO
   def handleRetain(retain: Boolean): State => Either[Violation, (Topic, State)] = state => {
     ???
   }

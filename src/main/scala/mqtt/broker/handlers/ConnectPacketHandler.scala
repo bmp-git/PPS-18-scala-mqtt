@@ -1,6 +1,6 @@
 package mqtt.broker.handlers
 
-import mqtt.broker.Common.closeChannel
+import mqtt.broker.Common.{closeChannel, sendPacket}
 import mqtt.broker.state.StateImplicits._
 import mqtt.broker.state.Violation.{InvalidIdentifier, InvalidProtocolName, InvalidProtocolVersion, MultipleConnectPacketsOnSameChannel}
 import mqtt.broker.state.{Channel, Session, State, Violation}
@@ -177,11 +177,6 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
    * @param sessionPresent the session present flag.
    * @return a function that maps a state to a new state.
    */
-  def replyWithACK(sessionPresent: Boolean): State => State = state => {
-    state.updateSession(packet.clientId, s => {
-      val newPending = s.pendingTransmission ++ Seq(Connack(sessionPresent, ConnectionAccepted))
-      s.copy(pendingTransmission = newPending)
-    })
-  }
+  def replyWithACK(sessionPresent: Boolean): State => State = sendPacket(packet.clientId, Connack(sessionPresent, ConnectionAccepted))
   
 }

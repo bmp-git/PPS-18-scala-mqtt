@@ -4,9 +4,8 @@ import java.util.Calendar
 
 import mqtt.broker.state.{BrokerState, MQTTChannel, Session}
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
-import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, Disconnect, Protocol}
-import mqtt.model.TopicFilter
-import mqtt.model.QoS
+import mqtt.model.Packet._
+import mqtt.model.{QoS, TopicFilter}
 
 import scala.concurrent.duration.Duration
 
@@ -17,7 +16,7 @@ object SampleInstances {
   val sample_id_1 = "456"
   val sample_id_2 = "789"
   
-  val sample_topic_0 = "abc"
+  val sample_topic_0 = "sport/tennis"
   val sample_topic_1 = "def"
   
   val sample_channel_0 = MQTTChannel(0)
@@ -34,6 +33,12 @@ object SampleInstances {
     clientId = sample_id_0,
     credential = Option.empty,
     willMessage = Option.empty
+  )
+  
+  val sample_publish_packet_0 = Publish(
+    duplicate = false,
+    packetId = 0,
+    message = ApplicationMessage(retain = false, qos = QoS(0), topic = sample_topic_0, payload = "hello".toSeq.map(_.toByte))
   )
   
   val sample_disconnect_packet_0 = Disconnect()
