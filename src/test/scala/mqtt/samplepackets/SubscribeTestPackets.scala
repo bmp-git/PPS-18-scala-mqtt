@@ -1,21 +1,13 @@
-package mqtt.builder.packets
+package mqtt.samplepackets
 
 import mqtt.model.Packet.Subscribe
-import mqtt.model.QoS
+import mqtt.model.{Packet, QoS}
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
 
-
-class SubscribeBuilderTest extends PacketBuilderTester {
-  assertBuild(Map[Subscribe, Seq[Bit]](
-    Subscribe(1234, Seq()) ->
-      Seq(
-        1, 0, 0, 0, 0, 0, 1, 0,
-        0, 0, 0, 0, 0, 0, 1, 0, //Remaining length
-        0, 0, 0, 0, 0, 1, 0, 0, //Packet id MSB
-        1, 1, 0, 1, 0, 0, 1, 0, //Packet id LSB
-      ),
-      Subscribe(1234, Seq(("a/b", QoS(2)))) ->
+object SubscribeTestPackets {
+  val samples: Map[Packet, Seq[Bit]] = Map(
+    Subscribe(1234, Seq(("a/b", QoS(2)))) ->
       Seq(
         1, 0, 0, 0, 0, 0, 1, 0,
         0, 0, 0, 0, 1, 0, 0, 0, //Remaining length
@@ -45,5 +37,5 @@ class SubscribeBuilderTest extends PacketBuilderTester {
         0, 1, 1, 0, 0, 0, 1, 1, //Topic filter name 'c'
         0, 1, 1, 0, 0, 1, 0, 0, //Topic filter name 'd'
         0, 0, 0, 0, 0, 0, 0, 0, //QoS2
-      )))
+      ))
 }

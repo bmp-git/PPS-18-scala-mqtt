@@ -64,7 +64,11 @@ object MqttFragmentsParsers {
   } yield willFlags.map(f => ApplicationMessage(f.retain, f.qos, willTopic, willMessage))
   
   def utf8(): Parser[String] =
-    Parser(s => Option((MqttString.decode(s.toBytes), s.toBytes.drop(MqttString.size(s.toBytes) + 2).toBitsSeq)))
+    Parser(s => if (s.size > 2) {
+      Option((MqttString.decode(s.toBytes), s.toBytes.drop(MqttString.size(s.toBytes) + 2).toBitsSeq)).orElse(Option.empty)
+    } else {
+      Option.empty
+    })
   
   def message(): Parser[Payload] = binaryData()
   
@@ -92,8 +96,8 @@ object MqttFragmentsParsers {
   } yield ConnectReturnCode(code)
   
   def subscriptionGrantedQoS(): Parser[Option[QoS]] = for {
-    code <- first(byte(0), byte(1), byte(2), byte(80))
-  } yield if (code == 80) Option.empty else Option(QoS(code))
+    code <- first(byte(0), byte(1), byte(2), byte(128 toByte))
+  } yield if (code == 128.toByte) Option.empty else Option(QoS(code))
   
   def packetIdentifier(): Parser[PackedID] = for {id <- twoBytesInt(); _ <- assure(id != 0)} yield id
   

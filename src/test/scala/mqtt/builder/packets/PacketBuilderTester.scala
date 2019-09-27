@@ -2,11 +2,12 @@ package mqtt.builder.packets
 
 import mqtt.builder.MqttPacketBuilder
 import mqtt.model.Packet
+import mqtt.samplepackets._
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
 import org.scalatest.FunSuite
 
-trait PacketBuilderTester extends FunSuite {
+class PacketBuilderTester extends FunSuite {
   def assertBuild[P <: Packet](expected: Map[P, Seq[Bit]]): Unit = {
     expected foreach {
       case (packet, bits) => {
@@ -18,4 +19,14 @@ trait PacketBuilderTester extends FunSuite {
       }
     }
   }
+  
+  assertBuild(ConnectTestPackets samples)
+  assertBuild(ConnackTestPackets samples)
+  assertBuild(DisconnectTestPackets samples)
+  
+  assertBuild(PublishTestPackets samples)
+  
+  assertBuild(SubscribeTestPackets samples)
+  assertBuild(SubackTestPackets samples)
+  
 }
