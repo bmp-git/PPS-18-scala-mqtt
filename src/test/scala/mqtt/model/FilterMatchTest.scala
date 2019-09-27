@@ -3,7 +3,7 @@ package mqtt.model
 import org.scalatest.FunSuite
 
 class FilterMatchTest extends FunSuite {
-  val filters_match: Map[String, List[(String, Boolean)]] = Map(
+  val filters_match: Seq[(String, List[(String, Boolean)])] = Seq(
     "sport/tennis/player1/#" -> List(("sport/tennis/player1", true), ("sport/tennis/player1/ranking", true), ("sport/tennis/player1/score/wimbledon", true)),
     "sport/#" -> List(("sport", true)),
     "#" -> List(("//", true), ("game", true), ("sport/tennis/player", true), ("sport/tennis/player/", true)),
