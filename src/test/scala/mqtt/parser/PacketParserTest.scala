@@ -3,7 +3,7 @@ package mqtt.parser
 import mqtt.model.ErrorPacket.MalformedPacket
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.Packet._
-import mqtt.model.QoS.QoS2
+import mqtt.model.QoS
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
 import org.scalatest.{FunSuite, Matchers}
@@ -55,9 +55,9 @@ class PacketParserTest extends FunSuite with Matchers {
   
   test("An MQTT packet parser should parse a connect message") {
     MqttPacketParser parse connect shouldBe
-      Connect(Protocol("MQTT", 4), true, 10 seconds, "a",
+      Connect(Protocol("MQTT", 4), cleanSession = true, 10 seconds, "a",
         Option(Credential("c", Option(Seq[Byte](12)))),
-        Option(ApplicationMessage(retain = true, QoS2, "b", Seq[Byte](10, 11))))
+        Option(ApplicationMessage(retain = true, QoS(2), "b", Seq[Byte](10, 11))))
   }
   
   test("An MQTT packet parser should parse a disconnect message") {

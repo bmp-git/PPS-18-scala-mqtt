@@ -35,7 +35,8 @@ object RxMain extends App {
   val tickStream: Observable[Option[Nothing]] = Observable.interval(1 second).map(_ => Option.empty).subscribeOn(ioScheduler)
   
   //TODO: groupBy has a problem until at least 2 different id are handled
-  Listener(server, socketIdMap)
+  Listener(server)
+    .doOnEach(idSocket => socketIdMap += (idSocket.id -> idSocket))
     .flatMap(client => Receiver(client).subscribeOn(ioScheduler))
     .map(Option[(IdSocket, Packet)])
     .merge(tickStream)

@@ -4,8 +4,8 @@ import java.util.Calendar
 
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, Disconnect, Protocol}
-import mqtt.model.QoS.QoS0
 import mqtt.model.TopicFilter
+import mqtt.model.QoS
 
 import scala.concurrent.duration.Duration
 
@@ -43,7 +43,7 @@ object SampleInstances {
     channel = Option.empty,
     keepAlive = sample_duration_0,
     lastContact = Calendar.getInstance().getTime,
-    subscriptions = Map((new TopicFilter(sample_topic_0), QoS0)),
+    subscriptions = Map((new TopicFilter(sample_topic_0), QoS(0))),
     notYetAcknowledged = Map(),
     receivedButNotYetAcknowledged = Map(),
     pendingTransmission = Seq(),
@@ -73,6 +73,6 @@ object SampleInstances {
     persistent = false
   )
   
-  val sample_application_message_0 = ApplicationMessage(retain = false, QoS0, sample_topic_0, Seq())
-  val sample_application_message_1 = ApplicationMessage(retain = false, QoS0, sample_topic_1, Seq())
+  val sample_application_message_0 = ApplicationMessage(retain = false, QoS(0), sample_topic_0, Seq())
+  val sample_application_message_1 = ApplicationMessage(retain = false, QoS(0), sample_topic_1, Seq())
 }

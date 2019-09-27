@@ -14,7 +14,9 @@ object MqttPacketBuilder extends PacketBuilder {
   /**
    * All possible packet's structures
    */
-  private val structures = Seq(ConnectStructure, ConnackStructure, DisconnectStructure)
+  private val structures = Seq(
+    ConnectStructure, ConnackStructure, DisconnectStructure,
+    PublishStructure, SubackStructure, SubscribeStructure)
   
   /**
    * Transforms an input packet to sequence of bits.

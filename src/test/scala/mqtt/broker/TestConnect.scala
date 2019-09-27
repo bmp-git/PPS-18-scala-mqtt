@@ -3,7 +3,7 @@ package mqtt.broker
 import mqtt.broker.SampleInstances._
 import mqtt.model.Packet.ConnectReturnCode.{ConnectionAccepted, IdentifierRejected, UnacceptableProtocolVersion}
 import mqtt.model.Packet._
-import mqtt.model.QoS.QoS0
+import mqtt.model.QoS
 import org.scalatest.{Assertion, FunSuite}
 
 import scala.concurrent.duration.Duration
@@ -124,7 +124,7 @@ class TestConnect(ConnectPacketHandler: (State, Connect, Channel) => State) exte
   }
   
   test("Causing a disconnection should publish the will message") {
-    val packet = sample_connect_packet_0.copy(willMessage = Option(ApplicationMessage(retain = false, QoS0, sample_topic_0, Seq())))
+    val packet = sample_connect_packet_0.copy(willMessage = Option(ApplicationMessage(retain = false, QoS(0), sample_topic_0, Seq())))
     val bs1 = ConnectPacketHandler(bs0, packet, sample_channel_0)
     
     //TODO refactor, workaround to check a publish through println

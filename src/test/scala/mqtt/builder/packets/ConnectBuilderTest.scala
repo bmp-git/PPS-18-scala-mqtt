@@ -1,9 +1,10 @@
 package mqtt.builder.packets
 
 import mqtt.model.Packet.{ApplicationMessage, Connect, Credential, Protocol}
-import mqtt.model.QoS.{QoS1, QoS2}
+import mqtt.model.QoS
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
+
 import scala.concurrent.duration._
 
 
@@ -29,7 +30,7 @@ class ConnectBuilderTest extends PacketBuilderTester {
         0, 1, 1, 0, 0, 0, 0, 1, //'a'
       ),
     Connect(Protocol("MQTT", 4), cleanSession = true, 10 seconds, "a", Option(Credential("c", Option.empty)),
-      Option(ApplicationMessage(retain = false, QoS1, "b", Seq[Byte](10, 11)))) ->
+      Option(ApplicationMessage(retain = false, QoS(1), "b", Seq[Byte](10, 11)))) ->
       Seq(
         0, 0, 0, 1, 0, 0, 0, 0, //id and reserved
         0, 0, 0, 1, 0, 1, 1, 1, //remaining length
@@ -58,7 +59,7 @@ class ConnectBuilderTest extends PacketBuilderTester {
         0, 1, 1, 0, 0, 0, 1, 1, //'c'
       ),
     Connect(Protocol("MQTT", 4), cleanSession = true, 10 seconds, "a", Option(Credential("c", Option(Seq[Byte](12)))),
-      Option(ApplicationMessage(retain = true, QoS2, "b", Seq[Byte](10, 11)))) ->
+      Option(ApplicationMessage(retain = true, QoS(2), "b", Seq[Byte](10, 11)))) ->
       Seq(
         0, 0, 0, 1, 0, 0, 0, 0, //id and reserved
         0, 0, 0, 1, 1, 0, 1, 0, //remaining length
