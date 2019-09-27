@@ -2,7 +2,7 @@ package mqtt.broker
 
 import mqtt.model.Packet.ApplicationMessage
 import mqtt.model.Types.ClientID
-import mqtt.model.{Packet, Types}
+import mqtt.model.{Packet, Topic, Types}
 
 /**
  * Represents the internal state of the server/broker.
@@ -13,7 +13,7 @@ import mqtt.model.{Packet, Types}
  * @param wills    the will messages to be initialized with.
  */
 case class BrokerState(override val sessions: Map[ClientID, Session],
-                       override val retains: Map[Types.Topic, Packet.ApplicationMessage],
+                       override val retains: Map[Topic, Packet.ApplicationMessage],
                        override val closing: Map[Channel, Seq[Packet]],
                        override val wills: Map[Channel, ApplicationMessage]) extends State {
   override def sessionFromClientID(clientID: ClientID): Option[Session] = sessions.get(clientID)

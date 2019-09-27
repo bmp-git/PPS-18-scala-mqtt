@@ -1,8 +1,8 @@
 package mqtt.broker
 
-import mqtt.model.Packet
+import mqtt.model.{Packet, Topic}
 import mqtt.model.Packet.ApplicationMessage
-import mqtt.model.Types.{ClientID, Topic}
+import mqtt.model.Types.ClientID
 
 /**
  * Represents the internal State of the server (client sessions, retain messages, state of the channels).
