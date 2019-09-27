@@ -6,11 +6,10 @@ import mqtt.builder.fragments.PacketFragment
 import mqtt.builder.fragments.RichPacketFragment._
 import mqtt.model.Packet.Subscribe
 import mqtt.model.QoS
-import mqtt.model.Types.TopicFilter
 
 /**
- * Provide the structure of Subscribe packet as referred in chapter 3.8.
- */
+  * Provide the structure of Subscribe packet as referred in chapter 3.8.
+  */
 case object SubscribeStructure extends PacketStructure[Subscribe] {
   
   //3.8.3

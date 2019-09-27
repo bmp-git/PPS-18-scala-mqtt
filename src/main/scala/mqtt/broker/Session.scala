@@ -2,8 +2,8 @@ package mqtt.broker
 
 import java.util.{Calendar, Date}
 
-import mqtt.model.Types.{PackedID, TopicFilter}
-import mqtt.model.{Packet, PacketID, QoS}
+import mqtt.model.Types.PackedID
+import mqtt.model.{Packet, PacketID, QoS, TopicFilter}
 
 import scala.concurrent.duration.Duration
 

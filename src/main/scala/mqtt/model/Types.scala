@@ -34,25 +34,6 @@ object QoS {
 }
 
 object Types {
-
-  case class Topic(value: String) {
-    def matching(filter: TopicFilter): Boolean = ???
-  }
-
-  object Topic {
-    def apply(value: String): Option[Topic] = ???
-  }
-
-  case class TopicFilter(value: String) {
-    def matching(topic: Topic): Boolean = topic matching this
-  }
-
-  /*
-  object TopicFilter {
-    def apply(value: String): Option[TopicFilter] = ???
-  }
-  */
-
   type Payload = Seq[Byte]
   type Password = Seq[Byte]
   type ClientID = String

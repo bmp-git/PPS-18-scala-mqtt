@@ -3,9 +3,9 @@ package mqtt.broker
 import java.util.Calendar
 
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
-import mqtt.model.Packet._
+import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, Disconnect, Protocol}
+import mqtt.model.TopicFilter
 import mqtt.model.QoS
-import mqtt.model.Types.TopicFilter
 
 import scala.concurrent.duration.Duration
 
@@ -43,7 +43,7 @@ object SampleInstances {
     channel = Option.empty,
     keepAlive = sample_duration_0,
     lastContact = Calendar.getInstance().getTime,
-    subscriptions = Map((TopicFilter(sample_topic_0), QoS(0))),
+    subscriptions = Map((new TopicFilter(sample_topic_0), QoS(0))),
     notYetAcknowledged = Map(),
     receivedButNotYetAcknowledged = Map(),
     pendingTransmission = Seq(),

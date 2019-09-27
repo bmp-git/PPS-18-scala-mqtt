@@ -1,7 +1,7 @@
 package mqtt.broker
 
 import mqtt.broker.Common.closeChannel
-import mqtt.broker.StateImplicits.functionToStateTransitionWithError
+import mqtt.broker.StateImplicits._
 import mqtt.broker.Violation.{InvalidIdentifier, InvalidProtocolName, InvalidProtocolVersion, MultipleConnectPacketsOnSameChannel}
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.Packet.{ApplicationMessage, Connack, Connect, Protocol}
@@ -42,9 +42,9 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
    * @param channel the channel to check.
    * @return a function that maps a state to a violation or to a new state.
    */
-  def checkNotFirstPacketOfChannel(channel: Channel): State => Either[Violation, (Unit, State)] = state => {
+  def checkNotFirstPacketOfChannel(channel: Channel): State => Either[Violation, State] = state => {
     // check duplicate connect 3.1.0-2
-    state.sessionFromChannel(channel).fold[Either[Violation, (Unit, State)]](Right((), state))(_ => {
+    state.sessionFromChannel(channel).fold[Either[Violation, State]](Right(state))(_ => {
       //there is already a session with this channel
       Left(MultipleConnectPacketsOnSameChannel())
     })
@@ -56,7 +56,7 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
    * @param protocol the protocol information.
    * @return a function that maps a state to a violation or to a new state.
    */
-  def checkProtocol(protocol: Protocol): State => Either[Violation, (Unit, State)] = state => {
+  def checkProtocol(protocol: Protocol): State => Either[Violation, State] = state => {
     val f = for {
       _ <- checkProtocolName(protocol.name)
       _ <- checkProtocolVersion(protocol.level)
@@ -70,8 +70,8 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
    * @param name the protocol name.
    * @return a function that maps a state to a violation or to a new state.
    */
-  def checkProtocolName(name: String): State => Either[Violation, (Unit, State)] = state => {
-    if (name != "MQTT") Left(InvalidProtocolName()) else Right((), state)
+  def checkProtocolName(name: String): State => Either[Violation, State] = state => {
+    if (name != "MQTT") Left(InvalidProtocolName()) else Right(state)
   }
   
   /**
@@ -80,8 +80,8 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
    * @param version the protocol version.
    * @return a function that maps a state to a violation or to a new state.
    */
-  def checkProtocolVersion(version: Int): State => Either[Violation, (Unit, State)] = state => {
-    if (version != 4) Left(InvalidProtocolVersion()) else Right((), state)
+  def checkProtocolVersion(version: Int): State => Either[Violation, State] = state => {
+    if (version != 4) Left(InvalidProtocolVersion()) else Right(state)
   }
   
   /**
@@ -90,8 +90,8 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
    * @param clientId the client identifier.
    * @return a function that maps a state to a violation or to a new state.
    */
-  def checkClientId(clientId: String): State => Either[Violation, (Unit, State)] = state => {
-    if (clientId.isEmpty || clientId.length > 23) Left(InvalidIdentifier()) else Right((), state)
+  def checkClientId(clientId: String): State => Either[Violation, State] = state => {
+    if (clientId.isEmpty || clientId.length > 23) Left(InvalidIdentifier()) else Right(state)
   }
   
   /**
@@ -99,14 +99,14 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
    * If it has, there is another client connected with the same client identifier that must be disconnected.
    *
    * @param clientId the client identifier.
-   * @return a function that maps a state to a violation or to a new state.
+   * @return a function that maps a state to a new state.
    */
-  def disconnectOtherConnected(clientId: String): State => Either[Violation, (Unit, State)] = state => {
+  def disconnectOtherConnected(clientId: String): State => State = state => {
     //disconnect if already connected
     //there is a session with the same clientID and a non-empty channel.
-    Right((), state.sessionFromClientID(clientId).fold(state)(sess => sess.channel.fold(state)(sk => {
+    state.sessionFromClientID(clientId).fold(state)(sess => sess.channel.fold(state)(sk => {
       closeChannel(sk)(state)
-    })))
+    }))
   }
   
   /**
@@ -114,10 +114,10 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
    *
    * @param clientId     the client identifier associated with the session
    * @param cleanSession the cleanSession flag.
-   * @return a function that maps a state to a violation or to a tuple containing
+   * @return a function that maps a state to a tuple containing
    *         the new state and the flag that tells if the session has been successfully recovered or not.
    */
-  def manageSession(clientId: String, cleanSession: Boolean): State => Either[Violation, (Boolean, State)] = state => {
+  def manageSession(clientId: String, cleanSession: Boolean): State => (Boolean, State) = state => {
     if (cleanSession) createSession(clientId)(state) else recoverSession(clientId)(state)
   }
   
@@ -125,24 +125,24 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
    * Recovers the session if present (does nothing, only sets the flag) or creates a new one if not.
    *
    * @param clientId the client identifier.
-   * @return a function that maps a state to a violation or to a tuple containing
+   * @return a function that maps a state to a tuple containing
    *         the new state and the flag that tells if the session has been successfully recovered or not.
    */
-  def recoverSession(clientId: String): State => Either[Violation, (Boolean, State)] = state => {
+  def recoverSession(clientId: String): State => (Boolean, State) = state => {
     //session present 1 in connack
-    state.sessionFromClientID(clientId).fold(createSession(clientId)(state))(_ => Right((true, state)))
+    state.sessionFromClientID(clientId).fold(createSession(clientId)(state))(_ => (true, state))
   }
   
   /**
    * Creates a new empty session for the given client identifier.
    *
    * @param clientId the client identifier.
-   * @return a function that maps a state to a violation or to a tuple containing
+   * @return a function that maps a state to a tuple containing
    *         the new state and the flag that tells that the session has not been recovered.
    */
-  def createSession(clientId: String): State => Either[Violation, (Boolean, State)] = state => {
+  def createSession(clientId: String): State => (Boolean, State) = state => {
     //session present 0 in connack
-    Right((false, state.setSession(clientId, session = Session.createEmptySession())))
+    (false, state.setSession(clientId, session = Session.createEmptySession()))
   }
   
   /**
@@ -150,10 +150,10 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
    *
    * @param clientId     the client identifier.
    * @param cleanSession the cleanSession flag received.
-   * @return a function that maps a state to a violation or to a new state.
+   * @return a function that maps a state to a new state.
    */
-  def setCleanSessionFlag(clientId: String, cleanSession: Boolean): State => Either[Violation, (Unit, State)] = state => {
-    Right((), state.updateSession(clientId, s => s.copy(persistent = !cleanSession)))
+  def setCleanSessionFlag(clientId: String, cleanSession: Boolean): State => State = state => {
+    state.updateSession(clientId, s => s.copy(persistent = !cleanSession))
   }
   
   /**
@@ -162,10 +162,10 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
    *
    * @param clientId the client identifier.
    * @param channel  the channel to be bound.
-   * @return a function that maps a state to a violation or to a new state.
+   * @return a function that maps a state to a new state.
    */
-  def updateChannel(clientId: String, channel: Channel): State => Either[Violation, (Unit, State)] = state => {
-    Right((), state.setChannel(clientId, channel))
+  def updateChannel(clientId: String, channel: Channel): State => State = state => {
+    state.setChannel(clientId, channel)
   }
   
   /**
@@ -173,10 +173,10 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
    *
    * @param channel     the channel.
    * @param willMessage the will message.
-   * @return a function that maps a state to a violation or to a new state.
+   * @return a function that maps a state to a new state.
    */
-  def setWillMessage(channel: Channel, willMessage: Option[ApplicationMessage]): State => Either[Violation, (Unit, State)] = state => {
-    Right((), willMessage.fold(state)(m => state.setWillMessage(channel, m)))
+  def setWillMessage(channel: Channel, willMessage: Option[ApplicationMessage]): State => State = state => {
+    willMessage.fold(state)(m => state.setWillMessage(channel, m))
   }
   
   /**
@@ -184,13 +184,12 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
    *
    * @param clientId  the client identifier.
    * @param keepAlive the keep alive timespan to be set.
-   * @return a function that maps a state to a violation or to a new state.
+   * @return a function that maps a state to a new state.
    */
-  def setKeepAlive(clientId: String, keepAlive: Duration): State => Either[Violation, (Unit, State)] = state => {
-    val newState = state.updateSession(clientId, s => {
+  def setKeepAlive(clientId: String, keepAlive: Duration): State => State = state => {
+    state.updateSession(clientId, s => {
       s.copy(keepAlive = keepAlive)
     })
-    Right((), newState)
   }
   
   /**
@@ -199,14 +198,13 @@ object ConnectPacketHandler extends PacketHandler[Connect] {
    *
    * @param clientId       the client identifier.
    * @param sessionPresent the session present flag.
-   * @return a function that maps a state to a violation or to a new state.
+   * @return a function that maps a state to a new state.
    */
-  def replyWithACK(clientId: String, sessionPresent: Boolean): State => Either[Violation, (Unit, State)] = state => {
-    val newState = state.updateSession(clientId, s => {
+  def replyWithACK(clientId: String, sessionPresent: Boolean): State => State = state => {
+    state.updateSession(clientId, s => {
       val newPending = s.pendingTransmission ++ Seq(Connack(sessionPresent, ConnectionAccepted))
       s.copy(pendingTransmission = newPending)
     })
-    Right((), newState)
   }
   
 }

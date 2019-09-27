@@ -2,7 +2,7 @@ package mqtt.broker
 
 import mqtt.broker.SampleInstances._
 import mqtt.model.Packet.Connack
-import org.scalatest.FunSuite
+import org.scalatest.{Assertion, FunSuite}
 
 import scala.concurrent.duration.Duration
 
@@ -115,7 +115,7 @@ class TestBrokerState extends FunSuite {
     val s1 = sample_session_0.copy(channel = Option(sample_channel_0), pendingTransmission = Seq(sample_connack_packet_0))
     val bs1 = bs0.setSession(sample_id_0, s1)
     val (bs2, _) = bs1.takeAllPendingTransmission
-    bs2.sessionFromChannel(sample_channel_0).fold(fail){case (_, s) => assert(s.pendingTransmission.isEmpty)}
+    bs2.sessionFromChannel(sample_channel_0).fold[Assertion](fail){case (_, s) => assert(s.pendingTransmission.isEmpty)}
   }
   
   test("Pending transmissions of a non active session are not taken.") {
