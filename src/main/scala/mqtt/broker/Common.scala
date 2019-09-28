@@ -1,9 +1,9 @@
 package mqtt.broker
 
+import mqtt.broker.handlers.PublishPacketHandler
 import mqtt.broker.state.{Channel, State}
-import mqtt.model.Packet.{ApplicationMessage, Publish}
 import mqtt.model.Types.ClientID
-import mqtt.model.{Packet, QoS, Topic}
+import mqtt.model.{Packet, Topic}
 
 /**
  * Contains common utility methods to modify the state of the server.
@@ -76,65 +76,17 @@ object Common {
    * @return a function that maps the old server state in the new one.
    */
   def publishWillMessage(channel: Channel): State => State = state => {
-    state.wills.get(channel).fold[State](state)(publishMessage(_)(state))
+    state.wills.get(channel).fold[State](state)(msg => {
+      val topic = new Topic(msg.topic) //assuming topic is valid, it should aways be
+      (PublishPacketHandler.handleRetain(topic, msg) andThen PublishPacketHandler.publishMessage(msg.qos, msg.topic, msg.payload)) (state)
+    }
+    )
   }
   
   def sendPacket(clientID: ClientID, packet: Packet): State => State = state => {
     state.updateSession(clientID, s => {
       val newPending = s.pendingTransmission ++ Seq(packet)
       s.copy(pendingTransmission = newPending)
-    })
-  }
-  
-  def min(firstQoS: QoS, secondQoS: QoS): QoS = (firstQoS, secondQoS) match {
-    case (QoS(first), QoS(second)) => if (first < second) firstQoS else secondQoS
-  }
-  
-  def getMatchingSubscriptionsAndMaxQoS(topic: Topic, qoS: QoS): State => Map[ClientID, Iterable[QoS]] = state => {
-    for {
-      (clientId, session) <- state.sessions
-      if session.channel.isDefined //check the session is active
-      qosses = for {
-        (filter, qos) <- session.subscriptions
-        if filter.matching(topic)
-        maxQos = min(qos, qoS)
-      } yield (maxQos)
-    } yield ((clientId, qosses))
-  }
-  
-  def publishMessageTo(clientID: ClientID, message: ApplicationMessage): State => State = state => message.qos match {
-    case QoS(0) => publishMessageToWithQoS0(clientID, message)(state)
-    case QoS(1) => ???
-    case QoS(2) => ???
-  }
-  
-  def publishMessageToWithQoS0(clientID: ClientID, message: ApplicationMessage): State => State = state => {
-    val packet = Publish(duplicate = false, packetId = 0, message = message)
-    sendPacket(clientID, packet)(state)
-  }
-  
-  /**
-   * Publishes a message.
-   *
-   * @param message the message to publish.
-   * @return a function that maps the old server state in the new one.
-   */
-  def publishMessage(message: ApplicationMessage): State => State = state => {
-    //TODO
-    println("Message published ".concat(message.toString))
-    
-    Topic(message.topic).fold(state)(topic => {
-      val subs = getMatchingSubscriptionsAndMaxQoS(topic, message.qos)(state)
-      
-      val publishfunctions = for {
-        (clientID, qosses) <- subs
-        qos <- qosses
-        msg = message.copy(retain = false, qos = qos)
-        fun = publishMessageTo(clientID, msg)
-      } yield (fun)
-    
-      publishfunctions.foldLeft[State => State](s => s)(_ andThen _)(state)
-    
     })
   }
   

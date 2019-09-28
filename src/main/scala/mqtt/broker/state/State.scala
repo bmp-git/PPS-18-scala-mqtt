@@ -110,5 +110,10 @@ trait State {
    */
   def takeAllPendingTransmission: (State, Map[Channel, Seq[Packet]])
   
+  //TODO doc
   def takeClosing: (State, Map[Channel, Seq[Packet]])
+  
+  def setRetainMessage(topic: Topic, message: ApplicationMessage): State
+  
+  def clearRetainMessage(topic: Topic): State
 }

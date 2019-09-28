@@ -1,6 +1,7 @@
 package mqtt.broker
 
 import mqtt.broker.SampleInstances._
+import mqtt.broker.UtilityFunctions.assertPacketPending
 import mqtt.broker.state.{Channel, State}
 import mqtt.model.Packet.ConnectReturnCode.{ConnectionAccepted, IdentifierRejected, UnacceptableProtocolVersion}
 import mqtt.model.Packet._
@@ -125,14 +126,16 @@ class TestConnect(ConnectPacketHandler: (State, Connect, Channel) => State) exte
   }
   
   test("Causing a disconnection should publish the will message") {
-    val packet = sample_connect_packet_0.copy(willMessage = Option(ApplicationMessage(retain = false, QoS(0), sample_topic_0, Seq())))
-    val bs1 = ConnectPacketHandler(bs0, packet, sample_channel_0)
-    
-    //TODO refactor, workaround to check a publish through println
-    val stream = new java.io.ByteArrayOutputStream()
-    Console.withOut(stream) {
-      val bs2 = ConnectPacketHandler(bs1, packet, sample_channel_0)
-    }
-    assert(stream.toString.contains(s"Message published ApplicationMessage(false,QoS0,$sample_topic_0,List())"))
+    val applicationMessage = ApplicationMessage(retain = false, QoS(0), sample_topic_0, Seq())
+    val packet = sample_connect_packet_0.copy(clientId = sample_id_1, willMessage = Option(applicationMessage))
+  
+    val bs1 = bs0.setSession(sample_id_0, sample_session_0.copy(channel = Option(sample_channel_0))) //he is subscribed to topic0
+    val bs2 = ConnectPacketHandler(bs1, packet, sample_channel_1) //sets will message
+    val bs3 = ConnectPacketHandler(bs2, packet, sample_channel_1) //will be disconnected and will published
+  
+    assertPacketPending(sample_id_0, {
+      case p: Publish => p.message == applicationMessage
+      case _ => false
+    })(bs3)
   }
 }

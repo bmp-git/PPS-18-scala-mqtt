@@ -83,4 +83,14 @@ case class BrokerState(override val sessions: Map[ClientID, Session],
   }
   
   override def takeClosing: (State, Map[Channel, Seq[Packet]]) = (this.copy(closing = Map()), this.closing)
+  
+  override def setRetainMessage(topic: Topic, message: ApplicationMessage): State = {
+    val newRetains = retains + ((topic, message))
+    this.copy(retains = newRetains)
+  }
+  
+  override def clearRetainMessage(topic: Topic): State = {
+    val newRetains = retains - topic
+    this.copy(retains = newRetains)
+  }
 }

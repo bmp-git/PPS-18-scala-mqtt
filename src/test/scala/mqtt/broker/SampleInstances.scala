@@ -41,6 +41,12 @@ object SampleInstances {
     message = ApplicationMessage(retain = false, qos = QoS(0), topic = sample_topic_0, payload = "hello".toSeq.map(_.toByte))
   )
   
+  val sample_publish_packet_1 = Publish(
+    duplicate = false,
+    packetId = 0,
+    message = ApplicationMessage(retain = false, qos = QoS(0), topic = sample_topic_1, payload = "hello".toSeq.map(_.toByte))
+  )
+  
   val sample_disconnect_packet_0 = Disconnect()
   
   val sample_connack_packet_0 = Connack(sessionPresent = false, ConnectionAccepted)
