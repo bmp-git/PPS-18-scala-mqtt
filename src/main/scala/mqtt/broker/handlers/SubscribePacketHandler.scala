@@ -9,7 +9,7 @@ import mqtt.model.Packet.{ApplicationMessage, Suback, Subscribe}
 import mqtt.model.Types.ClientID
 import mqtt.model.{QoS, TopicFilter}
 
-class SubscribePacketHandler(override val packet: Subscribe, override val channel: Channel) extends PacketHandler[Subscribe] with AutoViolationHandler {
+case class SubscribePacketHandler(override val packet: Subscribe, override val channel: Channel) extends PacketHandler[Subscribe] with AutoViolationHandler {
   type FilterOptions = Seq[Option[(TopicFilter, QoS)]]
   
   override def handle: State => State = {

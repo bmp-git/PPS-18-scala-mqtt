@@ -16,6 +16,8 @@ object SampleInstances {
   val sample_id_1 = "456"
   val sample_id_2 = "789"
   
+  val sample_packet_id_0 = 111
+  
   val sample_topic_0 = "sport/tennis"
   val sample_topic_1 = "def"
   
@@ -35,17 +37,26 @@ object SampleInstances {
     willMessage = Option.empty
   )
   
+  
+  val sample_application_message_0 = ApplicationMessage(retain = false, qos = QoS(0), topic = sample_topic_0, payload = "hello".toSeq.map(_.toByte))
+  val sample_application_message_1 = ApplicationMessage(retain = false, qos = QoS(0), topic = sample_topic_1, payload = "hello".toSeq.map(_.toByte))
+  
+  
   val sample_publish_packet_0 = Publish(
     duplicate = false,
     packetId = 0,
-    message = ApplicationMessage(retain = false, qos = QoS(0), topic = sample_topic_0, payload = "hello".toSeq.map(_.toByte))
+    message = sample_application_message_0
   )
+  
+  
   
   val sample_publish_packet_1 = Publish(
     duplicate = false,
     packetId = 0,
-    message = ApplicationMessage(retain = false, qos = QoS(0), topic = sample_topic_1, payload = "hello".toSeq.map(_.toByte))
+    message = sample_application_message_1
   )
+  
+  val sample_subscribe_packet_0 = Subscribe(sample_packet_id_0, Seq((sample_topic_0, QoS(0))))
   
   val sample_disconnect_packet_0 = Disconnect()
   
@@ -84,7 +95,5 @@ object SampleInstances {
     pendingTransmission = Seq(),
     persistent = false
   )
-  
-  val sample_application_message_0 = ApplicationMessage(retain = false, QoS(0), sample_topic_0, Seq())
-  val sample_application_message_1 = ApplicationMessage(retain = false, QoS(0), sample_topic_1, Seq())
+
 }

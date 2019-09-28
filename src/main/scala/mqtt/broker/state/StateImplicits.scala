@@ -19,9 +19,5 @@ object StateImplicits {
     new StateTransitionWithError(s => Right(f(s)))
   }
   
-  implicit def outToSTWE[S, A, E](f: => A): StateTransitionWithError[S, A, E] = {
-    stateToStateAndOutToSTWE[S, A, E]((f, _))
-  }
-  
   implicit def eitherRemoveUnit[S, E](either: Either[E, (Unit, S)]): Either[E, S] = either.map { case (_, s) => s }
 }
