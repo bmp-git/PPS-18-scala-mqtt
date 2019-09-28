@@ -51,7 +51,7 @@ object Receiver {
   }
   
   /**
-   * Receives packets from the specified socket and creates a source of packets (Observer)
+   * Receives bits from the specified socket and creates a source of packets (Observer)
    * @param idSocket the socket to listen to
    * @return the source of received packet
    */

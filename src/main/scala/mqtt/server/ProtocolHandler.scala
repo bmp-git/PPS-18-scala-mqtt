@@ -4,10 +4,18 @@ import mqtt.broker.{BrokerManager, Channel, MQTTChannel, State}
 import mqtt.model.Packet
 import rx.lang.scala.Observable
 
-//TODO: doc
+/**
+ * Handles the protocol logic with reactivex.
+ */
 object ProtocolHandler {
   
-  //TODO: doc, ???getState: => State, setState: State => Unit???
+  /**
+   * Produces a stream of reactions from an input packet and a given state.
+   *
+   * @param p       the pair (socket, packet) representing the received packet from the socket
+   * @param program the state of the program
+   * @return a new observer representing the packets to send to the client. (socket id, packet to send)
+   */
   def apply(p: Option[(IdSocket, Packet)], program: ProgramState): Observable[(Int, Packet)] =
     Observable[(Int, Packet)](s => {
 

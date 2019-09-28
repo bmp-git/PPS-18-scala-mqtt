@@ -2,10 +2,14 @@ package mqtt.server
 
 import mqtt.builder.MqttPacketBuilder
 import mqtt.model.Packet
-import rx.lang.scala.Observer
 import mqtt.utils.BitImplicits._
+import rx.lang.scala.Observer
 
-//TODO: doc
+/**
+ * An observer that emits the incoming packets to the specified socket.
+ *
+ * @param idSocket the socket
+ */
 case class Sender(idSocket: IdSocket) extends Observer[Packet] {
   
   override def onNext(packet: Packet): Unit = {

@@ -15,6 +15,7 @@ import scala.util.Try
 object Listener {
   /**
    * Listens for incoming connection and generate a source of clients.
+   * When the server is closed or an exception occur the stream will complete.
    *
    * @param server the listener
    * @return the source of IdSockets (unique id, socket)
