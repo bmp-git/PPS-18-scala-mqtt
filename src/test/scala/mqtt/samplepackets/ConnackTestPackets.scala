@@ -1,13 +1,13 @@
-package mqtt.builder.packets
+package mqtt.samplepackets
 
+import mqtt.model.Packet
 import mqtt.model.Packet.Connack
 import mqtt.model.Packet.ConnectReturnCode._
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
 
-
-class ConnackBuilderTest extends PacketBuilderTester {
-  assertBuild(Map[Connack, Seq[Bit]](
+object ConnackTestPackets {
+  val samples: Map[Packet, Seq[Bit]] = Map(
     Connack(sessionPresent = false, returnCode = ConnectionAccepted) ->
       Seq(
         0, 0, 1, 0, 0, 0, 0, 0,
@@ -56,5 +56,5 @@ class ConnackBuilderTest extends PacketBuilderTester {
         0, 0, 0, 0, 0, 0, 1, 0,
         0, 0, 0, 0, 0, 0, 0, 1,
         0, 0, 0, 0, 0, 1, 0, 1
-      )))
+      ))
 }
