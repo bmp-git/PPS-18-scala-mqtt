@@ -1,17 +1,17 @@
 package mqtt.parser
 
-import mqtt.parser.BitParsers.bit
-import mqtt.parser.Parsers.{first, ifConditionFails, optional, many, many1, seqN}
+import mqtt.parser.Parsers.{first, skip, many, many1, optional, seqN}
 import ParserUtils._
+import mqtt.parser.fragments.BitParsers
 import org.scalatest.{FunSuite, Matchers}
 
 class ParsersTest extends FunSuite with Matchers {
-  //ifConditionFails parser
-  test("An ifConditionFails parser SHOULD parse and consume input if condition=true") {
-    ifConditionFails(zero, bit())(condition = true) run Seq(one, one) shouldBe partialResult(one)(Seq(one))
+  //skip parser
+  test("An skip parser SHOULD parse and consume input if condition=false") {
+    skip(BitParsers.bit())(condition = false, zero) run Seq(one, one) shouldBe partialResult(one)(Seq(one))
   }
-  test("An ifConditionFails parser SHOULD NOT parse and consume input if condition=false") {
-    ifConditionFails(zero, bit())(condition = false) run Seq(zero) shouldBe partialResult(zero)(Seq(zero))
+  test("An skip parser SHOULD NOT parse and consume input if condition=true") {
+    skip(BitParsers.bit())(condition = true, zero) run Seq(zero) shouldBe partialResult(zero)(Seq(zero))
   }
   
   //first parser

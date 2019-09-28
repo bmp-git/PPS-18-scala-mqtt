@@ -36,31 +36,31 @@ object Parsers {
    *
    * @param p         the parser to wrap
    * @param predicate the predicate
-   * @tparam A the new parser result type
+   * @tparam A the parser result type
    * @return the new parser
    */
   def conditional[A](p: Parser[A])(predicate: A => Boolean): Parser[A] =
     p.flatMap(a => if (predicate(a)) success(a) else failure)
   
   /**
-   * A parser that return a default value without tampering the input bits if the condition is false,
+   * A parser that skip the parser and return a default value without tampering the input bits if the condition is true,
    * executing the parser p otherwise
    *
-   * @param default   the default result if condition is false
-   * @param p         the parser to use if condition is true
-   * @param condition the condition
-   * @tparam A the new parser result type
+   * @param p the parser
+   * @param condition the condition to evaluate
+   * @param default the default value
+   * @tparam A the parser result type
    * @return the new parser
    */
-  def ifConditionFails[A](default: A, p: Parser[A])(condition: Boolean): Parser[A] =
-    if (condition) p else Parser(s => Option((default, s)))
+  def skip[A](p: Parser[A])(condition: Boolean, default: A): Parser[A] =
+    if (!condition) p else success[A](default)
   
   /**
    * A parser that assure if a condition hold.
    * @param condition the condition that must be evaluated
    * @return the new parser that fails and breaks the parsing chain if the condition is false
    */
-  def assure(condition: Boolean): Parser[Unit] = if (condition) parserMonad.unit(()) else failure
+  def assure(condition: Boolean): Parser[Unit] = if (condition) success[Unit](()) else failure
   
   /**
    * A parser that fails if a condition hold.

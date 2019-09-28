@@ -1,11 +1,12 @@
-package mqtt.parser
+package mqtt.parser.packets
 
+import mqtt.parser.MqttPacketParser
 import mqtt.samplepackets._
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
 import org.scalatest.{FunSuite, Matchers}
 
-class PacketParserTest extends FunSuite with Matchers {
+class MqttPacketParserTest extends FunSuite with Matchers {
   
   def assertParse[Packet](expected: Map[Packet, Seq[Bit]]): Unit = {
     expected foreach {

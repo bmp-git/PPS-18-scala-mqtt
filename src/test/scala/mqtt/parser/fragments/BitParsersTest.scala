@@ -1,9 +1,9 @@
-package mqtt.parser
+package mqtt.parser.fragments
 
-import ParserUtils._
+import mqtt.parser.ParserUtils._
 import mqtt.utils.BitImplicits._
-import mqtt.parser.BitParsers.{bit, bits, bytes}
 import org.scalatest.{FunSuite, Matchers}
+import mqtt.parser.fragments.BitParsers.{bit, bits, bytes}
 
 class BitParsersTest extends FunSuite with Matchers {
   //Bit parser

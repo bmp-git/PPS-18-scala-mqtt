@@ -4,7 +4,7 @@ import mqtt.utils.Bit
 import mqtt.PacketParser
 import mqtt.model.ErrorPacket.MalformedPacket
 import mqtt.model.Packet
-import mqtt.parser.MqttPacketsParsers.mqtt
+import mqtt.parser.packets.MqttPacketsParsers.mqtt
 
 /**
  * An MQTT packet parser.

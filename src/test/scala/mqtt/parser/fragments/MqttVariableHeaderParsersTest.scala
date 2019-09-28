@@ -1,13 +1,15 @@
-package mqtt.parser
+package mqtt.parser.fragments
 
 import mqtt.model.Packet.ConnectReturnCode._
 import mqtt.model.QoS
-import mqtt.parser.MqttFragmentsParsers._
+import mqtt.parser.ParserUtils.{failed, result, zerobyte}
+import mqtt.parser.datastructure.WillFlags
+import mqtt.parser.fragments.MqttCommonParsers._
+import mqtt.parser.fragments.MqttVariableHeaderParsers._
 import mqtt.utils.BitImplicits._
 import org.scalatest.{FunSuite, Matchers}
-import ParserUtils._
 
-class MqttFragmentsParsersTest extends FunSuite with Matchers {
+class MqttVariableHeaderParsersTest extends FunSuite with Matchers {
   //Qos parser
   test("A QoS parser SHOULD parse a QoS 0") {
     qos() run Seq(0, 0) shouldBe result(QoS(0))
@@ -63,5 +65,10 @@ class MqttFragmentsParsersTest extends FunSuite with Matchers {
   }
   test("A ConnectReturnCode parser SHOULD NOT parse a byte > 5") {
     connectReturnCode() run(31.toByte.bits) shouldBe failed
+  }
+  
+  //Packet identifier
+  test("A PacketIdentifier parser SHOULD NOT parse an id=0 [MQTT-2.3.1-1]") {
+    packetIdentifier() run (zerobyte ++ zerobyte) shouldBe failed
   }
 }

@@ -1,11 +1,15 @@
-package mqtt.parser
+package mqtt.parser.packets
 
-import mqtt.model.{Packet, QoS}
 import mqtt.model.Packet._
-import mqtt.parser.BitParsers._
+import mqtt.model.{Packet, QoS}
 import mqtt.parser.Monad._
-import mqtt.parser.MqttFragmentsParsers._
-import mqtt.parser.Parsers.{Parser, first, ifConditionFails, many, many1, fail}
+import mqtt.parser.Parsers.{Parser, fail, first, many, many1, skip}
+import mqtt.parser.datastructure._
+import mqtt.parser.fragments.BitParsers.{bit, byte}
+import mqtt.parser.fragments.MqttCommonParsers._
+import mqtt.parser.fragments.MqttFixedHeaderParsers._
+import mqtt.parser.fragments.MqttPayloadParsers._
+import mqtt.parser.fragments.MqttVariableHeaderParsers._
 import mqtt.utils.BitImplicits._
 
 import scala.concurrent.duration._
@@ -20,7 +24,7 @@ object MqttPacketsParsers {
    *
    * @return the MQTT 3.1.1 packets parser
    */
-  def mqtt(): Parser[Packet] = first (
+  def mqtt(): Parser[Packet] = first(
     connect(), connack(), disconnect(),
     publish(), puback(), pubrec(), pubrel(), pubcomp(),
     subscribe(), suback(),
@@ -31,14 +35,14 @@ object MqttPacketsParsers {
     _ <- packetType(ConnectMask)
     _ <- reserved()
     _ <- variableLength()
-    _ <- protocolName()
+    name <- protocolName()
     version <- protocolLevel()
     flags <- connectFlags()
     keepAlive <- keepAlive()
     clientId <- utf8()
     willMessage <- willPayload(flags.willFlags)
     credentials <- credentials(flags.credentials)
-  } yield Connect(Protocol("MQTT", version), flags cleanSession, keepAlive seconds, clientId, credentials, willMessage)
+  } yield Connect(Protocol(name, version), flags cleanSession, keepAlive seconds, clientId, credentials, willMessage)
   
   def connack(): Parser[Packet] = for {
     _ <- packetType(ConnackMask)
@@ -49,7 +53,7 @@ object MqttPacketsParsers {
   } yield Connack(session, code)
   
   def disconnect(): Parser[Packet] = for {
-    _ <- disconnectPacketType()
+    _ <- packetType(DisconnectMask)
     _ <- reserved()
     _ <- variableLength()
   } yield Disconnect()
@@ -61,7 +65,7 @@ object MqttPacketsParsers {
     retain <- bit()
     _ <- variableLength()
     topic <- utf8()
-    id <- ifConditionFails(0, packetIdentifier())(qos != QoS(0))
+    id <- skip(packetIdentifier())(qos == QoS(0), default = 0)
     payload <- many(byte())
   } yield Publish(dup, id, ApplicationMessage(retain, qos, topic, payload))
   
