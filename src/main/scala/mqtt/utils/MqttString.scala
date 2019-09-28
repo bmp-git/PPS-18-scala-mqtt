@@ -16,7 +16,7 @@ object MqttString {
    * @return the string decoded
    */
   def decode(bytes: Seq[Byte]): String = {
-    new String(bytes.slice(2, size(bytes) + 2) toArray, StandardCharsets.UTF_8)
+     new String(bytes.slice(2, size(bytes) + 2) toArray, StandardCharsets.UTF_8)
   }
   
   /**
@@ -25,7 +25,7 @@ object MqttString {
    * @param bytes the buffer with the size in the first two bytes
    * @return the length of the following UTF8 string
    */
-  def size(bytes: Seq[Byte]): Int = BigInt(bytes.take(2).toArray).toInt
+  def size(bytes: Seq[Byte]): Int = if (bytes.size > 2) BigInt(bytes.take(2).toArray).toInt else 0
   
   /**
    * Encode a MQTT string.
