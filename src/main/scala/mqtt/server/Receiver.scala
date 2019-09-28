@@ -51,7 +51,7 @@ object Receiver {
   }
   
   /**
-   * Receives packets from the specified socket and creates a source of packets (Observer)
+   * Receives bits from the specified socket and creates a source of packets (Observer)
    * @param idSocket the socket to listen to
    * @return the source of received packet
    */
@@ -73,17 +73,19 @@ object Receiver {
     }
   
     def nextPacket: Option[Packet] = {
-      val firstByte = inputStream.next()
-      VariableLengthInteger.decode(inputStream) match {
-        case Some(length) =>
-          val buffer = inputStream.read(length)
-          if (buffer.length == length) {
-            val packetData = (firstByte +: VariableLengthInteger.encode(length)) ++ buffer
-            Option(MqttPacketParser.parse(packetData.toBitsSeq))
-          } else {
-            Option.empty
-          }
-        case None => Option.empty
+      inputStream.next() match {
+        case 0 => Option.empty
+        case firstByte: Byte => VariableLengthInteger.decode(inputStream) match {
+          case Some(length) =>
+            val buffer = inputStream.read(length)
+            if (buffer.length == length) {
+              val packetData = (firstByte +: VariableLengthInteger.encode(length)) ++ buffer
+              Option(MqttPacketParser.parse(packetData.toBitsSeq))
+            } else {
+              Option.empty
+            }
+          case None => Option.empty
+        }
       }
     }
   

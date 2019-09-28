@@ -73,7 +73,6 @@ object CommonPacketFragments {
    */
   val empty: StaticPacketFragment = rawBits of Seq.empty
   
-  //TODO move
   /**
    * Enrich Int object with zeros and ones StaticPacketFragment.
    *
@@ -92,7 +91,7 @@ object CommonPacketFragments {
   
   /**
    * A packet fragment representing the byte's structure of mqtt 3.1.1.
-   * Builds in a sequence of bits as specified in TODO
+   * Builds in a sequence of bits as prefixed with a two byte length field which indicates the number of bytes used by the binary data.
    */
   val bytesStructure: PacketFragment[Seq[Byte]] = lengthMSB :: lengthLSB :: rawBytes
   
@@ -113,7 +112,7 @@ object CommonPacketFragments {
   
   /**
    * A packet fragment representing the duration's structure of mqtt 3.1.1.
-   * Builds in a sequence of bits as specified in TODO
+   * Builds in a sequence of bits as specified in 3.1.2.10
    */
   val keepAliveStructure: PacketFragment[Duration] = rawBits from ((d: Duration) => d.toSeconds.toInt.bits.drop(16))
 
