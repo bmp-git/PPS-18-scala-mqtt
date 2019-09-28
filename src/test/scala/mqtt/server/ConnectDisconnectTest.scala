@@ -1,7 +1,6 @@
 package mqtt.server
 
 import mqtt.client.DummyClient
-import mqtt.model.ErrorPacket.ChannelClosed
 import mqtt.model.Packet
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.Packet.{Connack, Connect, Disconnect}
@@ -11,27 +10,35 @@ import scala.concurrent.duration._
 
 class ConnectDisconnectTest extends FunSuite {
   
-  def assertSendReceive(actions: Seq[(Duration, Packet)], expected: Seq[Packet]): Unit = {
+  def assertSendReceive(data: Seq[(Seq[Packet], Seq[Packet])]): Unit = {
     val stopper = MqttBroker(9999).run()
-    val client = DummyClient(9999, actions)
-    client.start()
-    val receivedPackets = client.inputPacketStream().toList.toBlocking.single.filter {
-      case _: ChannelClosed => false
-      case _ => true
+    
+    data map {
+      case (actions, expected) =>
+        val client = DummyClient(9999, actions)
+        client.start()
+        (client, expected)
+    } foreach {
+      case (client, expected) =>
+        client.join()
+        val received = client.receivedPackets()
+        assert(received == expected)
     }
-    client.join()
+    
     stopper.stop()
-    
-    
-    assert(receivedPackets == expected)
-    receivedPackets match {
-      case head :: _ => assert(head == Connack(sessionPresent = false, ConnectionAccepted))
-    }
   }
   
+  def basicConnect(clientId: String): Connect =
+    Connect(mqtt.model.Packet.Protocol("MQTT", 4), cleanSession = true, 10 second, clientId, Option.empty, Option.empty)
+  
   test("A client should be able to connect") {
-    val connect = Connect(mqtt.model.Packet.Protocol("MQTT", 4), cleanSession = true, 10 second, "Dummyclient", Option.empty, Option.empty)
+    val connect1 = basicConnect("c1")
+    val connect2 = basicConnect("c2")
     val disconnect = Disconnect()
-    assertSendReceive(Seq((1 second, connect), (0 second, disconnect)), Seq(Connack(sessionPresent = false, ConnectionAccepted)))
+    val connack = Connack(sessionPresent = false, ConnectionAccepted)
+    assertSendReceive(Seq[(Seq[Packet], Seq[Packet])](
+      (Seq(connect1, disconnect), Seq(connack)),
+      (Seq(connect2, disconnect), Seq(connack))
+    ))
   }
 }
