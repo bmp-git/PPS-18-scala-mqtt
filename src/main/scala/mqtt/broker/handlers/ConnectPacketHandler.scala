@@ -137,7 +137,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
    * @return a function that maps a state to a new state.
    */
   def storeCleanSessionFlag: State => State = state => {
-    state.updateSession(packet.clientId, s => s.copy(persistent = !packet.cleanSession))
+    state.updateSessionFromClientID(packet.clientId, s => s.copy(persistent = !packet.cleanSession))
   }
   
   /**
@@ -165,7 +165,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
    * @return a function that maps a state to a new state.
    */
   def storeKeepAlive: State => State = state => {
-    state.updateSession(packet.clientId, s => {
+    state.updateSessionFromClientID(packet.clientId, s => {
       s.copy(keepAlive = packet.keepAlive)
     })
   }

@@ -60,4 +60,6 @@ object Violation {
   case class InvalidTopicName() extends GenericViolation("InvalidTopicName")
   
   case class InvalidQoSDupPair() extends GenericViolation("InvalidQoSDupPair")
+  
+  case class SubscriptionTopicListEmpty() extends GenericViolation("SubscriptionTopicListEmpty")
 }

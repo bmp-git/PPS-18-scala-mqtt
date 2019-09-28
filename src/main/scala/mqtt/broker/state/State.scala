@@ -71,12 +71,22 @@ trait State {
   def setChannel(clientID: ClientID, channel: Channel): State
   
   /**
-   * Updates a session of a client, given the mapping function.
+   * Updates a session of a client (if found), given the mapping function.
+   *
    * @param clientID the client identifier to identify the session.
    * @param f the function that updates the session.
    * @return the new State.
    */
-  def updateSession(clientID: ClientID, f: Session => Session): State
+  def updateSessionFromClientID(clientID: ClientID, f: Session => Session): State
+  
+  /**
+   * Updates a session of a client (if found), given the mapping function.
+   *
+   * @param channel the channel to identify the session.
+   * @param f       the function that updates the session.
+   * @return the new State.
+   */
+  def updateSessionFromChannel(channel: Channel, f: Session => Session): State
   
   /**
    * Deletes a session of a client.

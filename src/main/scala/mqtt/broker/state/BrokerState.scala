@@ -41,12 +41,20 @@ case class BrokerState(override val sessions: Map[ClientID, Session],
     this.copy(closing = newClosing)
   }
   
-  override def updateSession(clientID: ClientID, f: Session => Session): State = {
+  override def updateSessionFromClientID(clientID: ClientID, f: Session => Session): State = {
     this.sessionFromClientID(clientID)
       .fold[State](this)(ses => {
         val newSession = f(ses)
         this.setSession(clientID, newSession)
       })
+  }
+  
+  override def updateSessionFromChannel(channel: Channel, f: Session => Session): State = {
+    this.sessionFromChannel(channel)
+      .fold[State](this) { case (id, ses) =>
+        val newSession = f(ses)
+        this.setSession(id, newSession)
+      }
   }
   
   override def deleteSession(clientID: ClientID): State = {

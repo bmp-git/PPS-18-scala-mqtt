@@ -53,7 +53,7 @@ object Common {
     state.sessionFromChannel(channel).fold(state) { case (id, sess) => {
       if (sess.persistent) {
         val newSess = sess.copy(channel = Option.empty)
-        state.updateSession(id, _ => newSess)
+        state.updateSessionFromClientID(id, _ => newSess)
       } else {
         state.deleteSession(id)
       }
@@ -84,7 +84,7 @@ object Common {
   }
   
   def sendPacket(clientID: ClientID, packet: Packet): State => State = state => {
-    state.updateSession(clientID, s => {
+    state.updateSessionFromClientID(clientID, s => {
       val newPending = s.pendingTransmission ++ Seq(packet)
       s.copy(pendingTransmission = newPending)
     })
