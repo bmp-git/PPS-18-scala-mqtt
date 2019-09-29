@@ -2,9 +2,11 @@ package mqtt.broker
 
 import mqtt.broker.Common.updateLastContact
 import mqtt.broker.SampleInstances._
+import mqtt.broker.UtilityFunctions.assertPacketNotPending
 import mqtt.broker.state.{Channel, State}
 import mqtt.model.ErrorPacket.MalformedPacket
 import mqtt.model.Packet
+import mqtt.model.Packet.Publish
 import org.scalatest.FunSuite
 
 import scala.concurrent.duration._
@@ -23,6 +25,20 @@ class TestBrokerManager extends FunSuite with TestConnect with TestDisconnect wi
     val bs1 = bs0.setSession(sample_id_0, sample_session_0.copy(channel = Option(sample_channel_0)))
     val bs2 = BrokerManager.handle(bs1, MalformedPacket(), sample_channel_0)
     assert(bs2.closing.contains(sample_channel_0))
+  }
+  
+  test("After disconnection new packets should be discarded.") {
+    val bs1 = bs0.setSession(sample_id_0, sample_session_0.copy(channel = Option(sample_channel_0)))
+    val bs2 = bs1.setSession(sample_id_1, sample_session_1.copy(channel = Option(sample_channel_1)))
+    
+    val bs3 = BrokerManager.handle(bs2, MalformedPacket(), sample_channel_1) //disconnect
+    
+    val bs4 = PublishHandler(bs3, sample_publish_packet_0, sample_channel_1)
+    
+    assertPacketNotPending(sample_id_0, {
+      case _: Publish => true
+      case _ => false
+    })(bs4)
   }
   
   test("After 1.5 time KeepAlive without messages should disconnect.") {

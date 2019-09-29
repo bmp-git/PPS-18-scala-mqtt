@@ -120,7 +120,6 @@ trait State {
    */
   def takeAllPendingTransmission: (State, Map[Channel, Seq[Packet]])
   
-  //TODO doc
   /**
    * Takes all the connections that must be closed, removing them from the state.
    *
