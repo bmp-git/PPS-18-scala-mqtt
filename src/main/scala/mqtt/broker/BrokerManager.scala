@@ -1,5 +1,7 @@
 package mqtt.broker
 
+import java.util.Calendar
+
 import mqtt.broker.Common.closeChannel
 import mqtt.broker.handlers.{ConnectPacketHandler, DisconnectPacketHandler, PublishPacketHandler, SubscribePacketHandler}
 import mqtt.broker.state.{Channel, State}
@@ -10,20 +12,32 @@ import mqtt.model.Packet.{Connect, Disconnect, Publish, Subscribe}
 
 object BrokerManager extends ProtocolManager {
   override def handle(state: State, packet: Packet, channel: Channel): State = {
-    //TODO refactor
     //if the channel is closing the packet cannot be accepted
-    state.closing.get(channel).fold({
+    val transition = state.closing.get(channel).fold[State => State]({
       packet match {
-        case p: Connect => ConnectPacketHandler(p, channel).handle(state)
-        case p: Disconnect => DisconnectPacketHandler(p, channel).handle(state)
-        case p: Publish => PublishPacketHandler(p, channel).handle(state)
-        case p: Subscribe => SubscribePacketHandler(p, channel).handle(state)
-        case _: MalformedPacket => println("Received malformed packet from ".concat(channel.toString)); closeChannel(channel)(state)
-        case _: ChannelClosed => closeChannel(channel)(state)
-        case _ => println("Packet not supported"); state
+        case p: Connect => ConnectPacketHandler(p, channel).handle
+        case p: Disconnect => DisconnectPacketHandler(p, channel).handle
+        case p: Publish => PublishPacketHandler(p, channel).handle
+        case p: Subscribe => SubscribePacketHandler(p, channel).handle
+        case _: MalformedPacket => println("Received malformed packet from ".concat(channel.toString)); closeChannel(channel)
+        case _: ChannelClosed => closeChannel(channel)
+        case _ => println("Packet not supported"); identity[State]
       }
-    })(_ => state)
+    })(_ => identity[State]) andThen tick
+  
+    transition(state)
   }
   
-  override def tick(state: State): State = state //TODO
+  override def tick(state: State): State = {
+    val now = Calendar.getInstance().getTime
+    val chToClose = for {
+      (_, session) <- state.sessions
+      ch <- session.channel //active sessions
+      if session.keepAlive.toMillis > 0 //if 0 keepAlive is disabled
+      elapsed = now.getTime - session.lastContact.getTime
+      if elapsed > (session.keepAlive.toMillis * 1.5)
+    } yield ch
+    
+    chToClose.map(closeChannel).foldLeft[State => State](identity)(_ andThen _)(state)
+  }
 }

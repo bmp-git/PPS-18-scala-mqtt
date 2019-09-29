@@ -1,11 +1,12 @@
 package mqtt.broker.handlers
 
-import mqtt.broker.Common.{closeChannel, sendPacket}
+import mqtt.broker.Common.{closeChannel, sendPacket, updateLastContact}
 import mqtt.broker.state.StateImplicits._
-import mqtt.broker.state.Violation.{InvalidIdentifier, InvalidProtocolName, InvalidProtocolVersion, MultipleConnectPacketsOnSameChannel}
+import mqtt.broker.state.Violation._
 import mqtt.broker.state.{Channel, Session, State, Violation}
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.Packet.{Connack, Connect}
+import mqtt.model.Topic
 
 /**
  * Handles connect packets.
@@ -17,6 +18,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
       _ <- checkNotFirstPacketOfChannel
       _ <- checkProtocol
       _ <- checkClientId
+      _ <- checkWillMessageTopic
       _ <- disconnectOtherConnected
       sessionPresent <- manageSession
       _ <- storeCleanSessionFlag
@@ -24,6 +26,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
       _ <- storeWillMessage
       _ <- storeKeepAlive
       _ <- replyWithACK(sessionPresent)
+      _ <- updateLastContact(channel)
       } yield ()
   }
   
@@ -83,6 +86,17 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
   def checkClientId: State => Either[Violation, State] = state => {
     val clientId = packet.clientId
     if (clientId.isEmpty || clientId.length > 23) Left(InvalidIdentifier()) else Right(state)
+  }
+  
+  /**
+   * Checks if the will message topic is a valid topic.
+   *
+   * @return a function that maps a state to a violation or to a new state.
+   */
+  def checkWillMessageTopic: State => Either[Violation, State] = state => {
+    packet.willMessage.fold[Either[Violation, State]](Right(state))(m => {
+      if (Topic.valid(m.topic)) Right(state) else Left(InvalidWillTopic())
+    })
   }
   
   /**

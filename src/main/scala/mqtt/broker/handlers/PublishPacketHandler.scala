@@ -1,9 +1,9 @@
 package mqtt.broker.handlers
 
-import mqtt.broker.Common.sendPacket
+import mqtt.broker.Common.{sendPacket, updateLastContact}
 import mqtt.broker.handlers.PublishPacketHandler._
 import mqtt.broker.state.StateImplicits._
-import mqtt.broker.state.Violation.{InvalidQoSDupPair, InvalidTopicName}
+import mqtt.broker.state.Violation.{InvalidQoSDupPair, InvalidTopicName, qoSNotSupported}
 import mqtt.broker.state.{Channel, State, Violation}
 import mqtt.model.Packet.{ApplicationMessage, Publish}
 import mqtt.model.Types.{ClientID, Payload}
@@ -13,11 +13,22 @@ import mqtt.model.{QoS, Topic}
 case class PublishPacketHandler(override val packet: Publish, override val channel: Channel) extends PacketHandler[Publish] with AutoViolationHandler {
   override def handle: State => State = {
     for {
+      _ <- checkSupportedQoS
       _ <- checkValidQoSDupPair
       topic <- checkValidTopic
       _ <- handleRetain(topic, packet.message)
       _ <- publishMessage(packet.message.qos, packet.message.topic, packet.message.payload)
+      _ <- updateLastContact(channel)
     } yield ()
+  }
+  
+  def checkSupportedQoS: State => Either[Violation, State] = state => {
+    //TODO currently only supporting QoS0
+    val valid = packet.message.qos match {
+      case QoS(0) => true
+      case _ => false
+    }
+    if (valid) Right(state) else Left(qoSNotSupported())
   }
   
   def checkValidQoSDupPair: State => Either[Violation, State] = state => {

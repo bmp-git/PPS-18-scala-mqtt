@@ -13,8 +13,14 @@ import scala.concurrent.duration.Duration
 trait TestConnect extends FunSuite {
   def ConnectHandler: (State, Connect, Channel) => State
   
-  test("Sending a connect packet with and unsupported protocol name should disconnect") {
+  test("Sending a connect packet with an invalid will message topic should disconnect") {
     val packet = sample_connect_packet_0.copy(protocol = Protocol("HTTP", 4))
+    val bs1 = ConnectHandler(bs0, packet, sample_channel_0)
+    assert(bs1.closing.get(sample_channel_0).isDefined)
+  }
+  
+  test("Sending a connect packet with and unsupported protocol name should disconnect") {
+    val packet = sample_connect_packet_0.copy(willMessage = Option(sample_application_message_0.copy(topic = "#")))
     val bs1 = ConnectHandler(bs0, packet, sample_channel_0)
     assert(bs1.closing.get(sample_channel_0).isDefined)
   }

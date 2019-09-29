@@ -1,6 +1,7 @@
 package mqtt.broker.handlers
 
 import mqtt.broker.Common
+import mqtt.broker.Common.updateLastContact
 import mqtt.broker.handlers.SubscribePacketHandler.maxAllowedQoS
 import mqtt.broker.state.StateImplicits._
 import mqtt.broker.state.Violation.{GenericViolation, SubscriptionTopicListEmpty}
@@ -20,6 +21,7 @@ case class SubscribePacketHandler(override val packet: Subscribe, override val c
       _ <- storeSubscriptions(filterOptions)
       _ <- sendSUBACK(clientID, filterOptions)
       _ <- publishRetains(clientID, filterOptions)
+      _ <- updateLastContact(channel)
     } yield ()
   }
   

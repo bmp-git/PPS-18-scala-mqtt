@@ -3,29 +3,29 @@ package mqtt.broker
 import mqtt.broker.state.State
 import mqtt.model.Packet
 import mqtt.model.Types.ClientID
-import org.scalatest.{Assertion, FunSuite}
+import org.scalatest.FunSuite
 
 object UtilityFunctions extends FunSuite {
-  def assertPacketPending(id: ClientID, f: Packet => Boolean): State => Assertion = state => {
-    state.sessionFromClientID(id).fold(fail)(s => {
-      s.pendingTransmission.find(f).fold(fail)(_ => succeed)
+  def assertPacketPending(id: ClientID, f: Packet => Boolean): State => Unit = state => {
+    state.sessionFromClientID(id).fold[Unit](fail)(s => {
+      assert(s.pendingTransmission.exists(f))
     })
   }
   
-  def assertPacketNotPending(id: ClientID, f: Packet => Boolean): State => Assertion = state => {
-    state.sessionFromClientID(id).fold(fail)(s => {
-      s.pendingTransmission.find(f).fold(succeed)(_ => fail)
+  def assertPacketNotPending(id: ClientID, f: Packet => Boolean): State => Unit = state => {
+    state.sessionFromClientID(id).fold[Unit](fail)(s => {
+      assert(!s.pendingTransmission.exists(f))
     })
   }
   
-  def assertPendingEmpty(id: ClientID): State => Assertion = state => {
-    state.sessionFromClientID(id).fold(fail)(s => {
+  def assertPendingEmpty(id: ClientID): State => Unit = state => {
+    state.sessionFromClientID(id).fold[Unit](fail)(s => {
       assert(s.pendingTransmission.isEmpty)
     })
   }
   
-  def assertDisconnected(id: ClientID): State => Assertion = state => {
-    state.sessionFromClientID(id).fold(succeed)(s => {
+  def assertDisconnected(id: ClientID): State => Unit = state => {
+    state.sessionFromClientID(id).fold[Unit](())(s => {
       assert(s.channel.isEmpty)
     })
   }

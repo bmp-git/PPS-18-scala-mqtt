@@ -1,5 +1,7 @@
 package mqtt.broker
 
+import java.util.Calendar
+
 import mqtt.broker.handlers.PublishPacketHandler
 import mqtt.broker.state.{Channel, State}
 import mqtt.model.Types.ClientID
@@ -87,6 +89,13 @@ object Common {
     state.updateSessionFromClientID(clientID, s => {
       val newPending = s.pendingTransmission ++ Seq(packet)
       s.copy(pendingTransmission = newPending)
+    })
+  }
+  
+  def updateLastContact(channel: Channel): State => State = state => {
+    val now = Calendar.getInstance().getTime
+    state.updateSessionFromChannel(channel, sess => {
+      sess.copy(lastContact = now)
     })
   }
   

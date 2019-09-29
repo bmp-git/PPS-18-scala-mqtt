@@ -58,8 +58,10 @@ trait TestSubscribe extends FunSuite {
       .copy(channel = Option(sample_channel_0), subscriptions = Map(new TopicFilter(sample_topic_0) -> QoS(2)))) //client 1 subscribed to sport/tennis with QoS2
     
     val bs2 = SubscribeHandler(bs1, sample_subscribe_packet_0, sample_channel_0) // client 1 resubscribes to sport/tennis with QoS0
-    
-    bs2.sessionFromClientID(sample_id_0).fold(fail)(s => s.subscriptions.get(new TopicFilter(sample_topic_0)).fold(fail){case QoS(0) => succeed})
+  
+    bs2.sessionFromClientID(sample_id_0).fold[Unit](fail)(s => {
+      s.subscriptions.get(new TopicFilter(sample_topic_0)).fold[Unit](fail) { case QoS(v) => assert(v == 0) }
+    })
   }
   
   test("After a subscription the retain message should be published only to the subscriber, with retain flag true.") {

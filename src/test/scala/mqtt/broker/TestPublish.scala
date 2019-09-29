@@ -10,6 +10,14 @@ import org.scalatest.FunSuite
 trait TestPublish extends FunSuite {
   def PublishHandler: (State, Publish, Channel) => State
   
+  //TODO remove when QoS2 will be supported.
+  test("A publish with an unsupported QoS should disconnect.") {
+    val bs1 = bs0.setSession(sample_id_0, sample_session_0.copy(channel = Option(sample_channel_0)))
+    val packet = sample_publish_packet_0.copy(message = sample_publish_packet_0.message.copy(qos = QoS(2)))
+    val bs2 = PublishHandler(bs1, packet, sample_channel_0)
+    assertDisconnected(sample_id_0)(bs2)
+  }
+  
   test("A publish with a bad topic name should disconnect.") {
     val bs1 = bs0.setSession(sample_id_0, sample_session_0.copy(channel = Option(sample_channel_0)))
     val packet = sample_publish_packet_0.copy(message = sample_publish_packet_0.message.copy(topic = "#"))
@@ -64,7 +72,7 @@ trait TestPublish extends FunSuite {
     })(bs4)
   }
   
-  
+  /* TODO cannot test with only QoS0 support, uncomment when QoS1 will be supported.
   test("DUP flag is not propagated.") {
     val bs1 = bs0.setSession(sample_id_0, sample_session_0.copy(channel = Option(sample_channel_0))) //client 1 subscribed to sport/tennis
     val bs2 = bs1.setSession(sample_id_1, sample_session_1.copy(channel = Option(sample_channel_1))) //client 2 empty subscriptions
@@ -79,6 +87,7 @@ trait TestPublish extends FunSuite {
       case _ => false
     })(bs4)
   }
+  */
   
   test("A QoSO publish with retain replaces the old retain message.") {
     val bs1 = bs0.setSession(sample_id_0, sample_session_0.copy(channel = Option(sample_channel_0)))
