@@ -39,7 +39,7 @@ object SampleInstances {
   
   
   val sample_application_message_0 = ApplicationMessage(retain = false, qos = QoS(0), topic = sample_topic_0, payload = "hello".toSeq.map(_.toByte))
-  val sample_application_message_1 = ApplicationMessage(retain = false, qos = QoS(0), topic = sample_topic_1, payload = "hello".toSeq.map(_.toByte))
+  val sample_application_message_1 = ApplicationMessage(retain = false, qos = QoS(0), topic = sample_topic_1, payload = "hi".toSeq.map(_.toByte))
   
   
   val sample_publish_packet_0 = Publish(

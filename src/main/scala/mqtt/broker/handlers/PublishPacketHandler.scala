@@ -21,7 +21,11 @@ case class PublishPacketHandler(override val packet: Publish, override val chann
   }
   
   def checkValidQoSDupPair: State => Either[Violation, State] = state => {
-    if (packet.message.qos == QoS(0) && !packet.duplicate) Right(state) else Left(InvalidQoSDupPair())
+    val valid = packet.message.qos match {
+      case QoS(0) => !packet.duplicate
+      case _ => true
+    }
+    if (valid) Right(state) else Left(InvalidQoSDupPair())
   }
   
   def checkValidTopic: State => Either[Violation, (Topic, State)] = state => {
