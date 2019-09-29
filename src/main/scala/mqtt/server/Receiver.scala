@@ -58,11 +58,13 @@ object Receiver {
   def apply(idSocket: IdSocket): Observable[(IdSocket, Packet)] = Observable[(IdSocket, Packet)](observer => {
     val inputStream = idSocket.socket.getInputStream.toIterator
   
-    def close(): Unit = idSocket.socket.close()
+    def close(): Unit = if (!idSocket.socket.isClosed) {
+      idSocket.socket.close()
+    }
   
     def complete(): Unit = observer.onCompleted()
   
-    def emitAlert(): Unit = {
+    def emitAlert(): Unit = if (!idSocket.socket.isClosed) {
       println(Thread.currentThread() + "    Error on socket " + idSocket.id)
       observer.onNext((idSocket, ChannelClosed())) //emit
     }
@@ -89,8 +91,7 @@ object Receiver {
       }
     }
   
-    @tailrec
-    def receive(): Unit = {
+    @tailrec def receive(): Unit = {
       Try {
         nextPacket match {
           case Some(packet: Disconnect) => emitPacket(packet); CloseAndComplete
@@ -103,7 +104,6 @@ object Receiver {
         case AlertCloseAndComplete => emitAlert(); close(); complete()
       }
     }
-  
     receive()
   })
 }
