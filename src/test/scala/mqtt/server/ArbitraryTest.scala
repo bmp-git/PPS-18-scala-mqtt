@@ -26,9 +26,9 @@ class ArbitraryTest extends FunSuite {
   
   test("A client who send a ad-hoc malformed packet shouldn't damage the broker") {
     val breaker = MqttBroker(50003).run()
-    val client1 = ArbitraryClient(50001, Seq[Bit](0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)) //Not completed remaining length
-    val client2 = ArbitraryClient(50001, Seq[Bit](0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0)) //Not matching remaining length
-    val client3 = ArbitraryClient(50001, Seq[Bit](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)) //First byte 0
+    val client1 = ArbitraryClient(50003, Seq[Bit](0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)) //Not completed remaining length
+    val client2 = ArbitraryClient(50003, Seq[Bit](0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0)) //Not matching remaining length
+    val client3 = ArbitraryClient(50003, Seq[Bit](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)) //First byte 0
     
     client1.start()
     client2.start()
