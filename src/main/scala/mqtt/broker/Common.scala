@@ -1,7 +1,11 @@
 package mqtt.broker
 
-import mqtt.model.Packet
-import mqtt.model.Packet.ApplicationMessage
+import java.util.Calendar
+
+import mqtt.broker.handlers.PublishPacketHandler
+import mqtt.broker.state.{Channel, State}
+import mqtt.model.Types.ClientID
+import mqtt.model.{Packet, QoS, Topic}
 
 /**
  * Contains common utility methods to modify the state of the server.
@@ -51,7 +55,7 @@ object Common {
     state.sessionFromChannel(channel).fold(state) { case (id, sess) => {
       if (sess.persistent) {
         val newSess = sess.copy(channel = Option.empty)
-        state.updateSession(id, _ => newSess)
+        state.updateSessionFromClientID(id, _ => newSess)
       } else {
         state.deleteSession(id)
       }
@@ -74,19 +78,48 @@ object Common {
    * @return a function that maps the old server state in the new one.
    */
   def publishWillMessage(channel: Channel): State => State = state => {
-    state.wills.get(channel).fold[State](state)(publishMessage(_)(state))
+    state.wills.get(channel).fold[State](state)(msg => {
+      val topic = new Topic(msg.topic) //assuming topic is valid, it should aways be
+      (PublishPacketHandler.handleRetain(topic, msg) andThen PublishPacketHandler.publishMessage(msg.qos, msg.topic, msg.payload)) (state)
+    }
+    )
   }
   
   /**
-   * Publishes a message.
+   * Sends a packet to a specified clientID.
    *
-   * @param message the message to publish.
+   * @param clientID the recipient of the message.
+   * @param packet   the packet to send.
    * @return a function that maps the old server state in the new one.
    */
-  def publishMessage(message: ApplicationMessage): State => State = state => {
-    //TODO
-    println("Message published ".concat(message.toString))
-    state
+  def sendPacket(clientID: ClientID, packet: Packet): State => State = state => {
+    state.updateSessionFromClientID(clientID, s => {
+      val newPending = s.pendingTransmission ++ Seq(packet)
+      s.copy(pendingTransmission = newPending)
+    })
   }
   
+  /**
+   * Updates the time of last contact of a client to now, if the session is active.
+   *
+   * @param channel the channel associated to the client.
+   * @return a function that maps the old server state in the new one.
+   */
+  def updateLastContact(channel: Channel): State => State = state => {
+    val now = Calendar.getInstance().getTime
+    state.updateSessionFromChannel(channel, sess => {
+      sess.copy(lastContact = now)
+    })
+  }
+  
+  /**
+   * Compute the minimum QoS between two specified QoSs.
+   *
+   * @param firstQoS  the first QoS.
+   * @param secondQoS the seconf QoS.
+   * @return the first QoS if firstQoS < secondQoS, the second otherwise.
+   */
+  def min(firstQoS: QoS, secondQoS: QoS): QoS = (firstQoS, secondQoS) match {
+    case (QoS(first), QoS(second)) => if (first < second) firstQoS else secondQoS
+  }
 }

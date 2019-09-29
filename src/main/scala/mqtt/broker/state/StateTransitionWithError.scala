@@ -1,7 +1,6 @@
-package mqtt.broker
+package mqtt.broker.state
 
-import mqtt.broker.StateTransitionWithError.unit
-
+import mqtt.broker.state.StateTransitionWithError.unit
 /**
  * Represents a state transition.
  * The transition can be successful returning a Right with an output and a new state.

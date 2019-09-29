@@ -1,8 +1,8 @@
-package mqtt.broker
+package mqtt.broker.state
 
 import mqtt.model.Packet.ApplicationMessage
 import mqtt.model.Types.ClientID
-import mqtt.model.{Packet, Topic, Types}
+import mqtt.model.{Packet, Topic}
 
 /**
  * Represents the internal state of the server/broker.
@@ -41,12 +41,20 @@ case class BrokerState(override val sessions: Map[ClientID, Session],
     this.copy(closing = newClosing)
   }
   
-  override def updateSession(clientID: ClientID, f: Session => Session): State = {
+  override def updateSessionFromClientID(clientID: ClientID, f: Session => Session): State = {
     this.sessionFromClientID(clientID)
       .fold[State](this)(ses => {
         val newSession = f(ses)
         this.setSession(clientID, newSession)
       })
+  }
+  
+  override def updateSessionFromChannel(channel: Channel, f: Session => Session): State = {
+    this.sessionFromChannel(channel)
+      .fold[State](this) { case (id, ses) =>
+        val newSession = f(ses)
+        this.setSession(id, newSession)
+      }
   }
   
   override def deleteSession(clientID: ClientID): State = {
@@ -83,4 +91,14 @@ case class BrokerState(override val sessions: Map[ClientID, Session],
   }
   
   override def takeClosing: (State, Map[Channel, Seq[Packet]]) = (this.copy(closing = Map()), this.closing)
+  
+  override def setRetainMessage(topic: Topic, message: ApplicationMessage): State = {
+    val newRetains = retains + ((topic, message))
+    this.copy(retains = newRetains)
+  }
+  
+  override def clearRetainMessage(topic: Topic): State = {
+    val newRetains = retains - topic
+    this.copy(retains = newRetains)
+  }
 }
