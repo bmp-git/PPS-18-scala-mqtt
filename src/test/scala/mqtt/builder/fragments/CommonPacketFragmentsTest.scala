@@ -41,7 +41,7 @@ class CommonPacketFragmentsTest extends FunSuite {
     assert((5 ones).build() == Seq[Bit](1, 1, 1, 1, 1))
   }
   test("Empty should build in empty-seq") {
-    assert(empty.build() == Seq[Bit]())
+    assert(empty.build() == Seq.empty)
   }
   test("Concat of One Zero Empty should build in 10") {
     assert((one :: zero :: empty).build() == Seq[Bit](1, 0))
@@ -90,13 +90,13 @@ class CommonPacketFragmentsTest extends FunSuite {
   
   val oneByte: StaticPacketFragment = () => Seq(0, 0, 0, 0, 0, 0, 0, 0)
   
-  test("Remaining length should be always the remaining length og the packet") {
+  test("Remaining length should be always the remaining length of the packet") {
+    assert(remainingLength.build() == Seq[Bit](0, 0, 0, 0, 0, 0, 0, 0))
     assert((remainingLength :: oneByte :: oneByte).build().getValue(0, 8) == 2)
     assert((remainingLength :: ((5 * 8) zeros)).build().getValue(0, 8) == 5)
     assert((remainingLength :: oneByte :: remainingLength :: oneByte).build().getValue(16, 8) == 1)
     assert((remainingLength :: oneByte :: remainingLength).build().getValue(16, 8) == 0)
     assert((remainingLength :: (rawBytes of (0 until 128).map(_.toByte))).build().take(16) ==
       Seq[Bit](1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1))
-    
   }
 }

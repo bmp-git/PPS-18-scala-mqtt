@@ -1,4 +1,3 @@
-import mqtt.client.ConnectDisconnectClient
 import mqtt.server._
 
 /**

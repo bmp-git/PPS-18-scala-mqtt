@@ -12,7 +12,7 @@ class PacketBuilderTester extends FunSuite {
     expected foreach {
       case (packet, bits) => {
         val build = MqttPacketBuilder.build(packet)
-        val buildString = build.toBinaryString.grouped(9 * 4).mkString("\n")
+        val buildString = bits.toBinaryString.grouped(9 * 4).mkString("\n")
         test(s"$packet should be built in \n$buildString") {
           assert(build == bits)
         }

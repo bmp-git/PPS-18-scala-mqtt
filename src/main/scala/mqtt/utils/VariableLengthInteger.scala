@@ -14,10 +14,11 @@ object VariableLengthInteger {
     process(value, Seq()).map(_.toByte)
   }
   
-  private def parse(included: Iterable[Byte]):Option[Int] = {
-    included.zipWithIndex.grouped(4).toSeq match {
-      case a: Seq[Iterable[(Byte, Int)]] if a.length != 1 => Option.empty
-      case a: Seq[Iterable[(Byte, Int)]] => a.flatten.map {
+  private def parse(included: Seq[Byte]): Option[Int] = {
+    included match {
+      case a: Seq[Byte] if a.length > 4 => Option.empty
+      case a: Seq[Byte] if a.lastOption.getOrElse((-1).toByte) < 0 => Option.empty
+      case a: Seq[Byte] => a.zipWithIndex.map {
         case (b, p) => (b & 0x7F) * Math.pow(128, p).toInt
       }.reduceOption(_ + _)
     }
@@ -26,7 +27,7 @@ object VariableLengthInteger {
   def decode(stream: Iterable[Byte]): (Option[Int], Iterable[Byte]) = {
     stream.spanUntil(_ < 0) match {
       case (included, excluded) => {
-        (parse(included), excluded)
+        (parse(included.toSeq), excluded)
       }
     }
   }

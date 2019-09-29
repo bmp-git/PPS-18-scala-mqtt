@@ -39,8 +39,8 @@ object CommonPacketFragments {
    */
   val remainingLength: PacketFragment[Any] = new PacketFragment[Any] {
     override def build[R <: Any](packet: R)(implicit context: Context[R]): Seq[Bit] = {
-      val data = context.parent.fold(Seq[Bit]())(p => p.right match {
-        case `remainingLength` => Seq[Bit]()
+      val data = context.parent.fold(Seq.empty[Bit])(p => p.right match {
+        case `remainingLength` => Seq.empty
         case _ => p.right.build(packet)(context)
       })
       VariableLengthInteger.encode(data.length / 8).toBitsSeq

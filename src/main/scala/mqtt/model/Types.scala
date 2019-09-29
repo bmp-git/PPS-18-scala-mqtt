@@ -22,15 +22,6 @@ object QoS {
     case QoS1 => 1
     case QoS2 => 2
   })
-  
-  
-  implicit class QoSExtensions(qos: QoS){
-    def value:Int = qos match {
-      case QoS0 => 0
-      case QoS1 => 1
-      case QoS2 => 2
-    }
-  }
 }
 
 object Types {
