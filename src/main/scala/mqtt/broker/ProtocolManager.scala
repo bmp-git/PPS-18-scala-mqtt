@@ -17,6 +17,12 @@ trait ProtocolManager {
    */
   def handle(state: State, packet: Packet, channel: Channel): State
   
-  //TODO: doc
+  /**
+   * Checks whether there are active clients whose timespan from last contact doesn't respect the keep alive specified during connection.
+   * In that case, the client is forcibly disconnected.
+   *
+   * @param state the old state of the server.
+   * @return the new state of the server.
+   */
   def tick(state: State): State
 }

@@ -85,6 +85,13 @@ object Common {
     )
   }
   
+  /**
+   * Sends a packet to a specified clientID.
+   *
+   * @param clientID the recipient of the message.
+   * @param packet   the packet to send.
+   * @return a function that maps the old server state in the new one.
+   */
   def sendPacket(clientID: ClientID, packet: Packet): State => State = state => {
     state.updateSessionFromClientID(clientID, s => {
       val newPending = s.pendingTransmission ++ Seq(packet)
@@ -92,6 +99,12 @@ object Common {
     })
   }
   
+  /**
+   * Updates the time of last contact of a client to now, if the session is active.
+   *
+   * @param channel the channel associated to the client.
+   * @return a function that maps the old server state in the new one.
+   */
   def updateLastContact(channel: Channel): State => State = state => {
     val now = Calendar.getInstance().getTime
     state.updateSessionFromChannel(channel, sess => {
@@ -99,6 +112,13 @@ object Common {
     })
   }
   
+  /**
+   * Compute the minimum QoS between two specified QoSs.
+   *
+   * @param firstQoS  the first QoS.
+   * @param secondQoS the seconf QoS.
+   * @return the first QoS if firstQoS < secondQoS, the second otherwise.
+   */
   def min(firstQoS: QoS, secondQoS: QoS): QoS = (firstQoS, secondQoS) match {
     case (QoS(first), QoS(second)) => if (first < second) firstQoS else secondQoS
   }

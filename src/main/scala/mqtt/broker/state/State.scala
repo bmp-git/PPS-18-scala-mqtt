@@ -105,7 +105,7 @@ trait State {
   def setWillMessage(channel: Channel, willMessage: ApplicationMessage): State
   
   /**
-   * Deletes the will message associated to a specified channel
+   * Deletes the will message associated to a specified channel.
    *
    * @param channel the channel to which the will message is associated.
    * @return the new State.
@@ -121,9 +121,27 @@ trait State {
   def takeAllPendingTransmission: (State, Map[Channel, Seq[Packet]])
   
   //TODO doc
+  /**
+   * Takes all the connections that must be closed, removing them from the state.
+   *
+   * @return a map containing, for each channel to be closed, the sequence of packets to be sent before closing.
+   */
   def takeClosing: (State, Map[Channel, Seq[Packet]])
   
+  /**
+   * Sets the retain message relative to a specified topic.
+   *
+   * @param topic   the topic to which associate the will message.
+   * @param message the retain message associated to the topic.
+   * @return the new State.
+   */
   def setRetainMessage(topic: Topic, message: ApplicationMessage): State
   
+  /**
+   * Deletes the retain message associated to a specified topic.
+   *
+   * @param topic the topic to which the retain message is associated.
+   * @return the new State.
+   */
   def clearRetainMessage(topic: Topic): State
 }
