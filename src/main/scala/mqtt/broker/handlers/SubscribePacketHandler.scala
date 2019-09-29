@@ -37,7 +37,7 @@ case class SubscribePacketHandler(override val packet: Subscribe, override val c
   }
   
   def validateFilters: State => (FilterOptions, State) = state => {
-    (packet.topics.map { case (str, qos) => TopicFilter(str).map(f => (f, PublishPacketHandler.min(maxAllowedQoS, qos))) }, state)
+    (packet.topics.map { case (str, qos) => TopicFilter(str).map(f => (f, Common.min(maxAllowedQoS, qos))) }, state)
   }
   
   def storeSubscriptions(filterOptions: FilterOptions): State => State = {
@@ -61,7 +61,7 @@ case class SubscribePacketHandler(override val packet: Subscribe, override val c
   }
   
   def publishRetain(clientID: ClientID, msg: ApplicationMessage, qos: QoS): State => State = state => {
-    val msgToSend = ApplicationMessage(retain = true, PublishPacketHandler.min(qos, msg.qos), msg.topic, msg.payload)
+    val msgToSend = ApplicationMessage(retain = true, Common.min(qos, msg.qos), msg.topic, msg.payload)
     PublishPacketHandler.publishMessageTo(clientID, msgToSend)(state)
   }
   

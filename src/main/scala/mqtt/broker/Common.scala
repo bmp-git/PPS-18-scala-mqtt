@@ -5,7 +5,7 @@ import java.util.Calendar
 import mqtt.broker.handlers.PublishPacketHandler
 import mqtt.broker.state.{Channel, State}
 import mqtt.model.Types.ClientID
-import mqtt.model.{Packet, Topic}
+import mqtt.model.{Packet, QoS, Topic}
 
 /**
  * Contains common utility methods to modify the state of the server.
@@ -99,4 +99,7 @@ object Common {
     })
   }
   
+  def min(firstQoS: QoS, secondQoS: QoS): QoS = (firstQoS, secondQoS) match {
+    case (QoS(first), QoS(second)) => if (first < second) firstQoS else secondQoS
+  }
 }

@@ -9,7 +9,10 @@ import mqtt.model.Packet.{Connack, Connect}
 import mqtt.model.Topic
 
 /**
- * Handles connect packets.
+ * Represents and handler for connect packets.
+ *
+ * @param packet  the connect packet to handle.
+ * @param channel the channel on which the packet has been received.
  */
 case class ConnectPacketHandler(override val packet: Connect, override val channel: Channel) extends PacketHandler[Connect] with AutoViolationHandler {
   
