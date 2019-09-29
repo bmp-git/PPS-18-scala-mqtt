@@ -1,9 +1,8 @@
 package mqtt.builder.packets
 
-import mqtt.builder.PacketStructure
-import mqtt.builder.fragments.CommonPacketFragments._
-import mqtt.builder.fragments.PacketFragment
-import mqtt.builder.fragments.RichPacketFragment._
+import mqtt.builder.Builder
+import mqtt.builder.CommonBuilders._
+import mqtt.builder.RichBuilder._
 import mqtt.model.Packet.Subscribe
 import mqtt.model.QoS
 
@@ -13,17 +12,16 @@ import mqtt.model.QoS
 case object SubscribeStructure extends PacketStructure[Subscribe] {
   
   //3.8.3
-  private val topicQoS: PacketFragment[(String, QoS)] = qosStructure from {
+  private val topicQoS: Builder[(String, QoS)] = qosBuilder from {
     case (_, qos) => qos
   }
-  private val topicFilter: PacketFragment[(String, QoS)] = stringStructure from {
+  private val topicFilter: Builder[(String, QoS)] = stringBuilder from {
     case (filter, _) => filter
   }
   
   
-  override val fixedHeader: PacketFragment[Subscribe] = controlPacketType(8) :: zero :: zero :: one :: zero :: remainingLength //3.8.1
-  
-  override val variableHeader: PacketFragment[Subscribe] = packetIdentifier //3.8.2
-  
-  override val payload: PacketFragment[Subscribe] = (topicFilter :: (6 zeros) :: topicQoS) foreach ((p: Subscribe) => p.topics) //3.8.3
+  override val builder: Builder[Subscribe] =
+    controlPacketType(8) :: zero :: zero :: one :: zero :: remainingLength :: //3.8.1
+      packetIdentifier :: //3.8.2
+      (topicFilter :: (6 zeros) :: topicQoS).foreach[Subscribe](_.topics) //3.8.3
 }

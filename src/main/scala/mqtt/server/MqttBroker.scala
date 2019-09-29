@@ -122,7 +122,7 @@ case class MqttBroker(port: Int) {
       .flatMap(packetHandler)
       .groupBy(socketId)
       .flatMap(clientSender)
-      .subscribe(unmapSocket, _ => println("Exception on main stream."))
+      .subscribe(unmapSocket, _ => println(Thread.currentThread() + "    Exception on main stream."))
   
     breaker
   }

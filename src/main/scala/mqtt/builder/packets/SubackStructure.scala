@@ -1,10 +1,9 @@
 package mqtt.builder.packets
 
-import mqtt.builder.PacketStructure
-import mqtt.builder.fragments.CommonPacketFragments._
-import mqtt.builder.fragments.PacketFragment
-import mqtt.builder.fragments.PacketFragmentImplicits._
-import mqtt.builder.fragments.RichPacketFragment._
+import mqtt.builder.Builder
+import mqtt.builder.BuilderImplicits._
+import mqtt.builder.CommonBuilders._
+import mqtt.builder.RichBuilder._
 import mqtt.model.Packet.Suback
 import mqtt.model.QoS
 
@@ -15,12 +14,10 @@ case object SubackStructure extends PacketStructure[Suback] {
   
   //3.9.3
   private val failure = (p: Option[QoS]) => p.isEmpty
-  private val qos = (p: Option[QoS]) => p.fold(zero :: zero)(qosStructure of _)
+  private val qos = (p: Option[QoS]) => p.fold(zero :: zero)(qosBuilder of _)
   
-  override val fixedHeader: PacketFragment[Suback] = controlPacketType(9) :: (4 zeros) :: remainingLength //3.9.1
-  
-  override val variableHeader: PacketFragment[Suback] = packetIdentifier //3.9.2
-  
-  override val payload: PacketFragment[Suback] = (failure :: (5 zeros) :: qos) foreach ((p: Suback) => p.subscriptions) //3.9.3
-  
+  override val builder: Builder[Suback] =
+    controlPacketType(9) :: (4 zeros) :: remainingLength :: //3.9.1
+      packetIdentifier :: //3.9.2
+      (failure :: (5 zeros) :: qos).foreach[Suback](_.subscriptions) //3.9.3
 }

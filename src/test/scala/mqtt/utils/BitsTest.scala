@@ -65,5 +65,9 @@ class BitsTest extends FunSuite {
     }
   }
   
-  //TODO: tests Bitify and other methods related to bits
+  test("Bitify of [1] should be 00000001") {
+    val bits = new Bitify(Seq[Byte](1))
+    assert(bits(7) == Bit(true))
+    assert(bits.toBinaryString == "00000001")
+  }
 }

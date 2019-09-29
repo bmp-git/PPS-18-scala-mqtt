@@ -1,10 +1,9 @@
 package mqtt.builder.packets
 
-import mqtt.builder.PacketStructure
-import mqtt.builder.fragments.CommonPacketFragments._
-import mqtt.builder.fragments.PacketFragment
-import mqtt.builder.fragments.PacketFragmentImplicits._
-import mqtt.builder.fragments.RichPacketFragment._
+import mqtt.builder.Builder
+import mqtt.builder.BuilderImplicits._
+import mqtt.builder.CommonBuilders._
+import mqtt.builder.RichBuilder._
 import mqtt.model.Packet.Publish
 import mqtt.model.QoS
 
@@ -25,7 +24,8 @@ case object PublishStructure extends PacketStructure[Publish] {
     case _ => packetIdentifier
   } //3.3.2.2
   
-  override val fixedHeader: PacketFragment[Publish] = controlPacketType(3) :: dup :: qos :: retain :: remainingLength //3.3.1
-  override val variableHeader: PacketFragment[Publish] = topicName :: packetId //3.3.2
-  override val payload: PacketFragment[Publish] = rawBytes from ((p: Publish) => p.message.payload) //3.3.3
+  override val builder: Builder[Publish] =
+    controlPacketType(3) :: dup :: qos :: retain :: remainingLength :: //3.3.1
+      topicName :: packetId :: //3.3.2
+      rawBytes.from[Publish](_.message.payload) //3.3.3
 }
