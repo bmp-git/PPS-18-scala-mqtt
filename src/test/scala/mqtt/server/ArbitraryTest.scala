@@ -1,9 +1,9 @@
 package mqtt.server
 
-import mqtt.client.ArbitraryClient
 import mqtt.model.Packet
 import mqtt.model.Packet.Disconnect
 import mqtt.server.AssertionsHelper._
+import mqtt.server.client.ArbitraryClient
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
 import org.scalatest.FunSuite

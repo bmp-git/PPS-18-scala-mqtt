@@ -1,8 +1,8 @@
 package mqtt.server
 
-import mqtt.client.DummyClient
 import mqtt.model.Packet
 import mqtt.model.Packet.Connect
+import mqtt.server.client.DummyClient
 
 import scala.concurrent.duration._
 
