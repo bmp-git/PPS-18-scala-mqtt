@@ -1,8 +1,8 @@
-package mqtt.builder.fragments
+package mqtt.builder
 
 import mqtt.builder.BuildContext._
-import mqtt.builder.fragments.CommonPacketFragments._
-import mqtt.builder.fragments.RichPacketFragment._
+import mqtt.builder.CommonBuilders._
+import mqtt.builder.RichBuilder._
 import mqtt.model.Types._
 import mqtt.model.{Packet, PacketID, QoS}
 import mqtt.utils.Bit
@@ -11,7 +11,7 @@ import org.scalatest.FunSuite
 
 import scala.concurrent.duration._
 
-class CommonPacketFragmentsTest extends FunSuite {
+class CommonBuildersTest extends FunSuite {
   
   case class DummyPacket(packetId: PackedID) extends Packet with PacketID
   
@@ -64,31 +64,31 @@ class CommonPacketFragmentsTest extends FunSuite {
   }
   
   test("byteStructure should always build to the specified values and the prefixed 2 byte length") {
-    assert(bytesStructure.build(Seq[Byte](1, 2, 3)) == Seq[Bit](
+    assert(bytesBuilder.build(Seq[Byte](1, 2, 3)) == Seq[Bit](
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, //length
       0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1))
     
-    assert(bytesStructure.build((0 until 1234).map(_.toByte)).getValue(0, 16) == 1234)
+    assert(bytesBuilder.build((0 until 1234).map(_.toByte)).getValue(0, 16) == 1234)
   }
   
   test("stringStructure should always build to the specified values and the prefixed 2 byte length") {
-    assert(stringStructure.build("abc") == Seq[Bit](
+    assert(stringBuilder.build("abc") == Seq[Bit](
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, //length
       0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1))
   }
   
   test("qosStructure should build always to 00 or 01 or 10") {
-    assert(qosStructure.build(QoS(0)) == Seq[Bit](0, 0))
-    assert(qosStructure.build(QoS(1)) == Seq[Bit](0, 1))
-    assert(qosStructure.build(QoS(2)) == Seq[Bit](1, 0))
+    assert(qosBuilder.build(QoS(0)) == Seq[Bit](0, 0))
+    assert(qosBuilder.build(QoS(1)) == Seq[Bit](0, 1))
+    assert(qosBuilder.build(QoS(2)) == Seq[Bit](1, 0))
   }
   
   test("keepAliveStructure should build always the duration in seconds and 16 bit") {
-    assert(keepAliveStructure.build(1 minute).getValue(0, 16) == 60)
-    assert(keepAliveStructure.build(65536 seconds).getValue(0, 16) == 0)
+    assert(keepAliveBuilder.build(1 minute).getValue(0, 16) == 60)
+    assert(keepAliveBuilder.build(65536 seconds).getValue(0, 16) == 0)
   }
   
-  val oneByte: StaticPacketFragment = () => Seq(0, 0, 0, 0, 0, 0, 0, 0)
+  val oneByte: StaticBuilder = () => Seq(0, 0, 0, 0, 0, 0, 0, 0)
   
   test("Remaining length should be always the remaining length of the packet") {
     assert(remainingLength.build() == Seq[Bit](0, 0, 0, 0, 0, 0, 0, 0))
