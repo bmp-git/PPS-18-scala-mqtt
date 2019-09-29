@@ -1,4 +1,4 @@
-package mqtt.broker
+package mqtt.broker.state
 
 import mqtt.broker.Common.closeChannelWithPackets
 import mqtt.model.Packet
@@ -56,4 +56,14 @@ object Violation {
   }
   
   case class MultipleConnectPacketsOnSameChannel() extends GenericViolation("MultipleConnectPacketsOnSameChannel")
+  
+  case class InvalidTopicName() extends GenericViolation("InvalidTopicName")
+  
+  case class qoSNotSupported() extends GenericViolation("qoSNotSupported")
+  
+  case class InvalidQoSDupPair() extends GenericViolation("InvalidQoSDupPair")
+  
+  case class SubscriptionTopicListEmpty() extends GenericViolation("SubscriptionTopicListEmpty")
+  
+  case class InvalidWillTopic() extends GenericViolation("InvalidWillTopic")
 }

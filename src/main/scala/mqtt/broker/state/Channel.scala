@@ -1,4 +1,4 @@
-package mqtt.broker
+package mqtt.broker.state
 
 /**
  * Represents a communication channel.

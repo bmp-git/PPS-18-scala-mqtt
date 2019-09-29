@@ -1,8 +1,8 @@
-package mqtt.broker
+package mqtt.broker.state
 
-import mqtt.model.{Packet, Topic}
 import mqtt.model.Packet.ApplicationMessage
 import mqtt.model.Types.ClientID
+import mqtt.model.{Packet, Topic}
 
 /**
  * Represents the internal State of the server (client sessions, retain messages, state of the channels).
@@ -71,12 +71,22 @@ trait State {
   def setChannel(clientID: ClientID, channel: Channel): State
   
   /**
-   * Updates a session of a client, given the mapping function.
+   * Updates a session of a client (if found), given the mapping function.
+   *
    * @param clientID the client identifier to identify the session.
    * @param f the function that updates the session.
    * @return the new State.
    */
-  def updateSession(clientID: ClientID, f: Session => Session): State
+  def updateSessionFromClientID(clientID: ClientID, f: Session => Session): State
+  
+  /**
+   * Updates a session of a client (if found), given the mapping function.
+   *
+   * @param channel the channel to identify the session.
+   * @param f       the function that updates the session.
+   * @return the new State.
+   */
+  def updateSessionFromChannel(channel: Channel, f: Session => Session): State
   
   /**
    * Deletes a session of a client.
@@ -95,7 +105,7 @@ trait State {
   def setWillMessage(channel: Channel, willMessage: ApplicationMessage): State
   
   /**
-   * Deletes the will message associated to a specified channel
+   * Deletes the will message associated to a specified channel.
    *
    * @param channel the channel to which the will message is associated.
    * @return the new State.
@@ -110,5 +120,27 @@ trait State {
    */
   def takeAllPendingTransmission: (State, Map[Channel, Seq[Packet]])
   
+  /**
+   * Takes all the connections that must be closed, removing them from the state.
+   *
+   * @return a map containing, for each channel to be closed, the sequence of packets to be sent before closing.
+   */
   def takeClosing: (State, Map[Channel, Seq[Packet]])
+  
+  /**
+   * Sets the retain message relative to a specified topic.
+   *
+   * @param topic   the topic to which associate the will message.
+   * @param message the retain message associated to the topic.
+   * @return the new State.
+   */
+  def setRetainMessage(topic: Topic, message: ApplicationMessage): State
+  
+  /**
+   * Deletes the retain message associated to a specified topic.
+   *
+   * @param topic the topic to which the retain message is associated.
+   * @return the new State.
+   */
+  def clearRetainMessage(topic: Topic): State
 }

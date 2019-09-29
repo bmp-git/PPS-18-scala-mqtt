@@ -1,6 +1,7 @@
 package mqtt.server
 
-import mqtt.broker.{BrokerState, State}
+
+import mqtt.broker.state.{BrokerState, State}
 
 import scala.collection.concurrent.TrieMap
 

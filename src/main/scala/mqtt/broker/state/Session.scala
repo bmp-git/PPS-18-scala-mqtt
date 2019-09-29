@@ -1,4 +1,4 @@
-package mqtt.broker
+package mqtt.broker.state
 
 import java.util.{Calendar, Date}
 
