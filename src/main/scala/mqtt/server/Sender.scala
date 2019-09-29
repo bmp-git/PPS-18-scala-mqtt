@@ -2,21 +2,23 @@ package mqtt.server
 
 import mqtt.builder.MqttPacketBuilder
 import mqtt.model.Packet
-import rx.lang.scala.Observer
 import mqtt.utils.BitImplicits._
+import rx.lang.scala.Observer
 
-//TODO: doc
-case class Sender(socketId: Int, socketIdMap:scala.collection.mutable.Map[Int, IdSocket]) extends Observer[Packet] {
-  private val idSocket = socketIdMap(socketId)
+/**
+ * An observer that emits the incoming packets to the specified socket.
+ *
+ * @param idSocket the socket
+ */
+case class Sender(idSocket: IdSocket) extends Observer[Packet] {
   
   override def onNext(packet: Packet): Unit = {
     implicit def packetToByteArray(p: Packet): Array[Byte] = MqttPacketBuilder.build(p).toBytes.toArray
     try {
-      println(Thread.currentThread() + "    Sending: " + packet + " to " + socketId)
+      println(Thread.currentThread() + "    Sending: " + packet + " to socket " + idSocket.id)
       packet match {
         case ClosePacket =>
           idSocket.socket.close()
-          socketIdMap -= socketId
         case _ =>
           idSocket.socket.getOutputStream.write(packet)
           idSocket.socket.getOutputStream.flush()
@@ -24,5 +26,7 @@ case class Sender(socketId: Int, socketIdMap:scala.collection.mutable.Map[Int, I
     }
   }
   
-  override def onCompleted(): Unit = println(Thread.currentThread() + "    Completed socket " + socketId)
+  override def onCompleted(): Unit = println(Thread.currentThread() + "    Completed socket " + idSocket.id)
+  
+  override def onError(error: Throwable): Unit = println(Thread.currentThread() + "    RxError on socket " + idSocket.id)
 }

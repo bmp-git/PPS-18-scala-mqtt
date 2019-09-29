@@ -1,16 +1,14 @@
-package mqtt.builder.packets
+package mqtt.samplepackets
 
 import mqtt.model.Packet.{ApplicationMessage, Connect, Credential, Protocol}
-import mqtt.model.QoS
+import mqtt.model.{Packet, QoS}
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
 
 import scala.concurrent.duration._
 
-
-class ConnectBuilderTest extends PacketBuilderTester {
-  
-  assertBuild(Map[Connect, Seq[Bit]](
+object ConnectTestPackets {
+  val samples: Map[Packet, Seq[Bit]] = Map(
     Connect(Protocol("MQTT", 4), cleanSession = false, 10 seconds, "a", Option.empty, Option.empty) ->
       Seq(
         0, 0, 0, 1, 0, 0, 0, 0, //id and reserved
@@ -90,5 +88,5 @@ class ConnectBuilderTest extends PacketBuilderTester {
         0, 0, 0, 0, 0, 0, 0, 1, //length LSB password
         0, 0, 0, 0, 1, 1, 0, 0, //12
       )
-  ))
+  )
 }

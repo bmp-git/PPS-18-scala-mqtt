@@ -1,4 +1,4 @@
-package mqtt.parser
+package mqtt.parser.datastructure
 
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._

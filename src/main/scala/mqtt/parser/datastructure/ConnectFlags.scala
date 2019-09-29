@@ -1,4 +1,4 @@
-package mqtt.parser
+package mqtt.parser.datastructure
 
 import mqtt.model.QoS
 

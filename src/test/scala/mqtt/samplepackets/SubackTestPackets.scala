@@ -1,13 +1,12 @@
-package mqtt.builder.packets
+package mqtt.samplepackets
 
+import mqtt.model.{Packet, QoS}
 import mqtt.model.Packet.Suback
-import mqtt.model.QoS
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
 
-
-class SubackBuilderTest extends PacketBuilderTester {
-  assertBuild(Map[Suback, Seq[Bit]](
+object SubackTestPackets {
+  val samples: Map[Packet, Seq[Bit]] = Map(
     Suback(1234, Seq(Option(QoS(0)), Option(QoS(1)), Option(QoS(2)), Option.empty)) ->
       Seq(
         1, 0, 0, 1, 0, 0, 0, 0,
@@ -18,5 +17,5 @@ class SubackBuilderTest extends PacketBuilderTester {
         0, 0, 0, 0, 0, 0, 0, 1, //QoS1
         0, 0, 0, 0, 0, 0, 1, 0, //QoS2
         1, 0, 0, 0, 0, 0, 0, 0, //None
-      )))
+      ))
 }
