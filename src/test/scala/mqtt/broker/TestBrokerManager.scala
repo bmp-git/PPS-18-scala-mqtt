@@ -12,7 +12,7 @@ import org.scalatest.FunSuite
 import scala.concurrent.duration._
 
 
-class TestBrokerManager extends FunSuite with TestConnect with TestDisconnect with TestSubscribe with TestPublish {
+class TestBrokerManager extends FunSuite with TestConnect with TestDisconnect with TestSubscribe with TestPublish with TestUnsubscribe {
   override def ConnectHandler: (State, Packet.Connect, Channel) => State = BrokerManager.handle
   
   override def DisconnectHandler: (State, Packet.Disconnect, Channel) => State = BrokerManager.handle
@@ -20,6 +20,8 @@ class TestBrokerManager extends FunSuite with TestConnect with TestDisconnect wi
   override def SubscribeHandler: (State, Packet.Subscribe, Channel) => State = BrokerManager.handle
   
   override def PublishHandler: (State, Packet.Publish, Channel) => State = BrokerManager.handle
+  
+  override def UnsubscribeHandler: (State, Packet.Unsubscribe, Channel) => State = BrokerManager.handle
   
   test("Receiving a malformed packet should disconnect the client") {
     val bs1 = bs0.setSession(sample_id_0, sample_session_0.copy(channel = Option(sample_channel_0)))

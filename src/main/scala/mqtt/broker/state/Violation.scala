@@ -65,5 +65,7 @@ object Violation {
   
   case class SubscriptionTopicListEmpty() extends GenericViolation("SubscriptionTopicListEmpty")
   
+  case class UnsubscriptionTopicListEmpty() extends GenericViolation("UnsubscriptionTopicListEmpty")
+  
   case class InvalidWillTopic() extends GenericViolation("InvalidWillTopic")
 }

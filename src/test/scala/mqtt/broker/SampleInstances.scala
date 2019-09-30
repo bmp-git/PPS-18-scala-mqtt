@@ -58,6 +58,10 @@ object SampleInstances {
   
   val sample_subscribe_packet_0 = Subscribe(sample_packet_id_0, Seq((sample_topic_0, QoS(0))))
   
+  val sample_unsubscribe_packet_0 = Unsubscribe(sample_packet_id_0, Seq(sample_topic_0))
+  val sample_unsubscribe_packet_1 = Unsubscribe(sample_packet_id_0, Seq(sample_topic_1))
+  
+  
   val sample_disconnect_packet_0 = Disconnect()
   
   val sample_connack_packet_0 = Connack(sessionPresent = false, ConnectionAccepted)

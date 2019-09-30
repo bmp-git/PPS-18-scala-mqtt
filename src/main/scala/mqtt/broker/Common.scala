@@ -3,7 +3,7 @@ package mqtt.broker
 import java.util.Calendar
 
 import mqtt.broker.handlers.PublishPacketHandler
-import mqtt.broker.state.{Channel, State}
+import mqtt.broker.state.{Channel, Session, State}
 import mqtt.model.Types.ClientID
 import mqtt.model.{Packet, QoS, Topic}
 
@@ -86,17 +86,36 @@ object Common {
   }
   
   /**
+   * Sends a packet in a specified session.
+   *
+   * @param packet the packet to send.
+   * @return a function that maps the old session in the new one.
+   */
+  def sendPacket(packet: Packet): Session => Session = session => {
+    val newPending = session.pendingTransmission ++ Seq(packet)
+    session.copy(pendingTransmission = newPending)
+  }
+  
+  /**
    * Sends a packet to a specified clientID.
    *
    * @param clientID the recipient of the message.
    * @param packet   the packet to send.
    * @return a function that maps the old server state in the new one.
    */
-  def sendPacket(clientID: ClientID, packet: Packet): State => State = state => {
-    state.updateSessionFromClientID(clientID, s => {
-      val newPending = s.pendingTransmission ++ Seq(packet)
-      s.copy(pendingTransmission = newPending)
-    })
+  def sendPacketToClient(clientID: ClientID, packet: Packet): State => State = state => {
+    state.updateSessionFromClientID(clientID, sendPacket(packet))
+  }
+  
+  /**
+   * Sends a packet to a specified client, given his channel.
+   *
+   * @param channel the channel associated with the client.
+   * @param packet  the packet to send.
+   * @return a function that maps the old server state in the new one.
+   */
+  def sendPacketOnChannel(channel: Channel, packet: Packet): State => State = state => {
+    state.updateSessionFromChannel(channel, sendPacket(packet))
   }
   
   /**
