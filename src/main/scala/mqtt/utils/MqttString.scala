@@ -5,8 +5,8 @@ import java.nio.charset.StandardCharsets
 import mqtt.utils.BitImplicits._
 
 /**
- * An MQTT strings encoder/decoder
- * In MQTT 3.1.1 strings are encoded in UT8 prefixed by two bytes indicating the length in bytes of the string
+ * An MQTT strings encoder/decoder.
+ * In MQTT 3.1.1 strings are encoded in UT8 prefixed by two bytes indicating the length in bytes of the string.
  */
 object MqttString {
   /**
@@ -20,7 +20,7 @@ object MqttString {
   }
   
   /**
-   * Get the size of a string
+   * Get the size of a string.
    *
    * @param bytes the buffer with the size in the first two bytes
    * @return the length of the following UTF8 string

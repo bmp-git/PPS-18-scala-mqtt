@@ -4,12 +4,14 @@ import mqtt.parser.Monad._
 import mqtt.utils.Bit
 
 /**
- * A container of generic parsers.
+ * Contains generic parsers.
  */
 object Parsers {
   
   /**
-   * A deterministic parser of bits that optionally return a result.
+   * Represents a deterministic parser.
+   * A deterministic parser of bits that optionally produce a result.
+   * A deterministic parser has a function run that produce a result and (may) consume the input string or produce nothing.
    *
    * @param run the parsing function
    * @tparam A the type of the object return by parsing
@@ -17,18 +19,47 @@ object Parsers {
   case class Parser[+A](run: Seq[Bit] => Option[(A, Seq[Bit])])
   
   /**
-   * Making Parser a monad.
+   * Implicitly making Parser a monad.
    */
   implicit object parserMonad extends Monad[Parser] {
     
+    /**
+     * The unit parser is simply a parser that produce `a` and do not consume the input.
+     *
+     * @param a the parser result
+     * @tparam A the parser result type
+     * @return the unit parser
+     */
     override def unit[A](a: => A): Parser[A] = Parser(s => Option((a, s)))
     
+    /**
+     * The parser representing the link between the result obtained running the first parser and the execution of the next parser.
+     *
+     * @param ma the current parser
+     * @param f  the function from the result of the current parser and the next parser
+     * @tparam A the current parser result type
+     * @tparam B the next parser result type
+     * @return the next parser
+     */
     override def flatMap[A, B](ma: Parser[A])(f: A => Parser[B]): Parser[B] =
       Parser(s => ma.run(s) flatMap { case (a, rest) => f(a).run(rest) })
   }
   
+  /**
+   * A success parser.
+   *
+   * @param a the result the parser will produce
+   * @tparam A the parser result type
+   * @return the parser
+   */
   def success[A](a: A): Parser[A] = parserMonad.unit(a)
   
+  /**
+   * A failure parser.
+   *
+   * @tparam A the parser result type
+   * @return the parser
+   */
   def failure[A]: Parser[A] = Parser(_ => Option.empty)
   
   /**
@@ -46,9 +77,9 @@ object Parsers {
    * A parser that skip the parser and return a default value without tampering the input bits if the condition is true,
    * executing the parser p otherwise
    *
-   * @param p the parser
+   * @param p         the parser
    * @param condition the condition to evaluate
-   * @param default the default value
+   * @param default   the default value
    * @tparam A the parser result type
    * @return the new parser
    */
@@ -57,6 +88,7 @@ object Parsers {
   
   /**
    * A parser that assure if a condition hold.
+   *
    * @param condition the condition that must be evaluated
    * @return the new parser that fails and breaks the parsing chain if the condition is false
    */
@@ -64,6 +96,7 @@ object Parsers {
   
   /**
    * A parser that fails if a condition hold.
+   *
    * @param condition the condition that must be evaluated
    * @return the new parser that fails and breaks the parsing chain if the condition is true
    */
@@ -97,45 +130,50 @@ object Parsers {
   
   /**
    * A parser that represent the sequential execution of a list of parsers.
+   *
    * @param ps the parsers
    * @tparam A the parsers result type
    * @return the new parser
    */
-  def seqN[A](ps : Parser[A]*): Parser[List[A]] = sequence(ps.toList)
+  def seqN[A](ps: Parser[A]*): Parser[List[A]] = sequence(ps.toList)
   
   /**
    * A parser that represent the sequential execution of a parser n times.
+   *
    * @param p the parser
    * @param n the number of execution
    * @tparam A the parser result type
    * @return the new parser
    */
-  def timesN[A](p : Parser[A])(n: Int): Parser[List[A]] = sequence(List.fill(n)(p))
+  def timesN[A](p: Parser[A])(n: Int): Parser[List[A]] = sequence(List.fill(n)(p))
   
   /**
    * An optional parser that parse like p or like a parser that return a default value without consuming input.
+   *
    * @param default the default value
-   * @param p the parser
+   * @param p       the parser
    * @tparam A the parser result and default type
    * @return the new parser
    */
-  def optional[A](default: A , p: Parser[A]): Parser[A] = first(p, success[A](default))
+  def optional[A](default: A, p: Parser[A]): Parser[A] = first(p, success[A](default))
   
   /**
    * A parser that represent the sequential execution of a parser 0, 1 or many times.
+   *
    * @param p the parser
    * @tparam A the parser result type
    * @return the new parser
    */
-  def many[A](p : Parser[A]): Parser[List[A]] = optional(List[A](), many1(p))
+  def many[A](p: Parser[A]): Parser[List[A]] = optional(List[A](), many1(p))
   
   /**
    * A parser that represent the sequential execution of a parser 1 or many times.
+   *
    * @param p the parser
    * @tparam A the result type
    * @return the new parser
    */
-  def many1[A](p: Parser[A]): Parser[List[A]] = map2(p)(many(p))(_::_)
+  def many1[A](p: Parser[A]): Parser[List[A]] = map2(p)(many(p))(_ :: _)
   
   /**
    * A parse method that parse to completion a sequence of bits using a parser and return the result.
