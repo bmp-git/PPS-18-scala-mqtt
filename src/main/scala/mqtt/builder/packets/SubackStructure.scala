@@ -1,17 +1,16 @@
 package mqtt.builder.packets
 
-import mqtt.builder.Builder
 import mqtt.builder.BuilderImplicits._
 import mqtt.builder.CommonBuilders._
 import mqtt.builder.RichBuilder._
+import mqtt.builder.{Builder, IdentityBuilder}
 import mqtt.model.Packet.Suback
 import mqtt.model.QoS
 
 /**
  * Provide the structure of Suback packet as referred in chapter 3.9.
  */
-case object SubackStructure extends PacketStructure[Suback] {
-  
+case object SubackStructure extends IdentityBuilder[Suback] {
   //3.9.3
   private val failure = (p: Option[QoS]) => p.isEmpty
   private val qos = (p: Option[QoS]) => p.fold(zero :: zero)(qosBuilder of _)

@@ -99,4 +99,21 @@ class CommonBuildersTest extends FunSuite {
     assert((remainingLength :: (rawBytes of (0 until 128).map(_.toByte))).build().take(16) ==
       Seq[Bit](1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1))
   }
+  
+  test("OrBuilder should give Option.empty if none of the sub-builders matches") {
+    val builder1: Builder[String] = new Builder[String] {
+      override def build[R <: String](value: R)(implicit context: Context[R]): Seq[Bit] = value.length.bits
+    }
+    val builder2: Builder[Int] = new Builder[Int] {
+      override def build[R <: Int](value: R)(implicit context: Context[R]): Seq[Bit] = value.bits
+    }
+    val builder3: Builder[Int] = new Builder[Int] {
+      override def build[R <: Int](value: R)(implicit context: Context[R]): Seq[Bit] = value.bits
+    }
+    
+    assert(((builder1 || builder2) build 23) == 23.bits)
+    assert(((builder1 || builder2) build "abc") == 3.bits)
+    assert(((builder1 || builder2) buildOption 3.4).isEmpty)
+    assert(((builder2 || builder3) build 23) == (23.bits ++ 23.bits))
+  }
 }

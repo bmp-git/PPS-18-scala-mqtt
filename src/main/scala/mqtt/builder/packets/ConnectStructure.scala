@@ -1,17 +1,16 @@
 package mqtt.builder.packets
 
-import mqtt.builder.Builder
 import mqtt.builder.BuilderImplicits._
 import mqtt.builder.CommonBuilders._
 import mqtt.builder.RichBuilder._
+import mqtt.builder.{Builder, IdentityBuilder}
 import mqtt.model.Packet.Connect
 import mqtt.utils.BitImplicits._
 
 /**
  * Provide the structure of Connect packet as referred in chapter 3.1.
  */
-case object ConnectStructure extends PacketStructure[Connect] {
-  
+case object ConnectStructure extends IdentityBuilder[Connect] {
   //3.1.2
   private val protocolName = (p: Connect) => p.protocol.name //3.1.2.1
   private val protocolLevel = (p: Connect) => p.protocol.level.bits.drop(24) //3.1.2.2

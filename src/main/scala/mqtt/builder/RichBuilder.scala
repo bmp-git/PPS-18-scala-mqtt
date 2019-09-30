@@ -3,6 +3,8 @@ package mqtt.builder
 import mqtt.builder.BuildContext.Context
 import mqtt.utils.Bit
 
+import scala.reflect.ClassTag
+
 /**
  * Include an explicit extension for builder.
  * Enables a simple dsl for builder composition.
@@ -15,7 +17,7 @@ object RichBuilder {
    * @param builder the instance to extend
    * @tparam T the type of the object needed to build
    */
-  implicit class RichBuilderExtension[T](builder: Builder[T]) {
+  implicit class RichBuilderExtension[T: ClassTag](builder: Builder[T]) {
     /**
      * Transforms this builder from type T to P.
      * In the building process this new builder will require a P value.
@@ -53,6 +55,68 @@ object RichBuilder {
      * @return a new StaticBuilder representing the result of the build
      */
     def of[P <: T](data: P): StaticBuilder = () => builder.build(data)
+  
+    /**
+     * Or operator between builders. This operation returns a new builder typed with
+     * the common ancestor of the two builders. The new builder will try to match
+     * the build input with all the internal builder, the output is the result of all
+     * matching builders concatenated.
+     *
+     * @param builder the other builder
+     * @tparam C the common ancestor
+     * @tparam B the other builder's build input type
+     * @return A new builder representing the or of the twos
+     */
+    def ||[C >: T, B <: C : ClassTag](builder: Builder[B]): OrBuilder[C, T, B] = OrBuilder(this.builder, builder)
   }
   
+  /**
+   * Class that represent or operator between builders. This builder will
+   * try to match the build input with all the internal builder, the output is the result
+   * of all matching builders concatenated.
+   *
+   * @param builderA the first builder
+   * @param builderB the second builder
+   * @tparam C the common ancestor
+   * @tparam A the first builder type
+   * @tparam B the second builder type
+   */
+  case class OrBuilder[C, A <: C : ClassTag, B <: C : ClassTag](builderA: Builder[A], builderB: Builder[B]) extends Builder[C] {
+    override def build[R <: C](value: R)(implicit context: Context[R]): Seq[Bit] =
+      buildOption(value) match {
+        case Some(seq) => seq
+      }
+    
+    /**
+     * Try to build with the given input, if none of the sub-builders matches then Option.empty is returned
+     *
+     * @param value the input value
+     * @tparam R the input value's type
+     * @return the build result, or empty if none of the sub.builders matches
+     */
+    def buildOption[R <: C](value: R): Option[Seq[Bit]] = {
+      (buildA(value), buildB(value)) match {
+        case (Some(a), Some(b)) => Option(a ++ b)
+        case (Some(a), None) => Option(a)
+        case (None, Some(b)) => Option(b)
+        case (None, None) => None
+      }
+    }
+    
+    private def buildA[R <: C](value: R): Option[Seq[Bit]] = builderA match {
+      case a: OrBuilder[C, _, _] => a.buildOption(value)
+      case _ => value match {
+        case a: A => Option(builderA.build(a))
+        case _ => Option.empty
+      }
+    }
+    
+    private def buildB[R <: C](value: R): Option[Seq[Bit]] = builderB match {
+      case b: OrBuilder[C, _, _] => b.buildOption(value)
+      case _ => value match {
+        case b: B => Option(builderB.build(b))
+        case _ => Option.empty
+      }
+    }
+  }
 }

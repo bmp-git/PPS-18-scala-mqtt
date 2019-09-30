@@ -1,7 +1,6 @@
 package mqtt.builder.packets
 
 import mqtt.builder.Builder
-import mqtt.builder.CommonBuilders.empty
 import mqtt.model.Packet
 import mqtt.utils.Bit
 
