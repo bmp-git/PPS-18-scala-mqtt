@@ -36,6 +36,9 @@ class MqttPacketParserTest extends FunSuite with Matchers {
   assertParse(UnsubscribeTestPackets samples)
   assertParse(UnsubackTestPackets samples)
   
+  assertParse(PingreqTestPackets samples)
+  assertParse(PingrespTestPackets samples)
+  
   assertParse(MalformedTestPackets samples)
   
 }

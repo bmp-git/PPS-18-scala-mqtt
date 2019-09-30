@@ -10,6 +10,6 @@ object PingrespTestPackets {
     Pingresp() ->
       Seq(
         1, 1, 0, 1, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, //Remaining length
       ))
 }
