@@ -8,7 +8,7 @@ import scala.util.Try
 /**
  * Test of MQTT functionality using Paho MQTT client library.
  */
-class MqttFunctionalityTest extends MqttClientServerTest("localhost", 1000) {
+class MqttFunctionalityTest extends MqttClientServerTest("localhost", 10000) {
   val defaultTopic = "a/b"
   val defaultFilter = "a/#"
   
