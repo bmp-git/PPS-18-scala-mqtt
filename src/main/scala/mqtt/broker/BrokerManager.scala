@@ -20,6 +20,7 @@ object BrokerManager extends ProtocolManager {
         case p: Publish => PublishPacketHandler(p, channel).handle
         case p: Subscribe => SubscribePacketHandler(p, channel).handle
         case p: Unsubscribe => UnsubscribePacketHandler(p, channel).handle
+        case p: Pingreq => PingReqPacketHandler(p, channel).handle
         case _: MalformedPacket => println("Received malformed packet from ".concat(channel.toString)); closeChannel(channel)
         case _: ChannelClosed => closeChannel(channel)
         case _ => println("Packet not supported"); identity[State]

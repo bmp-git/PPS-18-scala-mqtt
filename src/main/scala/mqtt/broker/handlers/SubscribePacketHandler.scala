@@ -11,7 +11,7 @@ import mqtt.model.Types.ClientID
 import mqtt.model.{QoS, TopicFilter}
 
 /**
- * Represents and handler for subscribe packets.
+ * Represents an handler for subscribe packets.
  *
  * @param packet  the subscribe packet to handle.
  * @param channel the channel on which the packet has been received.

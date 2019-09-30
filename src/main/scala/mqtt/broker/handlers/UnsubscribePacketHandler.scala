@@ -9,7 +9,7 @@ import mqtt.model.Packet.{Unsuback, Unsubscribe}
 import mqtt.model.TopicFilter
 
 /**
- * Represents and handler for unsubscribe packets.
+ * Represents an handler for unsubscribe packets.
  *
  * @param packet  the unsubscribe packet to handle.
  * @param channel the channel on which the packet has been received.

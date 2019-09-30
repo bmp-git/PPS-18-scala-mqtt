@@ -12,7 +12,7 @@ import mqtt.model.{QoS, Topic}
 
 
 /**
- * Represents and handler for publish packets.
+ * Represents an handler for publish packets.
  *
  * @param packet  the publish packet to handle.
  * @param channel the channel on which the packet has been received.

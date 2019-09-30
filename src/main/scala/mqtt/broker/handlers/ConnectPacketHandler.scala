@@ -9,7 +9,7 @@ import mqtt.model.Packet.{Connack, Connect}
 import mqtt.model.Topic
 
 /**
- * Represents and handler for connect packets.
+ * Represents an handler for connect packets.
  *
  * @param packet  the connect packet to handle.
  * @param channel the channel on which the packet has been received.
