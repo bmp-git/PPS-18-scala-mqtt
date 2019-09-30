@@ -58,13 +58,11 @@ object Receiver {
   def apply(idSocket: IdSocket): Observable[(IdSocket, Packet)] = Observable[(IdSocket, Packet)](observer => {
     val inputStream = idSocket.socket.getInputStream.toIterator
   
-    def close(): Unit = if (!idSocket.socket.isClosed) {
-      idSocket.socket.close()
-    }
+    def close(): Unit = idSocket.socket.close()
   
     def complete(): Unit = observer.onCompleted()
   
-    def emitAlert(): Unit = if (!idSocket.socket.isClosed) {
+    def emitAlert(): Unit = if (!idSocket.socket.isClosed) { //TODO can be false if the socket is closed, can cause problems
       println(Thread.currentThread() + "    Error on socket " + idSocket.id)
       observer.onNext((idSocket, ChannelClosed())) //emit
     }
@@ -104,6 +102,7 @@ object Receiver {
         case AlertCloseAndComplete => emitAlert(); close(); complete()
       }
     }
+    
     receive()
   })
 }

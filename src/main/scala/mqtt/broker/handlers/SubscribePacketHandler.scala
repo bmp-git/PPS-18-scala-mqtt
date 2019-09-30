@@ -11,7 +11,7 @@ import mqtt.model.Types.ClientID
 import mqtt.model.{QoS, TopicFilter}
 
 /**
- * Represents and handler for subscribe packets.
+ * Represents an handler for subscribe packets.
  *
  * @param packet  the subscribe packet to handle.
  * @param channel the channel on which the packet has been received.
@@ -28,7 +28,7 @@ case class SubscribePacketHandler(override val packet: Subscribe, override val c
       _ <- checkAtLeastOneSubscription
       filterOptions <- validateFilters
       _ <- storeSubscriptions(filterOptions)
-      _ <- sendSUBACK(clientID, filterOptions)
+      _ <- sendSUBACK(filterOptions)
       _ <- publishRetains(clientID, filterOptions)
       _ <- updateLastContact(channel)
     } yield ()
@@ -136,16 +136,16 @@ case class SubscribePacketHandler(override val packet: Subscribe, override val c
   }
   
   /**
-   * Sends a SUBACK to a specified client. The return codes are derived from the filterOptions specified.
+   * Sends an SUBACK to the client that requested the subscription.
+   * The return codes are derived from the filterOptions specified.
    *
-   * @param clientID      the recipient of the publish messages.
    * @param filterOptions the list of filters with the QoS granted by the server.
    * @return a function that maps the old server state in the new one.
    */
-  def sendSUBACK(clientID: ClientID, filterOptions: FilterOptions): State => State = state => {
+  def sendSUBACK(filterOptions: FilterOptions): State => State = state => {
     val qosses = filterOptions.map(opt => opt.map { case (_, qos) => qos })
     val ack = Suback(packet.packetId, qosses)
-    Common.sendPacket(clientID, ack)(state)
+    Common.sendPacketOnChannel(channel, ack)(state)
   }
 }
 
