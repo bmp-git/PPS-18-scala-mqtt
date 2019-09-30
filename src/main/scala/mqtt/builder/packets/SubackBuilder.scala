@@ -10,7 +10,7 @@ import mqtt.model.QoS
 /**
  * Provide the structure of Suback packet as referred in chapter 3.9.
  */
-case object SubackStructure extends IdentityBuilder[Suback] {
+case object SubackBuilder extends IdentityBuilder[Suback] {
   //3.9.3
   private val failure = (p: Option[QoS]) => p.isEmpty
   private val qos = (p: Option[QoS]) => p.fold(zero :: zero)(qosBuilder of _)

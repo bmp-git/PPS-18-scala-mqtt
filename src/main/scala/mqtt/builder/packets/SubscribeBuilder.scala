@@ -9,7 +9,7 @@ import mqtt.model.QoS
 /**
   * Provide the structure of Subscribe packet as referred in chapter 3.8.
   */
-case object SubscribeStructure extends IdentityBuilder[Subscribe] {
+case object SubscribeBuilder extends IdentityBuilder[Subscribe] {
   //3.8.3
   private val topicQoS: Builder[(String, QoS)] = qosBuilder from {
     case (_, qos) => qos

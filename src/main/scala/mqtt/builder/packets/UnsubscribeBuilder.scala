@@ -8,7 +8,7 @@ import mqtt.model.Packet.Unsubscribe
 /**
  * Provide the structure of Unsubscribe packet as referred in chapter 3.10.
  */
-case object UnsubscribeStructure extends IdentityBuilder[Unsubscribe] {
+case object UnsubscribeBuilder extends IdentityBuilder[Unsubscribe] {
   override val builder: Builder[Unsubscribe] =
     controlPacketType(10) :: zero :: zero :: one :: zero :: remainingLength :: //3.10.1
       packetIdentifier :: //3.10.2

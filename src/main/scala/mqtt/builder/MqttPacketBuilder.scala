@@ -8,8 +8,8 @@ import mqtt.model.Packet
  */
 object MqttPacketBuilder extends IdentityBuilder[Packet] {
   val builder: Builder[Packet] =
-    ConnectStructure || ConnackStructure || DisconnectStructure ||
-      PublishStructure || SubackStructure || SubscribeStructure ||
-      PingreqStructure || PingrespStructure || UnsubscribeStructure ||
-      UnsubackStructure
+    ConnectBuilder || ConnackBuilder || DisconnectBuilder ||
+      PublishBuilder || SubackBuilder || SubscribeBuilder ||
+      PingreqBuilder || PingrespBuilder || UnsubscribeBuilder ||
+      UnsubackBuilder
 }

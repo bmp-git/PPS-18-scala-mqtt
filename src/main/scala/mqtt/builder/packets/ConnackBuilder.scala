@@ -9,7 +9,7 @@ import mqtt.utils.BitImplicits._
 /**
  * Provide the structure of Connack packet as referred in chapter 3.2.
  */
-case object ConnackStructure extends IdentityBuilder[Connack] {
+case object ConnackBuilder extends IdentityBuilder[Connack] {
   private val returnCode = (p: Connack) => p.returnCode.value.toByte.bits //Reference table 3.1
   private val sessionPresent = (7 zeros) :: ((p: Connack) => p.sessionPresent) //3.2.2.2
   
