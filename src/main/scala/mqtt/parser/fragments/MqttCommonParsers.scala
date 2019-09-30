@@ -18,15 +18,15 @@ object MqttCommonParsers {
   } yield QoS(BigInt(Seq(most, least).toBytes toArray) intValue)
   
   
-  def utf8(): Parser[String] = Parser(s =>
+  def mqttString(): Parser[String] = Parser(s =>
     on(s.size > 2) {
       (MqttString.decode(s.toBytes), s.toBytes.drop(MqttString.size(s.toBytes) + 2).toBitsSeq)
     })
   
   def binaryData(): Parser[Seq[Byte]] = for {
-    length <- twoBytesInt()
+    length <- mqttInt()
     payload <- skip(bytes(length))(length == 0, Seq())
   } yield payload
   
-  def twoBytesInt(): Parser[Int] = for {bytes <- bytes(2)} yield BigInt(bytes toArray) intValue
+  def mqttInt(): Parser[Int] = for {bytes <- bytes(2)} yield BigInt(bytes toArray) intValue
 }

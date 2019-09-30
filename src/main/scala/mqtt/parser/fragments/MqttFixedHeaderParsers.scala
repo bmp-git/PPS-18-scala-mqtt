@@ -1,9 +1,11 @@
 package mqtt.parser.fragments
 
+import mqtt.model.QoS
 import mqtt.parser.Monad._
-import mqtt.parser.Parsers.{Parser, seqN, timesN}
-import mqtt.parser.datastructure.PacketMask
+import mqtt.parser.Parsers.{Parser, fail, seqN, timesN}
+import mqtt.parser.datastructure.{PacketMask, PublishFlags}
 import mqtt.parser.fragments.BitParsers._
+import mqtt.parser.fragments.MqttCommonParsers.qos
 import mqtt.utils.BitImplicits._
 import mqtt.utils.RichOption._
 import mqtt.utils.{Bit, VariableLengthInteger}
@@ -31,4 +33,11 @@ object MqttFixedHeaderParsers {
         })
     }
   })
+  
+  def publishFlags(): Parser[PublishFlags] = for {
+    dup <- bit()
+    qos <- qos(); _ <- fail(!dup && qos != QoS(0))
+    retain <- bit()
+  } yield PublishFlags(dup, qos, retain)
+  
 }

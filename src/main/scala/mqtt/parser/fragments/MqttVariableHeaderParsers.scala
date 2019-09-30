@@ -16,7 +16,7 @@ import mqtt.utils.RichOption._
  * A container of MQTT 3.1.1 variable header elements.
  */
 object MqttVariableHeaderParsers {
-  def protocolName(): Parser[String] = conditional(utf8())(_ == "MQTT")
+  def protocolName(): Parser[String] = conditional(mqttString())(_ == "MQTT")
   
   def protocolLevel(): Parser[Int] = for {byte <- byte()} yield byte toInt
   
@@ -36,7 +36,7 @@ object MqttVariableHeaderParsers {
     WillFlags(willRetain, willQos)
   }
   
-  def keepAlive(): Parser[Int] = twoBytesInt()
+  def keepAlive(): Parser[Int] = mqttInt()
   
   def sessionPresent(): Parser[Boolean] = for {
     _ <- timesN(zero())(7)
@@ -47,5 +47,5 @@ object MqttVariableHeaderParsers {
     code <- first(byte(0), byte(1), byte(2), byte(3), byte(4), byte(5))
   } yield ConnectReturnCode(code)
   
-  def packetIdentifier(): Parser[PackedID] = conditional(twoBytesInt())(_ != 0)
+  def packetIdentifier(): Parser[PackedID] = conditional(mqttInt())(_ != 0)
 }

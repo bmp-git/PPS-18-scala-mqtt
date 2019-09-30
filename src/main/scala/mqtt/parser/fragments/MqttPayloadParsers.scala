@@ -14,12 +14,12 @@ import mqtt.utils.RichOption._
  */
 object MqttPayloadParsers {
   def willPayload(willFlags: Option[WillFlags]): Parser[Option[ApplicationMessage]] = for {
-    willTopic <- skip(utf8())(willFlags isEmpty, default = "")
+    willTopic <- skip(mqttString())(willFlags isEmpty, default = "")
     willMessage <- skip(binaryData())(willFlags isEmpty, Seq())
   } yield willFlags.map(f => ApplicationMessage(f.retain, f.qos, willTopic, willMessage))
   
   def credentials(flags: CredentialFlags): Parser[Option[Credential]] = for {
-    username <- skip(utf8())(!flags.username, default = "")
+    username <- skip(mqttString())(!flags.username, default = "")
     password <- skip(binaryData())(!flags.password, Seq())
   } yield on(flags.username) {
     Credential(username, on(flags.password)(password))
@@ -32,10 +32,10 @@ object MqttPayloadParsers {
   }
   
   def subscription(): Parser[(String, QoS)] = for {
-    topic <- utf8()
+    topic <- mqttString()
     _ <- timesN(zero())(6)
     qos <- qos()
   } yield (topic, qos)
   
-  def unsubscription(): Parser[String] = utf8()
+  def unsubscription(): Parser[String] = mqttString()
 }

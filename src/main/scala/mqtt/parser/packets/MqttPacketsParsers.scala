@@ -3,14 +3,13 @@ package mqtt.parser.packets
 import mqtt.model.Packet._
 import mqtt.model.{Packet, QoS}
 import mqtt.parser.Monad._
-import mqtt.parser.Parsers.{Parser, fail, first, many, many1, skip}
+import mqtt.parser.Parsers.{Parser, first, many, many1, skip}
 import mqtt.parser.datastructure._
-import mqtt.parser.fragments.BitParsers.{bit, byte}
+import mqtt.parser.fragments.BitParsers.byte
 import mqtt.parser.fragments.MqttCommonParsers._
 import mqtt.parser.fragments.MqttFixedHeaderParsers._
 import mqtt.parser.fragments.MqttPayloadParsers._
 import mqtt.parser.fragments.MqttVariableHeaderParsers._
-import mqtt.utils.BitImplicits._
 
 import scala.concurrent.duration._
 
@@ -28,7 +27,8 @@ object MqttPacketsParsers {
     connect(), connack(), disconnect(),
     publish(), puback(), pubrec(), pubrel(), pubcomp(),
     subscribe(), suback(),
-    unsubscribe(), unsuback()
+    unsubscribe(), unsuback(),
+    pingreq(), pingresp()
   )
   
   def connect(): Parser[Packet] = for {
@@ -39,9 +39,9 @@ object MqttPacketsParsers {
     version <- protocolLevel()
     flags <- connectFlags()
     keepAlive <- keepAlive()
-    clientId <- utf8()
-    willMessage <- willPayload(flags.willFlags)
-    credentials <- credentials(flags.credentials)
+    clientId <- mqttString()
+    willMessage <- willPayload(flags willFlags)
+    credentials <- credentials(flags credentials)
   } yield Connect(Protocol(name, version), flags cleanSession, keepAlive seconds, clientId, credentials, willMessage)
   
   def connack(): Parser[Packet] = for {
@@ -60,14 +60,12 @@ object MqttPacketsParsers {
   
   def publish(): Parser[Packet] = for {
     _ <- packetType(PublishMask)
-    dup <- bit()
-    qos <- qos(); _ <- fail(!dup && qos != QoS(0))
-    retain <- bit()
+    flags <- publishFlags()
     _ <- variableLength()
-    topic <- utf8()
-    id <- skip(packetIdentifier())(qos == QoS(0), default = 0)
+    topic <- mqttString()
+    id <- skip(packetIdentifier())(flags.qos == QoS(0), default = 0)
     payload <- many(byte())
-  } yield Publish(dup, id, ApplicationMessage(retain, qos, topic, payload))
+  } yield Publish(flags duplicate, id, ApplicationMessage(flags retain, flags qos, topic, payload))
   
   def puback(): Parser[Packet] = for {
     _ <- packetType(PubackMask)
@@ -127,4 +125,16 @@ object MqttPacketsParsers {
     _ <- variableLength()
     id <- packetIdentifier()
   } yield Unsuback(id)
+  
+  def pingreq(): Parser[Packet] = for {
+    _ <- packetType(PingreqMask)
+    _ <- reserved()
+    _ <- variableLength()
+  } yield Pingreq()
+  
+  def pingresp(): Parser[Packet] = for {
+    _ <- packetType(PingrespMask)
+    _ <- reserved()
+    _ <- variableLength()
+  } yield Pingresp()
 }
