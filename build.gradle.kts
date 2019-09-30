@@ -23,6 +23,7 @@ dependencies {
     compile("org.scala-lang:scala-library:2.12.2")
     compile("io.reactivex:rxscala_2.12:0.26.5")
     testImplementation("org.scalatest:scalatest_2.12:3.0.1")
+    testImplementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0")
     testRuntimeOnly("org.pegdown:pegdown:1.4.2")
     scoverage("org.scoverage:scalac-scoverage-plugin_2.12:1.3.1")
     scoverage("org.scoverage:scalac-scoverage-runtime_2.12:1.3.1")
