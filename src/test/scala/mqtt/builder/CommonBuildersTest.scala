@@ -1,6 +1,7 @@
 package mqtt.builder
 
 import mqtt.builder.BuildContext._
+import mqtt.builder.BuilderImplicits._
 import mqtt.builder.CommonBuilders._
 import mqtt.builder.RichBuilder._
 import mqtt.model.Types._
@@ -98,5 +99,15 @@ class CommonBuildersTest extends FunSuite {
     assert((remainingLength :: oneByte :: remainingLength).build().getValue(16, 8) == 0)
     assert((remainingLength :: (rawBytes of (0 until 128).map(_.toByte))).build().take(16) ==
       Seq[Bit](1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1))
+  }
+  
+  test("OrBuilder should give Option.empty if none of the sub-builders matches") {
+    val builder1: Builder[String] = (s: String) => s.length.bits
+    val builder2: Builder[Int] = (p: Int) => p.bits
+    val builder3: Builder[Int] = (p: Int) => p.bits
+    assert(((builder1 || builder2) build 23) == 23.bits)
+    assert(((builder1 || builder2) build "abc") == 3.bits)
+    assert(((builder1 || builder2) buildOption 3.4).isEmpty)
+    assert(((builder2 || builder3) build 23) == (23.bits ++ 23.bits))
   }
 }

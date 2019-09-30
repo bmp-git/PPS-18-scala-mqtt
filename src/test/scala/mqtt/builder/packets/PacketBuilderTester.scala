@@ -23,10 +23,15 @@ class PacketBuilderTester extends FunSuite {
   assertBuild(ConnectTestPackets samples)
   assertBuild(ConnackTestPackets samples)
   assertBuild(DisconnectTestPackets samples)
-  
   assertBuild(PublishTestPackets samples)
-  
+  assertBuild(PubackTestPackets samples)
+  assertBuild(PubrecTestPackets samples)
+  assertBuild(PubrelTestPackets samples)
+  assertBuild(PubcompTestPackets samples)
   assertBuild(SubscribeTestPackets samples)
   assertBuild(SubackTestPackets samples)
-  
+  assertBuild(UnsubscribeTestPackets samples)
+  assertBuild(UnsubackTestPackets samples)
+  assertBuild(PingreqTestPackets samples)
+  assertBuild(PingrespTestPackets samples)
 }
