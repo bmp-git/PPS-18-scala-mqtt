@@ -6,7 +6,7 @@ import mqtt.builder.{Builder, IdentityBuilder}
 import mqtt.model.Packet.Unsubscribe
 
 /**
- * Provide the structure of Unsubscribe packet as referred in chapter 3.10.
+ * The builder of Unsubscribe packet as referred in chapter 3.10.
  */
 case object UnsubscribeBuilder extends IdentityBuilder[Unsubscribe] {
   override val builder: Builder[Unsubscribe] =

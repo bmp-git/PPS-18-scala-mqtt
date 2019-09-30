@@ -5,7 +5,7 @@ import mqtt.builder.{Builder, IdentityBuilder}
 import mqtt.model.Packet.Unsuback
 
 /**
- * Provide the structure of Unsuback packet as referred in chapter 3.11.
+ * The builder of Unsuback packet as referred in chapter 3.11.
  */
 case object UnsubackBuilder extends IdentityBuilder[Unsuback] {
   override val builder: Builder[Unsuback] =

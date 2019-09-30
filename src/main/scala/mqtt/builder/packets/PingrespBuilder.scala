@@ -5,7 +5,7 @@ import mqtt.builder.{Builder, IdentityBuilder}
 import mqtt.model.Packet.Pingresp
 
 /**
- * Provide the structure of Pingresp packet as referred in chapter 3.13.
+ * The builder of Pingresp packet as referred in chapter 3.13.
  */
 case object PingrespBuilder extends IdentityBuilder[Pingresp] {
   override val builder: Builder[Pingresp] =

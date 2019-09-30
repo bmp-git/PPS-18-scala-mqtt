@@ -8,7 +8,7 @@ import mqtt.model.Packet.Publish
 import mqtt.model.QoS
 
 /**
- * Provide the structure of Publish packet as referred in chapter 3.3.
+ * The builder of Publish packet as referred in chapter 3.3.
  */
 case object PublishBuilder extends IdentityBuilder[Publish] {
   //3.3.1

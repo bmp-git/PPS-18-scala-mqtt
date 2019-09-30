@@ -11,5 +11,6 @@ object MqttPacketBuilder extends IdentityBuilder[Packet] {
     ConnectBuilder || ConnackBuilder || DisconnectBuilder ||
       PublishBuilder || SubackBuilder || SubscribeBuilder ||
       PingreqBuilder || PingrespBuilder || UnsubscribeBuilder ||
-      UnsubackBuilder
+      UnsubackBuilder || PubrecBuilder || PubcompBuilder ||
+      PubrelBuilder || PubackBuilder
 }

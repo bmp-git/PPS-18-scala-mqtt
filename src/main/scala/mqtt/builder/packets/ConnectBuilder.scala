@@ -8,7 +8,7 @@ import mqtt.model.Packet.Connect
 import mqtt.utils.BitImplicits._
 
 /**
- * Provide the structure of Connect packet as referred in chapter 3.1.
+ * The builder of Connect packet as referred in chapter 3.1.
  */
 case object ConnectBuilder extends IdentityBuilder[Connect] {
   //3.1.2

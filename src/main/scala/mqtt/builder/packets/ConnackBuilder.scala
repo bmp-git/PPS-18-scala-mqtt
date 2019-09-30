@@ -7,7 +7,7 @@ import mqtt.model.Packet.Connack
 import mqtt.utils.BitImplicits._
 
 /**
- * Provide the structure of Connack packet as referred in chapter 3.2.
+ * The builder of Connack packet as referred in chapter 3.2.
  */
 case object ConnackBuilder extends IdentityBuilder[Connack] {
   private val returnCode = (p: Connack) => p.returnCode.value.toByte.bits //Reference table 3.1

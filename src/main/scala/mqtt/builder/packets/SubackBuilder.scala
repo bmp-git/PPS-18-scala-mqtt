@@ -8,7 +8,7 @@ import mqtt.model.Packet.Suback
 import mqtt.model.QoS
 
 /**
- * Provide the structure of Suback packet as referred in chapter 3.9.
+ * The builder of Suback packet as referred in chapter 3.9.
  */
 case object SubackBuilder extends IdentityBuilder[Suback] {
   //3.9.3

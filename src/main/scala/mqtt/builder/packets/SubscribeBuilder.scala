@@ -7,7 +7,7 @@ import mqtt.model.Packet.Subscribe
 import mqtt.model.QoS
 
 /**
-  * Provide the structure of Subscribe packet as referred in chapter 3.8.
+  * The builder of Subscribe packet as referred in chapter 3.8.
   */
 case object SubscribeBuilder extends IdentityBuilder[Subscribe] {
   //3.8.3
