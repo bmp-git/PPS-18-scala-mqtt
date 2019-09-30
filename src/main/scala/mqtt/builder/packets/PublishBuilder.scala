@@ -1,17 +1,16 @@
 package mqtt.builder.packets
 
-import mqtt.builder.Builder
 import mqtt.builder.BuilderImplicits._
 import mqtt.builder.CommonBuilders._
 import mqtt.builder.RichBuilder._
+import mqtt.builder.{Builder, IdentityBuilder}
 import mqtt.model.Packet.Publish
 import mqtt.model.QoS
 
 /**
- * Provide the structure of Publish packet as referred in chapter 3.3.
+ * The builder of Publish packet as referred in chapter 3.3.
  */
-case object PublishStructure extends PacketStructure[Publish] {
-  
+case object PublishBuilder extends IdentityBuilder[Publish] {
   //3.3.1
   private val dup = (p: Publish) => p.duplicate //3.3.1.1
   private val qos = (p: Publish) => p.message.qos //3.3.1.2
