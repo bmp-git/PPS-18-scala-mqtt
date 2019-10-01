@@ -1,5 +1,6 @@
 package mqtt.integration
 
+import mqtt.model.BrokerConfig
 import mqtt.server.MqttBroker
 import org.eclipse.paho.client.mqttv3.{MqttClient, MqttConnectOptions}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FunSuite, Matchers}
@@ -17,7 +18,7 @@ class MqttConnectDisconnectTest extends FunSuite with BeforeAndAfterAll with Bef
   }
   
   test("As a client, I want to connect and disconnect from the MQTTbroker"){
-    val server = MqttBroker(serverPort).run()
+    val server = MqttBroker(BrokerConfig(port = serverPort), Map()).run()
     val client = new MqttClient(s"tcp://localhost:$serverPort", MqttClient.generateClientId())
     
     client.connect(opt(true))
@@ -31,7 +32,7 @@ class MqttConnectDisconnectTest extends FunSuite with BeforeAndAfterAll with Bef
   }
   
   test("As a client, I should want to keep my session when reconnecting"){
-    val server = MqttBroker(serverPort).run()
+    val server = MqttBroker(BrokerConfig(port = serverPort), Map()).run()
     val client = new MqttClient(s"tcp://localhost:$serverPort", MqttClient.generateClientId())
     
     val conn = client.connectWithResult(opt(false))
