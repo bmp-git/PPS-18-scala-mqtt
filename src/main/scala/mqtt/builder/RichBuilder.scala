@@ -59,8 +59,8 @@ object RichBuilder {
     /**
      * Or operator between builders. This operation returns a new builder typed with
      * the common ancestor of the two builders. The new builder will try to match
-     * the build input with all the internal builder, the output is the result of all
-     * matching builders concatenated.
+     * the build input with all the internal builder, the output is the result of the
+     * first matching builder or otherwise Option.empty.
      *
      * @param builder the other builder
      * @tparam C the common ancestor
@@ -71,9 +71,9 @@ object RichBuilder {
   }
   
   /**
-   * Class that represent or operator between builders. This builder will
+   * Class that represents 'or' operator between builders. This builder will
    * try to match the build input with all the internal builder, the output is the result
-   * of all matching builders concatenated.
+   * of the first matching builder or otherwise Option.empty.
    *
    * @param builderA the first builder
    * @param builderB the second builder
@@ -85,36 +85,23 @@ object RichBuilder {
     override def build[R <: C](value: R)(implicit context: Context[R]): Seq[Bit] =
       buildOption(value) match {
         case Some(seq) => seq
+        case None => Seq.empty
       }
     
     /**
      * Try to build with the given input, if none of the sub-builders matches then Option.empty is returned
+     * otherwise the first matching builder is used to build.
      *
      * @param value the input value
      * @tparam R the input value's type
      * @return the build result, or empty if none of the sub.builders matches
      */
-    def buildOption[R <: C](value: R): Option[Seq[Bit]] = {
-      (buildA(value), buildB(value)) match {
-        case (Some(a), Some(b)) => Option(a ++ b)
-        case (Some(a), None) => Option(a)
-        case (None, Some(b)) => Option(b)
-        case (None, None) => None
-      }
-    }
-    
-    private def buildA[R <: C](value: R): Option[Seq[Bit]] = builderA match {
-      case a: OrBuilder[C, _, _] => a.buildOption(value)
+    def buildOption[R <: C](value: R): Option[Seq[Bit]] = tryBuild(builderA)(value).fold(tryBuild(builderB)(value))(Option.apply)
+  
+    private def tryBuild[K: ClassTag, R <: C](builderK: Builder[K])(value: R): Option[Seq[Bit]] = builderK match {
+      case k: OrBuilder[C, _, _] => k.buildOption(value)
       case _ => value match {
-        case a: A => Option(builderA.build(a))
-        case _ => Option.empty
-      }
-    }
-    
-    private def buildB[R <: C](value: R): Option[Seq[Bit]] = builderB match {
-      case b: OrBuilder[C, _, _] => b.buildOption(value)
-      case _ => value match {
-        case b: B => Option(builderB.build(b))
+        case k: K => Option(builderK.build(k))
         case _ => Option.empty
       }
     }
