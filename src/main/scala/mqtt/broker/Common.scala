@@ -1,5 +1,7 @@
 package mqtt.broker
 
+import java.math.BigInteger
+import java.security.MessageDigest
 import java.util.Calendar
 
 import mqtt.broker.handlers.PublishPacketHandler
@@ -140,5 +142,16 @@ object Common {
    */
   def min(firstQoS: QoS, secondQoS: QoS): QoS = (firstQoS, secondQoS) match {
     case (QoS(first), QoS(second)) => if (first < second) firstQoS else secondQoS
+  }
+  
+  /**
+   * Generates the sha256 of a seq of bytes, returning the corresponding sha256 string.
+   *
+   * @param bytes the bytes sequence.
+   * @return the sha256 string.
+   */
+  def sha256(bytes: Seq[Byte]): String = {
+    val digest = MessageDigest.getInstance("SHA-256").digest(bytes.toArray)
+    String.format("%032x", new BigInteger(1, digest))
   }
 }

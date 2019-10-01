@@ -10,8 +10,9 @@ import scala.collection.concurrent.TrieMap
  * Encapsulates all side effect that need to be handled.
  * The state of the broker and the active socket.
  */
+
 case class ProgramState(brokerConfig: BrokerConfig, usersConfig: Map[String, Option[String]]) {
-  private var _brokerState: State = BrokerState(Map(), Map(), Map(), Map() /*brokerConfig, usersConfig*/)
+  private var _brokerState: State = BrokerState(Map(), Map(), Map(), Map(), usersConfig, brokerConfig)
   private val socketMap = TrieMap[Int, IdSocket]()
   
   /**

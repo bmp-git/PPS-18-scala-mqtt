@@ -11,7 +11,5 @@ import mqtt.model.Packet.Disconnect
  * @param channel the channel on which the packet has been received.
  */
 case class DisconnectPacketHandler(override val packet: Disconnect, override val channel: Channel) extends PacketHandler[Disconnect] {
-  override def handle: State => State = state => {
-    closeChannelNoWillPublish(channel, Seq())(state)
-  }
+  override def handle: State => State = closeChannelNoWillPublish(channel, Seq())
 }

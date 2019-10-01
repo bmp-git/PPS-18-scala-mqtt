@@ -1,12 +1,14 @@
 package mqtt.broker.handlers
 
+import mqtt.broker.Common
 import mqtt.broker.Common.{closeChannel, sendPacketToClient, updateLastContact}
 import mqtt.broker.state.StateImplicits._
 import mqtt.broker.state.Violation._
 import mqtt.broker.state.{Channel, Session, State, Violation}
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
-import mqtt.model.Packet.{Connack, Connect}
+import mqtt.model.Packet.{Connack, Connect, Credential}
 import mqtt.model.Topic
+import mqtt.model.Types.Password
 
 /**
  * Represents an handler for connect packets.
@@ -20,6 +22,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
     for {
       _ <- checkNotFirstPacketOfChannel
       _ <- checkProtocol
+      _ <- handleCredentials
       _ <- checkClientId
       _ <- checkWillMessageTopic
       _ <- disconnectOtherConnected
@@ -79,6 +82,62 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
    */
   def checkProtocolVersion(version: Int): State => Either[Violation, State] = state => {
     if (version != 4) Left(InvalidProtocolVersion()) else Right(state)
+  }
+  
+  
+  /**
+   * Handles the credentials of the packet. If the server allows anonymous access the credentials are not checked.
+   *
+   * @return a function that maps a state to a violation or to a new state.
+   */
+  def handleCredentials: State => Either[Violation, State] = state => {
+    if (state.config.allowAnonymous) Right(state) else checkCredentials(state)
+  }
+  
+  /**
+   * Gets the client credentials specified in the packet. Fails if the credentials are not specified.
+   *
+   * @return a violation or the client credentials.
+   */
+  def getClientCredentials: Either[Violation, Credential] = {
+    packet.credential.fold[Either[Violation, Credential]](Left(ClientNotAuthorized()))(pwOpt => Right(pwOpt))
+  }
+  
+  /**
+   * Gets the stored password relative to a username. Fails if the record relative to that username does not exist.
+   *
+   * @return a function that maps a state to a violation or to the stored password.
+   */
+  def getStoredPassword(username: String): State => Either[Violation, Option[String]] = state => {
+    state.credentials.get(username).fold[Either[Violation, Option[String]]](Left(ClientNotAuthorized()))(pwOpt => Right(pwOpt))
+  }
+  
+  /**
+   * Compares the specified client password with the stored password.
+   *
+   * @param clientPassword the client password.
+   * @param storedPassword the stores password.
+   * @return a Left[Violation] if the passwords do not match, a Right otherwise.
+   */
+  def comparePasswords(clientPassword: Option[Password], storedPassword: Option[String]): Either[Violation, Unit] = {
+    (clientPassword.map(Common.sha256), storedPassword) match {
+      case (None, None) => Right(())
+      case (Some(p1), Some(p2)) if p1 == p2 => Right(())
+      case _ => Left(ClientNotAuthorized())
+    }
+  }
+  
+  /**
+   * Checks if the credentials specified by the client are compatible with the credentials stored on the server.
+   *
+   * @return a function that maps a state to a violation or to a new state.
+   */
+  def checkCredentials: State => Either[Violation, State] = state => {
+    for {
+      credentials <- getClientCredentials
+      storedPass <- getStoredPassword(credentials.username)(state)
+      _ <- comparePasswords(credentials.password, storedPass)
+    } yield state
   }
   
   /**

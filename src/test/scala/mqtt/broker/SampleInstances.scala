@@ -5,12 +5,30 @@ import java.util.Calendar
 import mqtt.broker.state.{BrokerState, MQTTChannel, Session}
 import mqtt.model.Packet.ConnectReturnCode.ConnectionAccepted
 import mqtt.model.Packet._
-import mqtt.model.{QoS, TopicFilter}
+import mqtt.model.{BrokerConfig, QoS, TopicFilter}
 
 import scala.concurrent.duration.Duration
 
 object SampleInstances {
-  val bs0 = BrokerState(Map(), Map(), Map(), Map())
+  val bs0 = BrokerState(Map(), Map(), Map(), Map(), Map(), BrokerConfig())
+  
+  val sample_password_0 = "secretPassword"
+  val sample_password_0_bytes: Seq[Byte] = sample_password_0.getBytes("UTF-8").toSeq
+  val sample_password_0_digest = "c3c9a0a7ed83ee612c4a3d0501c042778aed5d6399753d7d94ef9ba87c15de1c"
+  
+  val sample_password_1 = "secretPassword2"
+  val sample_password_1_bytes: Seq[Byte] = sample_password_1.getBytes("UTF-8").toSeq
+  val sample_password_1_digest = "53b5e46207285560a352b6abbe174a6f71369b882253f6d80868ea9e9ba1f1a3"
+  
+  val sample_username_0 = "user1"
+  val sample_username_1 = "user2"
+  val sample_username_2 = "user3"
+  
+  
+  val bs0_auth = BrokerState(Map(), Map(), Map(), Map(), Map(
+    sample_username_0 -> Some(sample_password_0_digest),
+    sample_username_2 -> None
+  ), BrokerConfig(allowAnonymous = false))
   
   val sample_id_0 = "123"
   val sample_id_1 = "456"
@@ -34,6 +52,21 @@ object SampleInstances {
     keepAlive = sample_duration_0,
     clientId = sample_id_0,
     credential = Option.empty,
+    willMessage = Option.empty
+  )
+  
+  val sample_credential_0 = Some(Credential(sample_username_0, Some(sample_password_0_bytes)))
+  val sample_credential_1 = Some(Credential(sample_username_0, Some(sample_password_1_bytes)))
+  val sample_credential_2 = Some(Credential(sample_username_1, Some(sample_password_1_bytes)))
+  val sample_credential_3 = Some(Credential(sample_username_2, None))
+  
+  
+  val sample_connect_packet_1 = Connect(
+    protocol = Protocol("MQTT", 4),
+    cleanSession = false,
+    keepAlive = sample_duration_0,
+    clientId = sample_id_0,
+    credential = sample_credential_0,
     willMessage = Option.empty
   )
   
