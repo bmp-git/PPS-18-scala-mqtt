@@ -1,7 +1,7 @@
 package mqtt.broker.handlers
 
 import mqtt.broker.Common
-import mqtt.broker.Common.{sendPacket, updateLastContact}
+import mqtt.broker.Common.{sendPacketToClient, updateLastContact}
 import mqtt.broker.handlers.PublishPacketHandler._
 import mqtt.broker.state.StateImplicits._
 import mqtt.broker.state.Violation.{InvalidQoSDupPair, InvalidTopicName, qoSNotSupported}
@@ -12,7 +12,7 @@ import mqtt.model.{QoS, Topic}
 
 
 /**
- * Represents and handler for publish packets.
+ * Represents an handler for publish packets.
  *
  * @param packet  the publish packet to handle.
  * @param channel the channel on which the packet has been received.
@@ -137,7 +137,7 @@ object PublishPacketHandler {
    */
   def publishMessageToWithQoS0(clientID: ClientID, message: ApplicationMessage): State => State = state => {
     val packet = Publish(duplicate = false, packetId = 0, message = message)
-    sendPacket(clientID, packet)(state)
+    sendPacketToClient(clientID, packet)(state)
   }
   
   /**

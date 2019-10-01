@@ -5,7 +5,7 @@ import mqtt.broker.state.{Channel, State}
 import mqtt.model.Packet.Disconnect
 
 /**
- * Represents and handler for disconnect packets.
+ * Represents an handler for disconnect packets.
  *
  * @param packet  the disconnect packet to handle.
  * @param channel the channel on which the packet has been received.

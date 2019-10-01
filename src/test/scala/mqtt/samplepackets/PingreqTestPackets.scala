@@ -10,6 +10,6 @@ object PingreqTestPackets {
     Pingreq() ->
       Seq(
         1, 1, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, //Remaining length
       ))
 }

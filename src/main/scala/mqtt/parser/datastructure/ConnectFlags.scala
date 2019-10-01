@@ -3,7 +3,7 @@ package mqtt.parser.datastructure
 import mqtt.model.QoS
 
 /**
- * A structure that represents the MQTT connect message flags.
+ * Represents the MQTT connect message flags.
  *
  * @param credentials  the user credentials flags
  * @param willFlags    the will options
@@ -16,7 +16,7 @@ case class ConnectFlags(
                        )
 
 /**
- * Options regarding the will message.
+ * Represents the options regarding the will message in the MQTT connect message.
  *
  * @param retain if the will message should be retained
  * @param qos    the qos of the will message
@@ -24,9 +24,9 @@ case class ConnectFlags(
 case class WillFlags(retain: Boolean, qos: QoS)
 
 /**
- * Users credentials flags.
+ * Represents the users credentials flags in the MQTT connect message.
  *
- * @param username the flag representing if username is present
- * @param password the flag representing if password is present
+ * @param username if username is present
+ * @param password if password is present
  */
 case class CredentialFlags(username: Boolean, password: Boolean)
