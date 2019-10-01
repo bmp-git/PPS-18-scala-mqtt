@@ -90,13 +90,13 @@ object Receiver {
     }
   
     @tailrec def receive(): Unit = {
-      Try {
+      Try[Action] {
         nextPacket match {
           case Some(packet: Disconnect) => emitPacket(packet); CloseAndComplete
           case Some(packet) => emitPacket(packet); Continue
           case None => AlertCloseAndComplete
         }
-      } getOrElse AlertCloseAndComplete match {
+      } getOrElse[Action] AlertCloseAndComplete match {
         case Continue => receive()
         case CloseAndComplete => close(); complete()
         case AlertCloseAndComplete => emitAlert(); close(); complete()

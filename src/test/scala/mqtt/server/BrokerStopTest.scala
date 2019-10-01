@@ -1,20 +1,21 @@
 package mqtt.server
 
+import mqtt.model.BrokerConfig
 import org.scalatest.FunSuite
 
 class BrokerStopTest extends FunSuite {
   test("A broker should shutdown gracefully and free the listening port") {
-    MqttBroker(50004).run().stop()
+    MqttBroker(BrokerConfig(port = 50004), Map()).run().stop()
     Thread.sleep(1000) //give time to the OS to release the port
-    MqttBroker(50004).run().stop()
+    MqttBroker(BrokerConfig(port = 50004), Map()).run().stop()
     Thread.sleep(1000) //give time to the OS to release the port
-    MqttBroker(50004).run().stop()
+    MqttBroker(BrokerConfig(port = 50004), Map()).run().stop()
   }
   
   test("A broker not started shouldn't bind the port") {
-    MqttBroker(50005)
-    val mqtt = MqttBroker(50005)
-    MqttBroker(50005)
+    MqttBroker(BrokerConfig(port = 50005), Map())
+    val mqtt = MqttBroker(BrokerConfig(port = 50005), Map())
+    MqttBroker(BrokerConfig(port = 50005), Map())
     mqtt.run().stop()
   }
 }

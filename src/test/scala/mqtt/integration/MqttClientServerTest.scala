@@ -1,5 +1,6 @@
 package mqtt.integration
 
+import mqtt.model.BrokerConfig
 import mqtt.server.MqttBroker
 import org.eclipse.paho.client.mqttv3.{MqttClient, MqttConnectOptions}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FunSuite, Matchers}
@@ -22,7 +23,7 @@ abstract class MqttClientServerTest(serverIp: String, serverPort: Int) extends F
   var client: MqttClient = _
   
   override def beforeAll(): Unit = {
-    server = MqttBroker(serverPort).run()
+    server = MqttBroker(BrokerConfig(port = serverPort), Map()).run()
     client = new MqttClient(s"tcp://$serverIp:$serverPort", MqttClient.generateClientId())
   }
   

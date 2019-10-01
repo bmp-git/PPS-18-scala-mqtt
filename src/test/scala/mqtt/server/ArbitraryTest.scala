@@ -1,6 +1,6 @@
 package mqtt.server
 
-import mqtt.model.Packet
+import mqtt.model.{BrokerConfig, Packet}
 import mqtt.model.Packet.Disconnect
 import mqtt.server.AssertionsHelper._
 import mqtt.server.client.ArbitraryClient
@@ -25,7 +25,7 @@ class ArbitraryTest extends FunSuite {
   }
   
   test("A client who send a ad-hoc malformed packet shouldn't damage the broker") {
-    val breaker = MqttBroker(50003).run()
+    val breaker = MqttBroker(BrokerConfig(port = 50003), Map()).run()
     val client1 = ArbitraryClient(50003, Seq[Bit](0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)) //Not completed remaining length
     val client2 = ArbitraryClient(50003, Seq[Bit](0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0)) //Not matching remaining length
     val client3 = ArbitraryClient(50003, Seq[Bit](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)) //First byte 0

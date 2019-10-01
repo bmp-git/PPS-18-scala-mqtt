@@ -7,7 +7,6 @@ import mqtt.model.{Packet, PacketID, QoS, TopicFilter}
 
 import scala.concurrent.duration.Duration
 
-//TODO Add credentials to session?
 /**
  * Represents the session of a client.
  *
