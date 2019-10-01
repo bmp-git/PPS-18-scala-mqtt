@@ -6,7 +6,7 @@ import mqtt.model.BrokerConfig
 
 import scala.reflect.ClassTag
 
-object ConfigParser extends App {
+object ConfigParser {
   private def parameter[_: P](name: String) = !"#" ~ name.! ~ " "
   
   private def parseComment[_: P] = "#" ~ CharsWhile(_ != '\n').?
@@ -22,7 +22,7 @@ object ConfigParser extends App {
       (parameter("bind_address") ~ address.?) |
       (parameter("allow_anonymous") ~ boolean.?)
   
-  private def configParser[_: P] = ((parseComment | (parameters ~ parseComment.?)) ~ "\n".rep).rep ~ End
+  private def configParser[_: P] = "\n".rep ~ ((parseComment | (parameters ~ parseComment.?)) ~ "\n".rep).rep ~ End
   
   private def configMap(fileContent: String): Option[Map[String, Option[Any]]] =
     parse(fileContent, configParser(_)) match {
@@ -71,7 +71,7 @@ object ConfigParser extends App {
   /**
    * Parse the configuration file.
    *
-   * @param fileContent content of the configuration file.
+   * @param fileContent content of the configuration file
    * @return the broker configuration
    */
   def apply(fileContent: String): Option[BrokerConfig] =

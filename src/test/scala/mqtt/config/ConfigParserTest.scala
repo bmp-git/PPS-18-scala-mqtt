@@ -1,15 +1,15 @@
 package mqtt.config
 
 import mqtt.model.BrokerConfig
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.FunSuite
 
-class ConfigParserTest extends FunSuite with Matchers {
+class ConfigParserTest extends FunSuite {
   test("An empty configuration file should be the default configuration") {
     assert(ConfigParser("") == Option(BrokerConfig()))
   }
   
   test("Parse a normal configuration file") {
-    val input = "#comment\n\n\n\nport 1234#comment\n#comment\n#comment\n\nbind_address localhost#\nallow_anonymous false#"
+    val input = "\n\n#comment\n\n\n\nport 1234#comment\n#comment\n#comment\n\nbind_address localhost#\nallow_anonymous false#"
     assert(ConfigParser(input) == Option(BrokerConfig(1234, Option("localhost"), allowAnonymous = false)))
   }
   
