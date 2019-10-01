@@ -1,9 +1,9 @@
 package mqtt.server
 
-import java.net.ServerSocket
+import java.net.{InetAddress, ServerSocket}
 import java.util.concurrent.Executors
 
-import mqtt.model.Packet
+import mqtt.model.{BrokerConfig, Packet}
 import rx.lang.scala.Observable
 import rx.lang.scala.schedulers.{ExecutionContextScheduler, IOScheduler}
 
@@ -13,13 +13,20 @@ import scala.concurrent.duration._
 /**
  * MQTT broker for version 3.1.1.
  *
- * @param port the listen port
+ * @param brokerConfig broker configurations
+ * @param usersConfig  users configurations
  */
-case class MqttBroker(port: Int) {
+case class MqttBroker(brokerConfig: BrokerConfig, usersConfig: Map[String, Option[String]]) {
+  
+  private val MAXIMUM_INCOMING_CONNECTION = 50
+  
   /**
    * Socket listener.
    */
-  private lazy val server = new ServerSocket(port)
+  private lazy val server = brokerConfig.bindAddress match {
+    case Some(bindAddress) => new ServerSocket(brokerConfig.port, MAXIMUM_INCOMING_CONNECTION, InetAddress.getByName(bindAddress))
+    case None => new ServerSocket(brokerConfig.port, MAXIMUM_INCOMING_CONNECTION)
+  }
   
   /**
    * Scheduler used for io.
@@ -44,7 +51,7 @@ case class MqttBroker(port: Int) {
   /**
    * State of the program.
    */
-  private lazy val program = ProgramState()
+  private lazy val program = ProgramState(brokerConfig, usersConfig)
   
   //Utilities functions
   private val mapSocket: IdSocket => Unit = idSocket => program.addSocket(idSocket)

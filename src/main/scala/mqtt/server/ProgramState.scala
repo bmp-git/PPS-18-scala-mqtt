@@ -2,6 +2,7 @@ package mqtt.server
 
 
 import mqtt.broker.state.{BrokerState, State}
+import mqtt.model.BrokerConfig
 
 import scala.collection.concurrent.TrieMap
 
@@ -9,8 +10,8 @@ import scala.collection.concurrent.TrieMap
  * Encapsulates all side effect that need to be handled.
  * The state of the broker and the active socket.
  */
-case class ProgramState() {
-  private var _brokerState: State = BrokerState(Map(), Map(), Map(), Map())
+case class ProgramState(brokerConfig: BrokerConfig, usersConfig: Map[String, Option[String]]) {
+  private var _brokerState: State = BrokerState(Map(), Map(), Map(), Map() /*brokerConfig, usersConfig*/)
   private val socketMap = TrieMap[Int, IdSocket]()
   
   /**

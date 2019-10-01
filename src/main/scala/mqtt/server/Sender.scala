@@ -23,8 +23,12 @@ case class Sender(idSocket: IdSocket) extends Observer[Packet] {
           idSocket.socket.getOutputStream.write(packet)
           idSocket.socket.getOutputStream.flush()
       }
+    } catch {
+      case ex: Exception => println(Thread.currentThread().toString + "    Error while sending: " + packet +
+        " to socket " + idSocket.id + ". Error: " + ex.getMessage)
+      }
     }
-  }
+  
   
   override def onCompleted(): Unit = println(Thread.currentThread() + "    Completed socket " + idSocket.id)
   
