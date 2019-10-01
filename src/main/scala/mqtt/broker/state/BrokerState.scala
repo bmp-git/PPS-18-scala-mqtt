@@ -2,20 +2,24 @@ package mqtt.broker.state
 
 import mqtt.model.Packet.ApplicationMessage
 import mqtt.model.Types.ClientID
-import mqtt.model.{Packet, Topic}
+import mqtt.model.{BrokerConfig, Packet, Topic}
 
 /**
  * Represents the internal state of the server/broker.
  *
- * @param sessions the client sessions to be initialized with.
- * @param retains  the retain messages to be initialized with.
- * @param closing  the closing channels to be initialized with.
- * @param wills    the will messages to be initialized with.
+ * @param sessions    the client sessions to be initialized with.
+ * @param retains     the retain messages to be initialized with.
+ * @param closing     the closing channels to be initialized with.
+ * @param wills       the will messages to be initialized with.
+ * @param credentials the users credentials to be initialized with (password is optional).
+ * @param config      the configuration to be initialized with.
  */
 case class BrokerState(override val sessions: Map[ClientID, Session],
                        override val retains: Map[Topic, Packet.ApplicationMessage],
                        override val closing: Map[Channel, Seq[Packet]],
-                       override val wills: Map[Channel, ApplicationMessage]) extends State {
+                       override val wills: Map[Channel, ApplicationMessage],
+                       override val credentials: Map[String, Option[String]],
+                       override val config: BrokerConfig) extends State {
   override def sessionFromClientID(clientID: ClientID): Option[Session] = sessions.get(clientID)
   
   override def sessionFromChannel(channel: Channel): Option[(ClientID, Session)] = {

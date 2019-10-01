@@ -3,7 +3,7 @@ package mqtt.broker
 import mqtt.broker.SampleInstances._
 import mqtt.broker.UtilityFunctions.assertPacketPending
 import mqtt.broker.state.{Channel, State}
-import mqtt.model.Packet.ConnectReturnCode.{ConnectionAccepted, IdentifierRejected, UnacceptableProtocolVersion}
+import mqtt.model.Packet.ConnectReturnCode._
 import mqtt.model.Packet._
 import mqtt.model.QoS
 import org.scalatest.{Assertion, FunSuite}
@@ -42,6 +42,48 @@ trait TestConnect extends FunSuite {
   test("Sending a connect packet with a bad client identifier should disconnect") {
     val packet = sample_connect_packet_0.copy(clientId = "")
     checkDisconnectionWithConnACKAfterConnect(packet, IdentifierRejected)
+  }
+  
+  test("Sending a connect packet without user and password to a server with anonymous false should disconnect.") {
+    val bs1 = ConnectHandler(bs0_auth, sample_connect_packet_0, sample_channel_0)
+    bs1.closing.get(sample_channel_0).fold(fail)(seq => {
+      seq.find { case Connack(_, NotAuthorized) => true }.fold(fail)(_ => succeed)
+    })
+  }
+  
+  test("Sending a connect packet with a bad password should disconnect.") {
+    val bs1 = ConnectHandler(bs0_auth, sample_connect_packet_1.copy(credential = sample_credential_1), sample_channel_0)
+    bs1.closing.get(sample_channel_0).fold(fail)(seq => {
+      seq.find { case Connack(_, NotAuthorized) => true }.fold(fail)(_ => succeed)
+    })
+  }
+  
+  test("Sending a connect packet with a bad username should disconnect.") {
+    val bs1 = ConnectHandler(bs0_auth, sample_connect_packet_1.copy(credential = sample_credential_2), sample_channel_0)
+    bs1.closing.get(sample_channel_0).fold(fail)(seq => {
+      seq.find { case Connack(_, NotAuthorized) => true }.fold(fail)(_ => succeed)
+    })
+  }
+  
+  test("Sending a connect packet with the right user and password should respond with ack 0.") {
+    val bs1 = ConnectHandler(bs0_auth, sample_connect_packet_1, sample_channel_0)
+    bs1.sessionFromClientID(sample_id_0).fold(fail)(s => {
+      s.pendingTransmission.find { case Connack(_, `ConnectionAccepted`) => true }.fold(fail)(_ => succeed)
+    })
+  }
+  
+  test("Sending a connect packet with the right username and empty password should respond with ack 0 if on the server the stored password is also empty.") {
+    val bs1 = ConnectHandler(bs0_auth, sample_connect_packet_1.copy(credential = sample_credential_3), sample_channel_0)
+    bs1.sessionFromClientID(sample_id_0).fold(fail)(s => {
+      s.pendingTransmission.find { case Connack(_, `ConnectionAccepted`) => true }.fold(fail)(_ => succeed)
+    })
+  }
+  
+  test("Sending a connect packet with user and password on a server with anonymous true should respond with ack 0.") {
+    val bs1 = ConnectHandler(bs0, sample_connect_packet_1, sample_channel_0)
+    bs1.sessionFromClientID(sample_id_0).fold(fail)(s => {
+      s.pendingTransmission.find { case Connack(_, `ConnectionAccepted`) => true }.fold(fail)(_ => succeed)
+    })
   }
   
   test("Sending a legit connect packet should respond with ack 0") {

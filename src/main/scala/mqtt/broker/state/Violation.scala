@@ -55,6 +55,10 @@ object Violation {
     override val closePackets: Seq[Connack] = Seq(Connack(sessionPresent = false, IdentifierRejected))
   }
   
+  case class ClientNotAuthorized() extends GenericViolation("ClientNotAuthorized") {
+    override val closePackets: Seq[Connack] = Seq(Connack(sessionPresent = false, NotAuthorized))
+  }
+  
   case class MultipleConnectPacketsOnSameChannel() extends GenericViolation("MultipleConnectPacketsOnSameChannel")
   
   case class InvalidTopicName() extends GenericViolation("InvalidTopicName")

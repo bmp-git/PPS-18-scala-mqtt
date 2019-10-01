@@ -2,7 +2,7 @@ package mqtt.broker.state
 
 import mqtt.model.Packet.ApplicationMessage
 import mqtt.model.Types.ClientID
-import mqtt.model.{Packet, Topic}
+import mqtt.model.{BrokerConfig, Packet, Topic}
 
 /**
  * Represents the internal State of the server (client sessions, retain messages, state of the channels).
@@ -28,6 +28,16 @@ trait State {
    * @return a map containing the will message associated to a specific channel.
    */
   def wills: Map[Channel, ApplicationMessage]
+  
+  /**
+   * @return a map containing the users credentials (username -> sha256(password)), password is optional.
+   */
+  def credentials: Map[String, Option[String]]
+  
+  /**
+   * @return the configuration of the broker.
+   */
+  def config: BrokerConfig
   
   /**
    * Adds a channel to the Map containing the channels that need to be closed.
