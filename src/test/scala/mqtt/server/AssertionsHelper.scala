@@ -1,7 +1,7 @@
 package mqtt.server
 
-import mqtt.model.Packet
 import mqtt.model.Packet.Connect
+import mqtt.model.{BrokerConfig, Packet}
 import mqtt.server.client.DummyClient
 
 import scala.concurrent.duration._
@@ -9,7 +9,7 @@ import scala.concurrent.duration._
 object AssertionsHelper {
   
   def assertSendReceive(port: Int)(data: Seq[(Seq[Packet], Seq[Packet])]): Unit = {
-    val breaker = MqttBroker(port).run()
+    val breaker = MqttBroker(BrokerConfig(port = port), Map()).run()
     
     data map {
       case (actions, expected) =>
