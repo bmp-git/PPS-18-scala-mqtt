@@ -10,6 +10,11 @@ import org.scalatest.FunSuite
 trait TestPublish extends FunSuite {
   def PublishHandler: (State, Publish, Channel) => State
   
+  test("Sending a publish without first having connected should disconnect.") {
+    val bs1 = PublishHandler(bs0, sample_publish_packet_0, sample_channel_0)
+    assertClosing(sample_channel_0)(bs1)
+  }
+  
   //TODO remove when QoS2 will be supported.
   test("A publish with an unsupported QoS should disconnect.") {
     val bs1 = bs0.setSession(sample_id_0, sample_session_0.copy(channel = Option(sample_channel_0)))

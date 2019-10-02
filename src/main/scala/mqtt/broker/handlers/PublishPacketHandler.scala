@@ -1,7 +1,7 @@
 package mqtt.broker.handlers
 
 import mqtt.broker.Common
-import mqtt.broker.Common.{sendPacketToClient, updateLastContact}
+import mqtt.broker.Common.{assertClientConnected, sendPacketToClient, updateLastContact}
 import mqtt.broker.handlers.PublishPacketHandler._
 import mqtt.broker.state.StateImplicits._
 import mqtt.broker.state.Violation.{InvalidQoSDupPair, InvalidTopicName, qoSNotSupported}
@@ -20,6 +20,7 @@ import mqtt.model.{QoS, Topic}
 case class PublishPacketHandler(override val packet: Publish, override val channel: Channel) extends PacketHandler[Publish] with AutoViolationHandler {
   override def handle: State => State = {
     for {
+      _ <- assertClientConnected(channel)
       _ <- checkSupportedQoS
       _ <- checkValidQoSDupPair
       topic <- checkValidTopic
@@ -59,7 +60,7 @@ case class PublishPacketHandler(override val packet: Publish, override val chann
   /**
    * Checks whether the specified topic on which to publish is valid.
    *
-   * @return a function that maps a state to a violation or to a new state.
+   * @return a function that maps a state to a violation or to a tuple with the topic instance and the new state.
    */
   def checkValidTopic: State => Either[Violation, (Topic, State)] = state => {
     Topic(packet.message.topic).fold[Either[Violation, (Topic, State)]](Left(InvalidTopicName()))(t => Right((t, state)))

@@ -10,6 +10,10 @@ import org.scalatest.FunSuite
 trait TestUnsubscribe extends FunSuite {
   def UnsubscribeHandler: (State, Unsubscribe, Channel) => State
   
+  test("Sending an unsubscribe without first having connected should disconnect.") {
+    val bs1 = UnsubscribeHandler(bs0, sample_unsubscribe_packet_0, sample_channel_0)
+    assertClosing(sample_channel_0)(bs1)
+  }
   
   test("An unsubscribe with an empty filter list should disconnect.") {
     val bs1 = bs0.setSession(sample_id_0, sample_session_0.copy(channel = Option(sample_channel_0)))

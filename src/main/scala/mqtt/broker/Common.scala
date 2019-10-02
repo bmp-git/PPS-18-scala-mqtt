@@ -5,7 +5,8 @@ import java.security.MessageDigest
 import java.util.Calendar
 
 import mqtt.broker.handlers.PublishPacketHandler
-import mqtt.broker.state.{Channel, Session, State}
+import mqtt.broker.state.Violation.ClientIsNotConnected
+import mqtt.broker.state.{Channel, Session, State, Violation}
 import mqtt.model.Types.ClientID
 import mqtt.model.{Packet, QoS, Topic}
 
@@ -85,6 +86,16 @@ object Common {
       (PublishPacketHandler.handleRetain(topic, msg) andThen PublishPacketHandler.publishMessage(msg.qos, msg.topic, msg.payload)) (state)
     }
     )
+  }
+  
+  /**
+   * Asserts that the client has already sent a Connect packet, therefore there is a session associated with the channel.
+   *
+   * @param channel the channel to check whether is associated to a session.
+   * @return a function that maps a state to a violation or to a tuple with the ClientID and the new state.
+   */
+  def assertClientConnected(channel: Channel): State => Either[Violation, (ClientID, State)] = state => {
+    state.sessionFromChannel(channel).fold[Either[Violation, (ClientID, State)]](Left(ClientIsNotConnected())) { case (id, _) => Right(id, state) }
   }
   
   /**

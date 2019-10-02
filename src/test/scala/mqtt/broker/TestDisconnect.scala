@@ -1,7 +1,7 @@
 package mqtt.broker
 
 import mqtt.broker.SampleInstances._
-import mqtt.broker.UtilityFunctions.assertPacketNotPending
+import mqtt.broker.UtilityFunctions.{assertClosing, assertPacketNotPending}
 import mqtt.broker.state.{Channel, State}
 import mqtt.model.Packet.{ApplicationMessage, Connect, Disconnect, Publish}
 import mqtt.model.QoS
@@ -12,6 +12,11 @@ trait TestDisconnect extends FunSuite {
   def ConnectHandler: (State, Connect, Channel) => State
   
   def DisconnectHandler: (State, Disconnect, Channel) => State
+  
+  test("Sending a disconnect without first having connected should disconnect.") {
+    val bs1 = DisconnectHandler(bs0, sample_disconnect_packet_0, sample_channel_0)
+    assertClosing(sample_channel_0)(bs1)
+  }
   
   def connectAndDisconnect(packet: Connect): State = {
     val bs1 = bs0.setSession(sample_id_0, sample_session_0)
