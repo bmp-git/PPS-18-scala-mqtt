@@ -1,10 +1,10 @@
 package mqtt.broker.handlers
 
 import mqtt.broker.Common
-import mqtt.broker.Common.updateLastContact
+import mqtt.broker.Common.{assertClientConnected, updateLastContact}
 import mqtt.broker.handlers.SubscribePacketHandler.maxAllowedQoS
 import mqtt.broker.state.StateImplicits._
-import mqtt.broker.state.Violation.{GenericViolation, SubscriptionTopicListEmpty}
+import mqtt.broker.state.Violation.SubscriptionTopicListEmpty
 import mqtt.broker.state.{Channel, State, Violation}
 import mqtt.model.Packet.{ApplicationMessage, Suback, Subscribe}
 import mqtt.model.Types.ClientID
@@ -24,7 +24,7 @@ case class SubscribePacketHandler(override val packet: Subscribe, override val c
   
   override def handle: State => State = {
     for {
-      clientID <- getClientID
+      clientID <- assertClientConnected(channel)
       _ <- checkAtLeastOneSubscription
       filterOptions <- validateFilters
       _ <- storeSubscriptions(filterOptions)
@@ -32,19 +32,6 @@ case class SubscribePacketHandler(override val packet: Subscribe, override val c
       _ <- publishRetains(clientID, filterOptions)
       _ <- updateLastContact(channel)
     } yield ()
-  }
-  
-  /**
-   * Gets the sender client id (from the current channel).
-   *
-   * @return a function that maps a state to a tuple containing the new state and the client id
-   *         or a Violation if there isn't a session associated to this channel.
-   */
-  def getClientID: State => Either[Violation, (ClientID, State)] = state => {
-    state.sessionFromChannel(channel)
-      .fold[Either[Violation, (ClientID, State)]] {
-        Left(new GenericViolation("Subscribe: unexpected error, client id not found."))
-      } { case (id, _) => Right(id, state) }
   }
   
   /**

@@ -1,12 +1,12 @@
 package mqtt.broker
 
 import mqtt.broker.SampleInstances._
-import mqtt.broker.UtilityFunctions.assertPacketPending
+import mqtt.broker.UtilityFunctions._
 import mqtt.broker.state.{Channel, State}
 import mqtt.model.Packet.ConnectReturnCode._
 import mqtt.model.Packet._
 import mqtt.model.QoS
-import org.scalatest.{Assertion, FunSuite}
+import org.scalatest.FunSuite
 
 import scala.concurrent.duration.Duration
 
@@ -16,21 +16,22 @@ trait TestConnect extends FunSuite {
   test("Sending a connect packet with an invalid will message topic should disconnect") {
     val packet = sample_connect_packet_0.copy(protocol = Protocol("HTTP", 4))
     val bs1 = ConnectHandler(bs0, packet, sample_channel_0)
-    assert(bs1.closing.get(sample_channel_0).isDefined)
+    assertClosing(sample_channel_0)(bs1)
   }
   
   test("Sending a connect packet with and unsupported protocol name should disconnect") {
     val packet = sample_connect_packet_0.copy(willMessage = Option(sample_application_message_0.copy(topic = "#")))
     val bs1 = ConnectHandler(bs0, packet, sample_channel_0)
-    assert(bs1.closing.get(sample_channel_0).isDefined)
+    assertClosing(sample_channel_0)(bs1)
   }
   
   
-  def checkDisconnectionWithConnACKAfterConnect(packet: Connect, returnCode: ConnectReturnCode): Assertion = {
+  def checkDisconnectionWithConnACKAfterConnect(packet: Connect, returnCode: ConnectReturnCode): Unit = {
     val bs1 = ConnectHandler(bs0, packet, sample_channel_0)
-    bs1.closing.get(sample_channel_0).fold(fail)(seq => {
-      seq.find { case Connack(_, `returnCode`) => true }.fold(fail)(_ => succeed)
-    })
+    assertClosingWithPacket(sample_channel_0, {
+      case Connack(_, `returnCode`) => true
+      case _ => false
+    })(bs1)
   }
   
   
@@ -46,51 +47,37 @@ trait TestConnect extends FunSuite {
   
   test("Sending a connect packet without user and password to a server with anonymous false should disconnect.") {
     val bs1 = ConnectHandler(bs0_auth, sample_connect_packet_0, sample_channel_0)
-    bs1.closing.get(sample_channel_0).fold(fail)(seq => {
-      seq.find { case Connack(_, NotAuthorized) => true }.fold(fail)(_ => succeed)
-    })
+    assertNotAuthorized(sample_channel_0)(bs1)
   }
   
   test("Sending a connect packet with a bad password should disconnect.") {
     val bs1 = ConnectHandler(bs0_auth, sample_connect_packet_1.copy(credential = sample_credential_1), sample_channel_0)
-    bs1.closing.get(sample_channel_0).fold(fail)(seq => {
-      seq.find { case Connack(_, NotAuthorized) => true }.fold(fail)(_ => succeed)
-    })
+    assertNotAuthorized(sample_channel_0)(bs1)
   }
   
   test("Sending a connect packet with a bad username should disconnect.") {
     val bs1 = ConnectHandler(bs0_auth, sample_connect_packet_1.copy(credential = sample_credential_2), sample_channel_0)
-    bs1.closing.get(sample_channel_0).fold(fail)(seq => {
-      seq.find { case Connack(_, NotAuthorized) => true }.fold(fail)(_ => succeed)
-    })
+    assertNotAuthorized(sample_channel_0)(bs1)
   }
   
   test("Sending a connect packet with the right user and password should respond with ack 0.") {
     val bs1 = ConnectHandler(bs0_auth, sample_connect_packet_1, sample_channel_0)
-    bs1.sessionFromClientID(sample_id_0).fold(fail)(s => {
-      s.pendingTransmission.find { case Connack(_, `ConnectionAccepted`) => true }.fold(fail)(_ => succeed)
-    })
+    assertConnectionAccepted(sample_id_0)(bs1)
   }
   
   test("Sending a connect packet with the right username and empty password should respond with ack 0 if on the server the stored password is also empty.") {
     val bs1 = ConnectHandler(bs0_auth, sample_connect_packet_1.copy(credential = sample_credential_3), sample_channel_0)
-    bs1.sessionFromClientID(sample_id_0).fold(fail)(s => {
-      s.pendingTransmission.find { case Connack(_, `ConnectionAccepted`) => true }.fold(fail)(_ => succeed)
-    })
+    assertConnectionAccepted(sample_id_0)(bs1)
   }
   
   test("Sending a connect packet with user and password on a server with anonymous true should respond with ack 0.") {
     val bs1 = ConnectHandler(bs0, sample_connect_packet_1, sample_channel_0)
-    bs1.sessionFromClientID(sample_id_0).fold(fail)(s => {
-      s.pendingTransmission.find { case Connack(_, `ConnectionAccepted`) => true }.fold(fail)(_ => succeed)
-    })
+    assertConnectionAccepted(sample_id_0)(bs1)
   }
   
   test("Sending a legit connect packet should respond with ack 0") {
     val bs1 = ConnectHandler(bs0, sample_connect_packet_0, sample_channel_0)
-    bs1.sessionFromClientID(sample_id_0).fold(fail)(s => {
-      s.pendingTransmission.find { case Connack(_, `ConnectionAccepted`) => true }.fold(fail)(_ => succeed)
-    })
+    assertConnectionAccepted(sample_id_0)(bs1)
   }
   
   test("Sending a connect packet with CleanSession 0 should clear the session") {
@@ -102,10 +89,10 @@ trait TestConnect extends FunSuite {
     })
   }
   
-  def checkPersistentFlag(packet: Connect, persistent: Boolean): Assertion = {
+  def checkPersistentFlag(packet: Connect, persistent: Boolean): Unit = {
     val bs1 = bs0.setSession(sample_id_0, sample_session_0)
     val bs2 = ConnectHandler(bs1, packet, sample_channel_0)
-    bs2.sessionFromClientID(sample_id_0).fold(fail)(s => {
+    bs2.sessionFromClientID(sample_id_0).fold[Unit](fail)(s => {
       assert(s.persistent == persistent)
     })
   }
@@ -120,12 +107,12 @@ trait TestConnect extends FunSuite {
     checkPersistentFlag(packet, persistent = true)
   }
   
-  def checkCleanSession(cleanSession: Boolean, SessionPresent: Boolean, SessionWasPresent: Boolean): Assertion = {
+  def checkCleanSession(cleanSession: Boolean, SessionPresent: Boolean, SessionWasPresent: Boolean): Unit = {
     val packet = sample_connect_packet_0.copy(cleanSession = cleanSession)
     val bs1 = if (SessionWasPresent) bs0.setSession(sample_id_0, sample_session_0) else bs0
     val bs2 = ConnectHandler(bs1, packet, sample_channel_0)
-    bs2.sessionFromClientID(sample_id_0).fold(fail)(s => {
-      s.pendingTransmission.find { case Connack(SessionPresent, ConnectionAccepted) => true }.fold(fail)(_ => succeed)
+    bs2.sessionFromClientID(sample_id_0).fold[Unit](fail)(s => {
+      assert(s.pendingTransmission.exists { case Connack(SessionPresent, ConnectionAccepted) => true })
     })
   }
   
@@ -172,7 +159,7 @@ trait TestConnect extends FunSuite {
   test("Connecting two times should disconnect") {
     val bs1 = ConnectHandler(bs0, sample_connect_packet_0, sample_channel_0)
     val bs2 = ConnectHandler(bs1, sample_connect_packet_0, sample_channel_0)
-    assert(bs2.closing.get(sample_channel_0).isDefined)
+    assertClosing(sample_channel_0)(bs2)
   }
   
   test("Causing a disconnection should publish the will message") {

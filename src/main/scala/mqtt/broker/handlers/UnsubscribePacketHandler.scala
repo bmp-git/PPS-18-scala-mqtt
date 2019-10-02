@@ -1,7 +1,7 @@
 package mqtt.broker.handlers
 
 import mqtt.broker.Common
-import mqtt.broker.Common.updateLastContact
+import mqtt.broker.Common.{assertClientConnected, updateLastContact}
 import mqtt.broker.state.StateImplicits._
 import mqtt.broker.state.Violation.UnsubscriptionTopicListEmpty
 import mqtt.broker.state.{Channel, State, Violation}
@@ -19,6 +19,7 @@ case class UnsubscribePacketHandler(override val packet: Unsubscribe, override v
   
   override def handle: State => State = {
     for {
+      _ <- assertClientConnected(channel)
       _ <- checkAtLeastOneUnsubscription
       _ <- eraseSubscriptions
       _ <- sendUNSUBACK

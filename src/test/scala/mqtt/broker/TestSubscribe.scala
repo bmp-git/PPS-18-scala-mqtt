@@ -10,6 +10,11 @@ import org.scalatest.FunSuite
 trait TestSubscribe extends FunSuite {
   def SubscribeHandler: (State, Subscribe, Channel) => State
   
+  test("Sending a subscribe without first having connected should disconnect.") {
+    val bs1 = SubscribeHandler(bs0, sample_subscribe_packet_0, sample_channel_0)
+    assertClosing(sample_channel_0)(bs1)
+  }
+  
   test("A subscribe packet with a legit filter should reply with a suback with a success return code.") {
     val bs1 = bs0.setSession(sample_id_0, sample_session_1.copy(channel = Option(sample_channel_0)))
     val bs2 = SubscribeHandler(bs1, sample_subscribe_packet_0, sample_channel_0)

@@ -2,7 +2,7 @@ package mqtt.broker
 
 import mqtt.broker.Common.updateLastContact
 import mqtt.broker.SampleInstances._
-import mqtt.broker.UtilityFunctions.assertPacketNotPending
+import mqtt.broker.UtilityFunctions._
 import mqtt.broker.state.{Channel, State}
 import mqtt.model.ErrorPacket.MalformedPacket
 import mqtt.model.Packet
@@ -50,7 +50,7 @@ class TestBrokerManager extends FunSuite with TestConnect with TestDisconnect wi
     val bs2 = updateLastContact(sample_channel_0)(bs1)
     Thread.sleep((4 seconds).toMillis)
     val bs3 = BrokerManager.tick(bs2)
-    assert(bs3.closing.contains(sample_channel_0))
+    assertClosing(sample_channel_0)(bs3)
   }
   
   test("Sending a publish should update last contact, resetting KeepAlive disconnect checks.") {

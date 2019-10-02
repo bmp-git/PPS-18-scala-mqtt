@@ -1,7 +1,8 @@
 package mqtt.broker.handlers
 
 import mqtt.broker.Common
-import mqtt.broker.Common.updateLastContact
+import mqtt.broker.Common.{assertClientConnected, updateLastContact}
+import mqtt.broker.state.StateImplicits._
 import mqtt.broker.state.{Channel, State}
 import mqtt.model.Packet.{Pingreq, Pingresp}
 
@@ -12,9 +13,15 @@ import mqtt.model.Packet.{Pingreq, Pingresp}
  * @param channel the channel on which the packet has been received.
  */
 case class PingReqPacketHandler(override val packet: Pingreq, override val channel: Channel)
-  extends PacketHandler[Pingreq] {
+  extends PacketHandler[Pingreq] with AutoViolationHandler {
   
-  override def handle: State => State = sendPINGRESP andThen updateLastContact(channel)
+  override def handle: State => State = {
+    for {
+      _ <- assertClientConnected(channel)
+      _ <- sendPINGRESP
+      _ <- updateLastContact(channel)
+    } yield ()
+  }
   
   /**
    * Sends a PINGRESP to the client that sent the PINGREQ.

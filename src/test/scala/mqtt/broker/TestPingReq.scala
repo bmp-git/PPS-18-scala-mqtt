@@ -9,6 +9,11 @@ import org.scalatest.FunSuite
 trait TestPingReq extends FunSuite {
   def PingReqHandler: (State, Pingreq, Channel) => State
   
+  test("Sending a pingreq without first having connected should disconnect.") {
+    val bs1 = PingReqHandler(bs0, Pingreq(), sample_channel_0)
+    assertClosing(sample_channel_0)(bs1)
+  }
+  
   test("A PINGREQ should respond with PINGRESP.") {
     val bs1 = bs0.setSession(sample_id_0, sample_session_0.copy(channel = Option(sample_channel_0)))
     val bs2 = PingReqHandler(bs1, Pingreq(), sample_channel_0)
