@@ -1,12 +1,13 @@
 package mqtt.config
 
+import com.typesafe.scalalogging.LazyLogging
 import fastparse.NoWhitespace._
 import fastparse._
 import mqtt.model.BrokerConfig
 
 import scala.reflect.ClassTag
 
-object ConfigParser {
+object ConfigParser extends LazyLogging {
   private def parameter[_: P](name: String) = !"#" ~ name.! ~ " "
   
   private def parseComment[_: P] = "#" ~ CharsWhile(_ != '\n').?
@@ -30,7 +31,7 @@ object ConfigParser {
         case (pName: String, pParam: Option[Any]) => pName -> pParam
       }).toMap[String, Option[Any]])
       case Parsed.Failure(label, index, extra) => {
-        println(s"Config parsing failed on index: $index, label: $label, extra: $extra")
+        logger.error(s"Config parsing failed on index: $index, label: $label, extra: $extra")
         Option.empty
       }
     }
@@ -41,7 +42,7 @@ object ConfigParser {
         case Some(Some(value: T)) => Option(f(config, value))
         case None => Option(config)
         case Some(None) => {
-          println(s"parameter '$key' need a value.")
+          logger.error(s"parameter '$key' need a value.")
           Option.empty
         }
       }

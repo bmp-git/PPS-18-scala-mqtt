@@ -2,6 +2,7 @@ package mqtt.server
 
 import java.net.ServerSocket
 
+import com.typesafe.scalalogging.LazyLogging
 import mqtt.utils.IdGenerator
 import mqtt.utils.IterableImplicits._
 import rx.lang.scala.Observable
@@ -12,7 +13,7 @@ import scala.util.Try
  * Contains the listen logic.
  * Interfaces with socket listener and accept clients.
  */
-object Listener {
+object Listener extends LazyLogging {
   /**
    * Listens for incoming connection and generate a source of clients.
    * When the server is closed or an exception occur the stream will complete.
@@ -28,7 +29,7 @@ object Listener {
             generator.next() match {
               case (id, idGenerator) =>
                 val idSocket = IdSocket(id, socket)
-                println(Thread.currentThread() + "    New client: " + idSocket.id)
+                logger.debug(s"New client: ${idSocket.id}")
                 s.onNext(idSocket)
                 idGenerator
             }

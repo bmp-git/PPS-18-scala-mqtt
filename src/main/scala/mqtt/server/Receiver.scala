@@ -2,6 +2,7 @@ package mqtt.server
 
 import java.io.InputStream
 
+import com.typesafe.scalalogging.LazyLogging
 import mqtt.model.ErrorPacket.ChannelClosed
 import mqtt.model.Packet
 import mqtt.model.Packet.Disconnect
@@ -17,7 +18,7 @@ import scala.util.Try
  * Contains the receive logic.
  * Interfaces with clients' input streams.
  */
-object Receiver {
+object Receiver extends LazyLogging {
   
   private trait Action
   
@@ -62,13 +63,13 @@ object Receiver {
   
     def complete(): Unit = observer.onCompleted()
   
-    def emitAlert(): Unit = if (!idSocket.socket.isClosed) { //TODO can be false if the socket is closed, can cause problems
-      println(Thread.currentThread() + "    Error on socket " + idSocket.id)
+    def emitAlert(): Unit = if (!idSocket.socket.isClosed) { //can be false if the socket is closed, can cause problems
+      logger.warn(s"Error on socket ${idSocket.id}")
       observer.onNext((idSocket, ChannelClosed())) //emit
     }
   
     def emitPacket(packet: Packet): Unit = {
-      println(Thread.currentThread() + "    Received: " + packet + " from socket " + idSocket.id)
+      logger.debug(s"Received: $packet from socket ${idSocket.id}")
       observer.onNext((idSocket, packet)) //emit
     }
   

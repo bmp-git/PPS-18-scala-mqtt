@@ -1,12 +1,13 @@
 package mqtt.broker.handlers
 
+import com.typesafe.scalalogging.LazyLogging
 import mqtt.broker.state.{State, StateTransitionWithError, Violation}
 
 /**
  * A mixin that defines an implicit function that recovers a StateTransitionWithError[State, _, Violation]
  * converting it to a function State => State, handling the violation if present.
  */
-trait AutoViolationHandler {
+trait AutoViolationHandler extends LazyLogging {
   this: PacketHandler[_] =>
   
   /**
@@ -17,8 +18,7 @@ trait AutoViolationHandler {
    */
   implicit def handleViolation(transition: StateTransitionWithError[State, _, Violation]): State => State = state => {
     transition run state match {
-      //TODO remove println, use a logger
-      case Left(v) => println(v.toString); v.handle(channel)(state) //close connection in case of error
+      case Left(v) => logger.warn(v.toString); v.handle(channel)(state) //close connection in case of error
       case Right((_, s)) => s
     }
   }

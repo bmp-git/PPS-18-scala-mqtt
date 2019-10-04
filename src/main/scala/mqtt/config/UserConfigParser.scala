@@ -1,9 +1,10 @@
 package mqtt.config
 
+import com.typesafe.scalalogging.LazyLogging
 import fastparse.NoWhitespace._
 import fastparse._
 
-object UserConfigParser {
+object UserConfigParser extends LazyLogging {
   private def username[_: P] = CharsWhile(_ != ':').! ~ ":"
   
   private def password[_: P] = (CharIn("0-9") | CharIn("a-f") | CharIn("A-F")).rep(min = 64, max = 64).!
@@ -23,7 +24,7 @@ object UserConfigParser {
         case (pName: String, None) => pName -> Option.empty
       }).toMap[String, Option[String]])
       case Parsed.Failure(label, index, extra) => {
-        println(s"User config parsing failed on index: $index, label: $label, extra: $extra")
+        logger.error(s"User config parsing failed on index: $index, label: $label, extra: $extra")
         Option.empty
       }
     }

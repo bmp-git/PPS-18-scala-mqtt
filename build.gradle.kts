@@ -20,6 +20,9 @@ repositories {
 
 dependencies {
     implementation("org.scala-lang:scala-library:2.12.2")
+    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation("com.typesafe.scala-logging:scala-logging_2.12:3.9.2")
+
     compile("org.scala-lang:scala-library:2.12.2")
     compile("io.reactivex:rxscala_2.12:0.26.5")
     compile("com.lihaoyi:fastparse_2.12:2.1.2")

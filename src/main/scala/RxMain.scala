@@ -1,3 +1,4 @@
+import com.typesafe.scalalogging.LazyLogging
 import mqtt.config.{ConfigParser, UserConfigParser}
 import mqtt.model.BrokerConfig
 import mqtt.server._
@@ -8,7 +9,7 @@ import scala.util.Try
 /**
  * Entry point of the mqtt broker.
  */
-object RxMain extends App {
+object RxMain extends App with LazyLogging {
   private val SETTINGS_PATH = "settings.conf"
   private val USERS_SETTINGS_PATH = "users.conf"
   
@@ -20,7 +21,7 @@ object RxMain extends App {
       data
     }.toOption match {
       case None =>
-        println("Error while opening '" + file)
+        logger.warn(s"Error while opening $file")
         None
       case Some(a) => Option(a)
     }
@@ -42,12 +43,12 @@ object RxMain extends App {
     case None => Map()
   }
   
-  println("Loaded " + usersConfig.size + " user configurations.")
-  println("Using " + brokerConfig + " configuration.")
+  logger.info(s"Loaded ${usersConfig.size} user configurations.")
+  logger.info(s"Using $brokerConfig configuration.")
   val stopper = MqttBroker(brokerConfig, usersConfig).run()
   scala.io.StdIn.readLine()
   stopper.stop()
-  println("Bye")
+  logger.debug("Bye")
 }
 
 
