@@ -2,6 +2,7 @@ package mqtt.broker
 
 import java.util.Calendar
 
+import com.typesafe.scalalogging.LazyLogging
 import mqtt.broker.Common.closeChannel
 import mqtt.broker.handlers._
 import mqtt.broker.state.{Channel, State}
@@ -10,7 +11,7 @@ import mqtt.model.Packet
 import mqtt.model.Packet._
 
 
-object BrokerManager extends ProtocolManager {
+object BrokerManager extends ProtocolManager with LazyLogging {
   override def handle(state: State, packet: Packet, channel: Channel): State = {
     //if the channel is closing the packet cannot be accepted
     val transition = state.closing.get(channel).fold[State => State]({
@@ -21,9 +22,9 @@ object BrokerManager extends ProtocolManager {
         case p: Subscribe => SubscribePacketHandler(p, channel).handle
         case p: Unsubscribe => UnsubscribePacketHandler(p, channel).handle
         case p: Pingreq => PingReqPacketHandler(p, channel).handle
-        case _: MalformedPacket => println("Received malformed packet from ".concat(channel.toString)); closeChannel(channel)
+        case _: MalformedPacket => logger.warn(s"Received malformed packet from $channel"); closeChannel(channel)
         case _: ChannelClosed => closeChannel(channel)
-        case _ => println("Packet not supported"); identity[State]
+        case _ => logger.info("Packet not supported"); identity[State]
       }
     })(_ => identity[State]) andThen tick
   

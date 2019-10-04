@@ -1,5 +1,6 @@
 package mqtt.server
 
+import com.typesafe.scalalogging.LazyLogging
 import mqtt.broker.state.{Channel, MQTTChannel, State}
 import mqtt.broker.BrokerManager
 import mqtt.model.Packet
@@ -8,7 +9,7 @@ import rx.lang.scala.Observable
 /**
  * Handles the protocol logic with reactivex.
  */
-object ProtocolHandler {
+object ProtocolHandler extends LazyLogging {
   
   /**
    * Produces a stream of reactions from an input packet and a given state.
@@ -45,11 +46,11 @@ object ProtocolHandler {
       
       p match {
         case Some((idSocket, packet)) => {
-          println(Thread.currentThread() + "    Handling: " + packet + " from " + idSocket.id)
+          logger.debug(s"Handling: $packet from ${idSocket.id}")
           program.brokerState = emitPackets(BrokerManager.handle(program.brokerState, packet, MQTTChannel(idSocket.id)))
         }
         case None => {
-          println(Thread.currentThread() + "    Checking timeouts")
+          logger.debug("Checking timeouts")
           program.brokerState = emitPackets(BrokerManager.tick(program.brokerState))
         }
       }

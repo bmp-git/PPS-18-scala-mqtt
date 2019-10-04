@@ -3,6 +3,7 @@ package mqtt.server
 import java.net.{InetAddress, ServerSocket}
 import java.util.concurrent.Executors
 
+import com.typesafe.scalalogging.LazyLogging
 import mqtt.model.{BrokerConfig, Packet}
 import rx.lang.scala.Observable
 import rx.lang.scala.schedulers.{ExecutionContextScheduler, IOScheduler}
@@ -16,7 +17,7 @@ import scala.concurrent.duration._
  * @param brokerConfig broker configurations
  * @param usersConfig  users configurations
  */
-case class MqttBroker(brokerConfig: BrokerConfig, usersConfig: Map[String, Option[String]]) {
+case class MqttBroker(brokerConfig: BrokerConfig, usersConfig: Map[String, Option[String]]) extends LazyLogging {
   
   private val MAXIMUM_INCOMING_CONNECTION = 50
   
@@ -129,7 +130,7 @@ case class MqttBroker(brokerConfig: BrokerConfig, usersConfig: Map[String, Optio
       .flatMap(packetHandler)
       .groupBy(socketId)
       .flatMap(clientSender)
-      .subscribe(unmapSocket, _ => println(Thread.currentThread() + "    Exception on main stream."))
+      .subscribe(unmapSocket, _ => logger.info("Closing main stream."))
   
     breaker
   }

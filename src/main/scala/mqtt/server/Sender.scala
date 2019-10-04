@@ -1,5 +1,6 @@
 package mqtt.server
 
+import com.typesafe.scalalogging.LazyLogging
 import mqtt.builder.MqttPacketBuilder
 import mqtt.model.Packet
 import mqtt.utils.BitImplicits._
@@ -10,12 +11,12 @@ import rx.lang.scala.Observer
  *
  * @param idSocket the socket
  */
-case class Sender(idSocket: IdSocket) extends Observer[Packet] {
+case class Sender(idSocket: IdSocket) extends Observer[Packet] with LazyLogging {
   
   override def onNext(packet: Packet): Unit = {
     implicit def packetToByteArray(p: Packet): Array[Byte] = MqttPacketBuilder.build(p).toBytes.toArray
     try {
-      println(Thread.currentThread() + "    Sending: " + packet + " to socket " + idSocket.id)
+      logger.debug(s"Sending $packet to socket ${idSocket.id}") //scalastyle:ignore
       packet match {
         case ClosePacket =>
           idSocket.socket.close()
@@ -24,13 +25,12 @@ case class Sender(idSocket: IdSocket) extends Observer[Packet] {
           idSocket.socket.getOutputStream.flush()
       }
     } catch {
-      case ex: Exception => println(Thread.currentThread().toString + "    Error while sending: " + packet +
-        " to socket " + idSocket.id + ". Error: " + ex.getMessage)
-      }
+      case ex: Exception => logger.warn(s"Error while sending $packet to socket ${idSocket.id}. Error: ${ex.getMessage}")
     }
+  }
   
   
-  override def onCompleted(): Unit = println(Thread.currentThread() + "    Completed socket " + idSocket.id)
+  override def onCompleted(): Unit = logger.debug(s"Completed socket ${idSocket.id}")
   
-  override def onError(error: Throwable): Unit = println(Thread.currentThread() + "    RxError on socket " + idSocket.id)
+  override def onError(error: Throwable): Unit = logger.error(s"RxError on socket ${idSocket.id}")
 }
