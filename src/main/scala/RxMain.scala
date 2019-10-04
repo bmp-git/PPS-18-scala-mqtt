@@ -45,10 +45,14 @@ object RxMain extends App with LazyLogging {
   
   logger.info(s"Loaded ${usersConfig.size} user configurations.")
   logger.info(s"Using $brokerConfig configuration.")
-  val stopper = MqttBroker(brokerConfig, usersConfig).run()
-  scala.io.StdIn.readLine()
+  
+  val stopper: MqttBroker#Breaker = MqttBroker(brokerConfig, usersConfig).run()
+  
+  Stream.continually(scala.io.StdIn.readLine())
+    .takeWhile(_ != "close")
+    .foreach(s => println(s"$s command not supported"))
+  
   stopper.stop()
-  logger.debug("Bye")
 }
 
 
