@@ -83,7 +83,7 @@ object Common {
   def publishWillMessage(channel: Channel): State => State = state => {
     state.wills.get(channel).fold[State](state)(msg => {
       val topic = new Topic(msg.topic) //assuming topic is valid, it should aways be
-      (PublishPacketHandler.handleRetain(topic, msg) andThen PublishPacketHandler.publishMessage(msg.qos, msg.topic, msg.payload)) (state)
+      (PublishPacketHandler.handleRetain(topic, msg) andThen PublishPacketHandler.publishMessage(msg.qos, topic, msg.payload)) (state)
     }
     )
   }

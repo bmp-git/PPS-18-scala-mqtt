@@ -25,7 +25,7 @@ case class PublishPacketHandler(override val packet: Publish, override val chann
       _ <- checkValidQoSDupPair
       topic <- checkValidTopic
       _ <- handleRetain(topic, packet.message)
-      _ <- publishMessage(packet.message.qos, packet.message.topic, packet.message.payload)
+      _ <- publishMessage(packet.message.qos, topic, packet.message.payload)
       _ <- updateLastContact(channel)
     } yield ()
   }
@@ -149,21 +149,17 @@ object PublishPacketHandler {
    * @param payload the payload to publish.
    * @return a function that maps the old server state in the new one.
    */
-  def publishMessage(qos: QoS, topic: String, payload: Payload): State => State = state => {
-    val msgToSend = ApplicationMessage(retain = false, qos, topic, payload)
-    
-    Topic(topic).fold(state)(topic => {
-      val subs = getMatchingSubscriptionsAndMaxQoS(topic, qos)(state)
-      
-      val publishFunctions = for {
-        (clientID, qosses) <- subs
-        qos <- qosses
-        msg = msgToSend.copy(qos = qos)
-        fun = publishMessageTo(clientID, msg)
-      } yield fun
-      
-      publishFunctions.foldLeft[State => State](s => s)(_ andThen _)(state)
-      
-    })
+  def publishMessage(qos: QoS, topic: Topic, payload: Payload): State => State = state => {
+    val msgToSend = ApplicationMessage(retain = false, qos, topic.value, payload)
+    val subs = getMatchingSubscriptionsAndMaxQoS(topic, qos)(state)
+  
+    val publishFunctions = for {
+      (clientID, qosses) <- subs
+      qos <- qosses
+      msg = msgToSend.copy(qos = qos)
+      fun = publishMessageTo(clientID, msg)
+    } yield fun
+  
+    publishFunctions.foldLeft[State => State](s => s)(_ andThen _)(state)
   }
 }
