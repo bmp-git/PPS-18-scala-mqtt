@@ -36,8 +36,8 @@ object ConfigParser extends LazyLogging {
       }
     }
   
-  private def setParam[T: ClassTag](key: String, f: (BrokerConfig, T) => BrokerConfig)(implicit data: Map[String, Option[Any]]): ConfigSetter =
-    ConfigSetter(config => {
+  private def setParam[T: ClassTag](key: String, f: (BrokerConfig, T) => BrokerConfig)(implicit data: Map[String, Option[Any]]): ConfigBuilder =
+    ConfigBuilder(config => {
       data.get(key) match {
         case Some(Some(value: T)) => Option(f(config, value))
         case None => Option(config)
@@ -48,22 +48,22 @@ object ConfigParser extends LazyLogging {
       }
     })
   
-  private def setPort(implicit data: Map[String, Option[Any]]): ConfigSetter =
+  private def setPort(implicit data: Map[String, Option[Any]]): ConfigBuilder =
     setParam[Int]("port", {
       case (config, port) => config.copy(port = port)
     })
   
-  private def setBindAddress(implicit data: Map[String, Option[Any]]): ConfigSetter =
+  private def setBindAddress(implicit data: Map[String, Option[Any]]): ConfigBuilder =
     setParam[String]("bind_address", {
       case (config, address) => config.copy(bindAddress = Option(address))
     })
   
-  private def setAllowAnonymous(implicit data: Map[String, Option[Any]]): ConfigSetter =
+  private def setAllowAnonymous(implicit data: Map[String, Option[Any]]): ConfigBuilder =
     setParam[Boolean]("allow_anonymous", {
       case (config, allow) => config.copy(allowAnonymous = allow)
     })
   
-  private def configBuilder(implicit data: Map[String, Option[Any]]): ConfigSetter = for {
+  private def configBuilder(implicit data: Map[String, Option[Any]]): ConfigBuilder = for {
     _ <- setPort
     _ <- setBindAddress
     s <- setAllowAnonymous

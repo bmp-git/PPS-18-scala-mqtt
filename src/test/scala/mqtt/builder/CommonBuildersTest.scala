@@ -115,9 +115,9 @@ class CommonBuildersTest extends FunSuite {
     assert(((builder1 || builder2) build 23) == 23.bits)
     assert(((builder1 || builder2) build "abc") == 3.bits)
     assert(((builder1 || builder2) buildOption 3.4).isEmpty)
+    assert(((builder1 || builder2) build 3.4).isEmpty)
     assert(((builder1 || builder3 || (builder4 || builder2)) build 23) == 24.bits)
     assert(((builder3 || builder4) build 23.2) == Seq[Bit](1, 0))
-  
   }
   
   test("OrBuilder should not match with an ancestor") {
