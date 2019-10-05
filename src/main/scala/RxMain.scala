@@ -1,9 +1,7 @@
-import ch.qos.logback.classic.{Level, Logger}
 import com.typesafe.scalalogging.LazyLogging
 import mqtt.config.{ConfigParser, UserConfigParser}
 import mqtt.model.BrokerConfig
 import mqtt.server._
-import org.slf4j.LoggerFactory
 
 import scala.io.Source
 import scala.util.Try
@@ -47,11 +45,16 @@ object RxMain extends App with LazyLogging {
   
   logger.info(s"Loaded ${usersConfig.size} user configurations.")
   logger.info(s"Using $brokerConfig configuration.")
+  
   //LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[Logger].setLevel(Level.ERROR)
+  
   val stopper = MqttBroker(brokerConfig, usersConfig).run()
-  scala.io.StdIn.readLine()
+  
+  Stream.continually(scala.io.StdIn.readLine())
+    .takeWhile(_ != "close")
+    .foreach(s => println(s"$s command not supported"))
+
   stopper.stop()
-  logger.debug("Bye")
 }
 
 
