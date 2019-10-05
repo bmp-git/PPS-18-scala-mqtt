@@ -77,6 +77,8 @@ case class MqttBroker(brokerConfig: BrokerConfig, usersConfig: Map[String, Optio
    * Generates a stream of packets of a client.
    */
   private val clientReceiver = (client: IdSocket) => Receiver(client).map(Option.apply).subscribeOn(ioScheduler)
+    .onBackpressureDrop(p => logger.info(s"Drop packet: $p"))
+  
   /**
    * Generates a stream of packets from an input packet.
    * Ex: receive a publish, emit 3 publish

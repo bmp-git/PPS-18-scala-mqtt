@@ -25,12 +25,12 @@ case class Sender(idSocket: IdSocket) extends Observer[Packet] with LazyLogging 
           idSocket.socket.getOutputStream.flush()
       }
     } catch {
-      case ex: Exception => logger.warn(s"Error while sending $packet to socket ${idSocket.id}. Error: ${ex.getMessage}")
+      case ex: Exception => logger.warn(s"Error while sending $packet to socket ${idSocket.id}. Error: $ex")
     }
   }
   
   
   override def onCompleted(): Unit = logger.debug(s"Completed socket ${idSocket.id}")
   
-  override def onError(error: Throwable): Unit = logger.error(s"RxError on socket ${idSocket.id}")
+  override def onError(error: Throwable): Unit = logger.error(s"RxError on socket ${idSocket.id}.  Error: $error")
 }

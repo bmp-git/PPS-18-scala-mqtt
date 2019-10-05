@@ -41,9 +41,9 @@ object RichBuilder {
      * @tparam P the new type of the object needed to build
      * @return the new builder
      */
-    def foreach[P](ex: P => Seq[T]): Builder[P] = new Builder[P] {
+    def foreach[P](ex: P => Iterable[T]): Builder[P] = new Builder[P] {
       override def build[R <: P](packet: R)(implicit context: Context[R]): Seq[Bit] =
-        ex(packet).flatMap(v => builder.build(v))
+        ex(packet).flatMap(v => builder.build(v)).toSeq
     }
     
     /**

@@ -16,7 +16,7 @@ object RxMain extends App with LazyLogging {
   private def readFile(file: String): Option[String] = {
     Try {
       val bufferedSource = Source.fromFile(file)
-      val data = bufferedSource.mkString("\n")
+      val data = bufferedSource.mkString("")
       bufferedSource.close
       data
     }.toOption match {
@@ -46,12 +46,14 @@ object RxMain extends App with LazyLogging {
   logger.info(s"Loaded ${usersConfig.size} user configurations.")
   logger.info(s"Using $brokerConfig configuration.")
   
-  val stopper: MqttBroker#Breaker = MqttBroker(brokerConfig, usersConfig).run()
+  //LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[Logger].setLevel(Level.ERROR)
+  
+  val stopper = MqttBroker(brokerConfig, usersConfig).run()
   
   Stream.continually(scala.io.StdIn.readLine())
     .takeWhile(_ != "close")
     .foreach(s => println(s"$s command not supported"))
-  
+
   stopper.stop()
 }
 
