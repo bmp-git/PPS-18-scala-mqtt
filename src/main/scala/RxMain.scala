@@ -1,7 +1,9 @@
+import ch.qos.logback.classic.{Level, Logger}
 import com.typesafe.scalalogging.LazyLogging
 import mqtt.config.{ConfigParser, UserConfigParser}
 import mqtt.model.BrokerConfig
 import mqtt.server._
+import org.slf4j.LoggerFactory
 
 import scala.io.Source
 import scala.util.Try
@@ -16,7 +18,7 @@ object RxMain extends App with LazyLogging {
   private def readFile(file: String): Option[String] = {
     Try {
       val bufferedSource = Source.fromFile(file)
-      val data = bufferedSource.mkString("\n")
+      val data = bufferedSource.mkString("")
       bufferedSource.close
       data
     }.toOption match {
@@ -45,6 +47,7 @@ object RxMain extends App with LazyLogging {
   
   logger.info(s"Loaded ${usersConfig.size} user configurations.")
   logger.info(s"Using $brokerConfig configuration.")
+  //LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[Logger].setLevel(Level.ERROR)
   val stopper = MqttBroker(brokerConfig, usersConfig).run()
   scala.io.StdIn.readLine()
   stopper.stop()
