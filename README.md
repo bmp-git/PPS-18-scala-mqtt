@@ -4,9 +4,9 @@
 
 **scala-mqtt** is a MQTT message broker written in Scala.
 
-**scala-mqtt** implements the [OASIS MQTT Version 3.1.1](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html) standard
+**scala-mqtt** implements the [OASIS MQTT Version 3.1.1](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html) standard.
 
-###Features
+### Features
 
 * [X] Publish with QoS 0
 * [X] Wildcard Topic Subscribe Support
