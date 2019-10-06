@@ -23,24 +23,8 @@ object Parsers {
    */
   implicit object parserMonad extends Monad[Parser] {
     
-    /**
-     * The unit parser is simply a parser that produce `a` and do not consume the input.
-     *
-     * @param a the parser result
-     * @tparam A the parser result type
-     * @return the unit parser
-     */
     override def unit[A](a: => A): Parser[A] = Parser(s => Option((a, s)))
     
-    /**
-     * The parser representing the link between the result obtained running the first parser and the execution of the next parser.
-     *
-     * @param ma the current parser
-     * @param f  the function from the result of the current parser and the next parser
-     * @tparam A the current parser result type
-     * @tparam B the next parser result type
-     * @return the next parser
-     */
     override def flatMap[A, B](ma: Parser[A])(f: A => Parser[B]): Parser[B] =
       Parser(s => ma.run(s) flatMap { case (a, rest) => f(a).run(rest) })
   }
@@ -121,10 +105,9 @@ object Parsers {
    *
    * @param ps the parsers
    * @tparam A the new parser result type
-   * @tparam B the parsers result type
    * @return the new parser
    */
-  def first[A, B <: A](ps: Parser[B]*): Parser[A] = {
+  def first[A](ps: Parser[A]*): Parser[A] = {
     if (ps.size == 2) first(ps.head, ps(1)) else Parser(s => ps.head.run(s) orElse first(ps.drop(1): _*).run(s))
   }
   

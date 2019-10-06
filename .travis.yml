@@ -7,7 +7,11 @@ before_install:
   - date
 
 script:
-- './gradlew clean build'
+  - './gradlew clean build test reportScoverage'
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
 notifications:
   email:
     recipients:
