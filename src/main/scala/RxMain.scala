@@ -10,8 +10,10 @@ import scala.util.Try
  * Entry point of the mqtt broker.
  */
 object RxMain extends App with LazyLogging {
-  private val SETTINGS_PATH = "settings.conf"
-  private val USERS_SETTINGS_PATH = "users.conf"
+  private val SETTINGS_PATH = "config/settings.conf"
+  private val USERS_SETTINGS_PATH = "config/users.conf"
+  
+  private val NO_STDIN_ARG_NAME = "--no_stdin"
   
   private def readFile(file: String): Option[String] = {
     Try {
@@ -50,11 +52,13 @@ object RxMain extends App with LazyLogging {
   
   val stopper = MqttBroker(brokerConfig, usersConfig).run()
   
-  Stream.continually(scala.io.StdIn.readLine())
-    .takeWhile(_ != "close")
-    .foreach(s => println(s"$s command not supported"))
-
-  stopper.stop()
+  if (!args.contains(NO_STDIN_ARG_NAME)) {
+    Stream.continually(scala.io.StdIn.readLine())
+      .takeWhile(_ != "close")
+      .foreach(s => println(s"$s command not supported"))
+    
+    stopper.stop()
+  }
 }
 
 
