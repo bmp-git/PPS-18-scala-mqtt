@@ -10,7 +10,11 @@ plugins {
 }
 
 application {
-    mainClassName = "HelloWorld"
+    mainClassName = "RxMain"
+}
+
+val run by tasks.getting(JavaExec::class) {
+    standardInput = System.`in`
 }
 
 repositories {

@@ -22,5 +22,5 @@ trait StaticBuilder extends Builder[Any] {
    * @param staticBuilder the StaticBuilder to chain
    * @return a new StaticBuilder
    */
-  def ::(staticBuilder: StaticBuilder): StaticBuilder = () => staticBuilder.build() ++ this.build()
+  final def ::(staticBuilder: StaticBuilder): StaticBuilder = () => staticBuilder.build() ++ this.build()
 }

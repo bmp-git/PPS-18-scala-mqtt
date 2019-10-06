@@ -9,7 +9,6 @@ import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FunSuite, Matchers}
  * Test of connection and disconnection to/from the broker using Paho MQTT client library.
  */
 class MqttConnectDisconnectTest extends FunSuite with BeforeAndAfterAll with BeforeAndAfterEach with Matchers {
-  val serverPort = 10001
   def opt(cleanSession: Boolean): MqttConnectOptions = {
     val opt = new MqttConnectOptions()
     opt.setCleanSession(cleanSession)
@@ -18,8 +17,8 @@ class MqttConnectDisconnectTest extends FunSuite with BeforeAndAfterAll with Bef
   }
   
   test("As a client, I want to connect and disconnect from the MQTTbroker"){
-    val server = MqttBroker(BrokerConfig(port = serverPort), Map()).run()
-    val client = new MqttClient(s"tcp://localhost:$serverPort", MqttClient.generateClientId())
+    val server = MqttBroker(BrokerConfig(port = 50100), Map()).run()
+    val client = new MqttClient(s"tcp://localhost:50100", MqttClient.generateClientId())
     
     client.connect(opt(true))
     assert(client isConnected)
@@ -32,8 +31,8 @@ class MqttConnectDisconnectTest extends FunSuite with BeforeAndAfterAll with Bef
   }
   
   test("As a client, I should want to keep my session when reconnecting"){
-    val server = MqttBroker(BrokerConfig(port = serverPort), Map()).run()
-    val client = new MqttClient(s"tcp://localhost:$serverPort", MqttClient.generateClientId())
+    val server = MqttBroker(BrokerConfig(port = 50101), Map()).run()
+    val client = new MqttClient(s"tcp://localhost:50101", MqttClient.generateClientId())
     
     val conn = client.connectWithResult(opt(false))
     assert(!conn.getSessionPresent)
