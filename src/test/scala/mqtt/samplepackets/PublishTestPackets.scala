@@ -1,7 +1,7 @@
 package mqtt.samplepackets
 
-import mqtt.model.{Packet, QoS}
 import mqtt.model.Packet.{ApplicationMessage, Publish}
+import mqtt.model.{Packet, QoS}
 import mqtt.utils.Bit
 import mqtt.utils.BitImplicits._
 
@@ -50,6 +50,20 @@ object PublishTestPackets {
     Publish(duplicate = true, 1234, ApplicationMessage(retain = true, QoS(2), "a/b", (0 until 123).map(_.toByte))) ->
       Seq[Bit](
         0, 0, 1, 1, 1, 1, 0, 1, //dup, qos | qos, retain
+        1, 0, 0, 0, 0, 0, 1, 0, //remaining length
+        0, 0, 0, 0, 0, 0, 0, 1, //remaining length
+        0, 0, 0, 0, 0, 0, 0, 0, //Topic name MSB
+        0, 0, 0, 0, 0, 0, 1, 1, //Topic name LSB
+        0, 1, 1, 0, 0, 0, 0, 1, //Topic name 'a'
+        0, 0, 1, 0, 1, 1, 1, 1, //Topic name '/'
+        0, 1, 1, 0, 0, 0, 1, 0, //Topic name 'b'
+        0, 0, 0, 0, 0, 1, 0, 0, //Packet id MSB
+        1, 1, 0, 1, 0, 0, 1, 0, //Packet id LSB
+      ).++((0 until 123).map(_.toByte).toBitsSeq) //payload
+    ,
+    Publish(duplicate = false, 1234, ApplicationMessage(retain = true, QoS(2), "a/b", (0 until 123).map(_.toByte))) ->
+      Seq[Bit](
+        0, 0, 1, 1, 0, 1, 0, 1, //dup, qos | qos, retain
         1, 0, 0, 0, 0, 0, 1, 0, //remaining length
         0, 0, 0, 0, 0, 0, 0, 1, //remaining length
         0, 0, 0, 0, 0, 0, 0, 0, //Topic name MSB

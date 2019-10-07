@@ -4,26 +4,11 @@ import mqtt.model.Packet.ConnectReturnCode._
 import mqtt.model.QoS
 import mqtt.parser.ParserUtils.{failed, result, zerobyte}
 import mqtt.parser.datastructure.WillFlags
-import mqtt.parser.fragments.MqttCommonParsers._
 import mqtt.parser.fragments.MqttVariableHeaderParsers._
 import mqtt.utils.BitImplicits._
 import org.scalatest.{FunSuite, Matchers}
 
 class MqttVariableHeaderParsersTest extends FunSuite with Matchers {
-  //Qos parser
-  test("A QoS parser SHOULD parse a QoS 0") {
-    qos() run Seq(0, 0) shouldBe result(QoS(0))
-  }
-  test("A QoS parser SHOULD parse a QoS 1") {
-    qos() run Seq(0, 1) shouldBe result(QoS(1))
-  }
-  test("A QoS parser SHOULD parse a QoS 2") {
-    qos() run Seq(1, 0) shouldBe result(QoS(2))
-  }
-  test("A QoS parser SHOULD NOT parse a QoS 3 [MQTT-3.1.2-14]") {
-    qos() run Seq(1, 1) shouldBe failed
-  }
-  
   //WillFlags parser
   test("A WillFlags parser SHOULD parse flags when will_flag=1, will_retain=1, will_QoS=2") {
     willFlags() run Seq(1, 1, 0, 1) shouldBe result(Option(WillFlags(retain = true, QoS(2))))
