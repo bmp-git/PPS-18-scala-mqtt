@@ -52,7 +52,7 @@ object MqttFixedHeaderParsers {
    */
   def publishFlags(): Parser[PublishFlags] = for {
     dup <- bit()
-    qos <- qos(); _ <- fail(!dup && qos != QoS(0))
+    qos <- qos(); _ <- fail(dup && qos == QoS(0))
     retain <- bit()
   } yield PublishFlags(dup, qos, retain)
   
