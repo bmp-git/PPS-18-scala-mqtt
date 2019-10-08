@@ -41,7 +41,7 @@ case class PublishPacketHandler(override val packet: Publish, override val chann
       case QoS(0) => true
       case _ => false
     }
-    if (valid) Right(state) else Left(qoSNotSupported())
+    if (valid) Right(state) else Left(qoSNotSupported)
   }
   
   /**
@@ -54,7 +54,7 @@ case class PublishPacketHandler(override val packet: Publish, override val chann
       case QoS(0) => !packet.duplicate
       case _ => true
     }
-    if (valid) Right(state) else Left(InvalidQoSDupPair())
+    if (valid) Right(state) else Left(InvalidQoSDupPair)
   }
   
   /**
@@ -63,7 +63,7 @@ case class PublishPacketHandler(override val packet: Publish, override val chann
    * @return a function that maps a state to a violation or to a tuple with the topic instance and the new state.
    */
   def checkValidTopic: State => Either[Violation, (Topic, State)] = state => {
-    Topic(packet.message.topic).fold[Either[Violation, (Topic, State)]](Left(InvalidTopicName()))(t => Right((t, state)))
+    Topic(packet.message.topic).fold[Either[Violation, (Topic, State)]](Left(InvalidTopicName))(t => Right((t, state)))
   }
   
 

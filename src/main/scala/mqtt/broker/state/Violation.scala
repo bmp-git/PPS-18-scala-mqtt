@@ -45,36 +45,36 @@ object Violation {
     override val closePackets: Seq[Connack] = Seq()
   }
   
-  case class InvalidProtocolName() extends GenericViolation("InvalidProtocolName")
+  case object InvalidProtocolName extends GenericViolation("InvalidProtocolName")
   
-  case class InvalidProtocolVersion() extends Violation {
+  case object InvalidProtocolVersion extends Violation {
     override def msg: String = "InvalidProtocolVersion"
     override val closePackets: Seq[Connack] = Seq(Connack(sessionPresent = false, UnacceptableProtocolVersion))
   }
   
-  case class InvalidIdentifier() extends Violation {
+  case object InvalidIdentifier extends Violation {
     override def msg: String = "InvalidIdentifier"
     override val closePackets: Seq[Connack] = Seq(Connack(sessionPresent = false, IdentifierRejected))
   }
   
-  case class ClientNotAuthorized() extends Violation {
+  case object ClientNotAuthorized extends Violation {
     override def msg: String = "ClientNotAuthorized"
     override val closePackets: Seq[Connack] = Seq(Connack(sessionPresent = false, NotAuthorized))
   }
   
-  case class MultipleConnectPacketsOnSameChannel() extends GenericViolation("MultipleConnectPacketsOnSameChannel")
+  case object MultipleConnectPacketsOnSameChannel extends GenericViolation("MultipleConnectPacketsOnSameChannel")
   
-  case class ClientIsNotConnected() extends GenericViolation("ClientIsNotConnected")
+  case object ClientIsNotConnected extends GenericViolation("ClientIsNotConnected")
   
-  case class InvalidTopicName() extends GenericViolation("InvalidTopicName")
+  case object InvalidTopicName extends GenericViolation("InvalidTopicName")
   
-  case class qoSNotSupported() extends GenericViolation("qoSNotSupported")
+  case object qoSNotSupported extends GenericViolation("qoSNotSupported")
   
-  case class InvalidQoSDupPair() extends GenericViolation("InvalidQoSDupPair")
+  case object InvalidQoSDupPair extends GenericViolation("InvalidQoSDupPair")
   
-  case class SubscriptionTopicListEmpty() extends GenericViolation("SubscriptionTopicListEmpty")
+  case object SubscriptionTopicListEmpty extends GenericViolation("SubscriptionTopicListEmpty")
   
-  case class UnsubscriptionTopicListEmpty() extends GenericViolation("UnsubscriptionTopicListEmpty")
+  case object UnsubscriptionTopicListEmpty extends GenericViolation("UnsubscriptionTopicListEmpty")
   
-  case class InvalidWillTopic() extends GenericViolation("InvalidWillTopic")
+  case object InvalidWillTopic extends GenericViolation("InvalidWillTopic")
 }

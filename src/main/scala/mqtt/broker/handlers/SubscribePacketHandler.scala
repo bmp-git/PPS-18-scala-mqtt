@@ -40,7 +40,7 @@ case class SubscribePacketHandler(override val packet: Subscribe, override val c
    * @return a function that maps a state to a violation or to a new state.
    */
   def checkAtLeastOneSubscription: State => Either[Violation, State] = state => {
-    if (packet.topics.isEmpty) Left(SubscriptionTopicListEmpty()) else Right(state)
+    if (packet.topics.isEmpty) Left(SubscriptionTopicListEmpty) else Right(state)
   }
   
   /**
