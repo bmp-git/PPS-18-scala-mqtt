@@ -47,15 +47,18 @@ object Violation {
   
   case class InvalidProtocolName() extends GenericViolation("InvalidProtocolName")
   
-  case class InvalidProtocolVersion() extends GenericViolation("InvalidProtocolVersion") {
+  case class InvalidProtocolVersion() extends Violation {
+    override def msg: String = "InvalidProtocolVersion"
     override val closePackets: Seq[Connack] = Seq(Connack(sessionPresent = false, UnacceptableProtocolVersion))
   }
   
-  case class InvalidIdentifier() extends GenericViolation("InvalidIdentifier") {
+  case class InvalidIdentifier() extends Violation {
+    override def msg: String = "InvalidIdentifier"
     override val closePackets: Seq[Connack] = Seq(Connack(sessionPresent = false, IdentifierRejected))
   }
   
-  case class ClientNotAuthorized() extends GenericViolation("ClientNotAuthorized") {
+  case class ClientNotAuthorized() extends Violation {
+    override def msg: String = "ClientNotAuthorized"
     override val closePackets: Seq[Connack] = Seq(Connack(sessionPresent = false, NotAuthorized))
   }
   
