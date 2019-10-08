@@ -4,7 +4,7 @@ import mqtt.broker.Common
 import mqtt.broker.Common.{assertClientConnected, sendPacketToClient, updateLastContact}
 import mqtt.broker.handlers.PublishPacketHandler._
 import mqtt.broker.state.StateImplicits._
-import mqtt.broker.state.Violation.{InvalidQoSDupPair, InvalidTopicName, qoSNotSupported}
+import mqtt.broker.state.Violation.{InvalidQoSDupPair, InvalidTopicName, QoSNotSupported}
 import mqtt.broker.state.{Channel, State, Violation}
 import mqtt.model.Packet.{ApplicationMessage, Publish}
 import mqtt.model.Types.{ClientID, Payload}
@@ -41,7 +41,7 @@ case class PublishPacketHandler(override val packet: Publish, override val chann
       case QoS(0) => true
       case _ => false
     }
-    if (valid) Right(state) else Left(qoSNotSupported)
+    if (valid) Right(state) else Left(QoSNotSupported)
   }
   
   /**

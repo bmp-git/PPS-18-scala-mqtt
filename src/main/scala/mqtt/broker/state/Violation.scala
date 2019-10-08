@@ -68,7 +68,7 @@ object Violation {
   
   case object InvalidTopicName extends GenericViolation("InvalidTopicName")
   
-  case object qoSNotSupported extends GenericViolation("qoSNotSupported")
+  case object QoSNotSupported extends GenericViolation("QoSNotSupported")
   
   case object InvalidQoSDupPair extends GenericViolation("InvalidQoSDupPair")
   
