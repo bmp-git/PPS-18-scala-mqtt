@@ -47,7 +47,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
     // check duplicate connect 3.1.0-2
     state.sessionFromChannel(channel).fold[Either[Violation, State]](Right(state))(_ => {
       //there is already a session with this channel
-      Left(MultipleConnectPacketsOnSameChannel())
+      Left(MultipleConnectPacketsOnSameChannel)
     })
   }
   
@@ -71,7 +71,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
    * @return a function that maps a state to a violation or to a new state.
    */
   def checkProtocolName(name: String): State => Either[Violation, State] = state => {
-    if (name != "MQTT") Left(InvalidProtocolName()) else Right(state)
+    if (name != "MQTT") Left(InvalidProtocolName) else Right(state)
   }
   
   /**
@@ -81,7 +81,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
    * @return a function that maps a state to a violation or to a new state.
    */
   def checkProtocolVersion(version: Int): State => Either[Violation, State] = state => {
-    if (version != 4) Left(InvalidProtocolVersion()) else Right(state)
+    if (version != 4) Left(InvalidProtocolVersion) else Right(state)
   }
   
   
@@ -100,7 +100,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
    * @return a violation or the client credentials.
    */
   def getClientCredentials: Either[Violation, Credential] = {
-    packet.credential.fold[Either[Violation, Credential]](Left(ClientNotAuthorized()))(pwOpt => Right(pwOpt))
+    packet.credential.fold[Either[Violation, Credential]](Left(ClientNotAuthorized))(pwOpt => Right(pwOpt))
   }
   
   /**
@@ -109,7 +109,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
    * @return a function that maps a state to a violation or to the stored password.
    */
   def getStoredPassword(username: String): State => Either[Violation, Option[String]] = state => {
-    state.credentials.get(username).fold[Either[Violation, Option[String]]](Left(ClientNotAuthorized()))(pwOpt => Right(pwOpt))
+    state.credentials.get(username).fold[Either[Violation, Option[String]]](Left(ClientNotAuthorized))(pwOpt => Right(pwOpt))
   }
   
   /**
@@ -123,7 +123,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
     (clientPassword.map(Common.sha256), storedPassword) match {
       case (None, None) => Right(())
       case (Some(p1), Some(p2)) if p1 == p2 => Right(())
-      case _ => Left(ClientNotAuthorized())
+      case _ => Left(ClientNotAuthorized)
     }
   }
   
@@ -147,7 +147,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
    */
   def checkClientId: State => Either[Violation, State] = state => {
     val clientId = packet.clientId
-    if (clientId.isEmpty || clientId.length > 23) Left(InvalidIdentifier()) else Right(state)
+    if (clientId.isEmpty || clientId.length > 23) Left(InvalidIdentifier) else Right(state)
   }
   
   /**
@@ -157,7 +157,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
    */
   def checkWillMessageTopic: State => Either[Violation, State] = state => {
     packet.willMessage.fold[Either[Violation, State]](Right(state))(m => {
-      if (Topic.valid(m.topic)) Right(state) else Left(InvalidWillTopic())
+      if (Topic.valid(m.topic)) Right(state) else Left(InvalidWillTopic)
     })
   }
   

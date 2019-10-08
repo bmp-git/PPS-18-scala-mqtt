@@ -33,7 +33,7 @@ case class UnsubscribePacketHandler(override val packet: Unsubscribe, override v
    * @return a function that maps a state to a violation or to a new state.
    */
   def checkAtLeastOneUnsubscription: State => Either[Violation, State] = state => {
-    if (packet.topics.isEmpty) Left(UnsubscriptionTopicListEmpty()) else Right(state)
+    if (packet.topics.isEmpty) Left(UnsubscriptionTopicListEmpty) else Right(state)
   }
   
   /**

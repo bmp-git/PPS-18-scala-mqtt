@@ -95,7 +95,7 @@ object Common {
    * @return a function that maps a state to a violation or to a tuple with the ClientID and the new state.
    */
   def assertClientConnected(channel: Channel): State => Either[Violation, (ClientID, State)] = state => {
-    state.sessionFromChannel(channel).fold[Either[Violation, (ClientID, State)]](Left(ClientIsNotConnected())) { case (id, _) => Right(id, state) }
+    state.sessionFromChannel(channel).fold[Either[Violation, (ClientID, State)]](Left(ClientIsNotConnected)) { case (id, _) => Right(id, state) }
   }
   
   /**
