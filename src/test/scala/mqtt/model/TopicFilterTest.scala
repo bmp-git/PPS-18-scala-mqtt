@@ -7,7 +7,7 @@ import scala.reflect.ClassTag
 class TopicFilterTest[T](build: String => Option[T])(implicit m: ClassTag[T]) extends FunSuite {
   val name: String = m.runtimeClass.getSimpleName
   
-  test(s"An empty $name is invalid") {
+  test(s"An empty $name is invalid.") {
     assert(build("").isEmpty)
   }
   

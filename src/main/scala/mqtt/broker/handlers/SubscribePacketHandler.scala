@@ -61,7 +61,7 @@ case class SubscribePacketHandler(override val packet: Subscribe, override val c
    */
   def storeSubscriptions(filterOptions: FilterOptions): State => State = {
     filterOptions.collect { case Some(fq) => fq }.map { case (filter, qos) => storeSubscription(filter, qos) }
-      .foldLeft[State => State](s => s)(_ andThen _)
+      .foldLeft[State => State](identity)(_ andThen _)
   }
   
   /**
@@ -119,7 +119,7 @@ case class SubscribePacketHandler(override val packet: Subscribe, override val c
    * @return a function that maps the old server state in the new one.
    */
   def publishRetains(clientID: ClientID, filterOptions: FilterOptions): State => State = state => {
-    getRetains(filterOptions)(state).map { case (msg, qos) => publishRetain(clientID, msg, qos) }.foldLeft[State => State](s => s)(_ andThen _)(state)
+    getRetains(filterOptions)(state).map { case (msg, qos) => publishRetain(clientID, msg, qos) }.foldLeft[State => State](identity)(_ andThen _)(state)
   }
   
   /**
