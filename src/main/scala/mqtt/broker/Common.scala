@@ -31,8 +31,8 @@ object Common {
    * @param closePackets the packets to be sent before closing.
    * @return a function that maps the old server state in the new one.
    */
-  def closeChannelWithPackets(channel: Channel, closePackets: Seq[Packet]): State => State = state => {
-    (publishWillMessage(channel) andThen closeChannelNoWillPublish(channel, closePackets)) (state)
+  def closeChannelWithPackets(channel: Channel, closePackets: Seq[Packet]): State => State = {
+    publishWillMessage(channel) andThen closeChannelNoWillPublish(channel, closePackets)
   }
   
   /**
@@ -43,8 +43,8 @@ object Common {
    * @param closePackets the packets to be sent before closing.
    * @return a function that maps the old server state in the new one.
    */
-  def closeChannelNoWillPublish(channel: Channel, closePackets: Seq[Packet]): State => State = state => {
-    (updateSessionAfterChannelDisconnection(channel) andThen deleteWillMessage(channel)) (state).addClosingChannel(channel, closePackets)
+  def closeChannelNoWillPublish(channel: Channel, closePackets: Seq[Packet]): State => State = {
+    updateSessionAfterChannelDisconnection(channel) andThen deleteWillMessage(channel) andThen (_.addClosingChannel(channel, closePackets))
   }
   
   /**
