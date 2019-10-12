@@ -27,9 +27,7 @@ object BitImplicits {
     def getValue(from: Int, length: Int): BigInt = {
       def bitsToByte(bits: Seq[Bit]): Byte =
         bits.zipWithIndex.map {
-          case (bit, place) => {
-            (if (bit) 1 else 0) * (1 << (7 - place))
-          }
+          case (bit, place) => (if (bit) 1 else 0) * (1 << (7 - place))
         }.sum.toByte
       
       //example: 10100000010
