@@ -112,8 +112,8 @@ object PublishPacketHandler {
         (filter, qos) <- session.subscriptions
         if filter.matching(topic)
         maxQos = Common.min(qos, qoS)
-      } yield (maxQos)
-    } yield ((clientId, qosses))
+      } yield maxQos
+    } yield (clientId, qosses)
   }
   
   /**
@@ -160,6 +160,6 @@ object PublishPacketHandler {
       fun = publishMessageTo(clientID, msg)
     } yield fun
   
-    publishFunctions.foldLeft[State => State](s => s)(_ andThen _)(state)
+    publishFunctions.foldLeft[State => State](identity)(_ andThen _)(state)
   }
 }

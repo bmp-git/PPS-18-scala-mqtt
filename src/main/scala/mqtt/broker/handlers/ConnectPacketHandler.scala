@@ -20,7 +20,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
   
   override def handle: State => State = {
     for {
-      _ <- checkNotFirstPacketOfChannel
+      _ <- checkIsFirstPacketOfChannel
       _ <- checkProtocol
       _ <- handleCredentials
       _ <- checkClientId
@@ -43,7 +43,7 @@ case class ConnectPacketHandler(override val packet: Connect, override val chann
    *
    * @return a function that maps a state to a violation or to a new state.
    */
-  def checkNotFirstPacketOfChannel: State => Either[Violation, State] = state => {
+  def checkIsFirstPacketOfChannel: State => Either[Violation, State] = state => {
     // check duplicate connect 3.1.0-2
     state.sessionFromChannel(channel).fold[Either[Violation, State]](Right(state))(_ => {
       //there is already a session with this channel
