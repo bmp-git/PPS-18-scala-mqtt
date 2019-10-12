@@ -13,6 +13,12 @@ import mqtt.utils.Bit
  * @tparam P the type of the object needed to build
  */
 case class BuilderPair[-P](left: Builder[P], right: Builder[P]) extends Builder[P] {
-  override def build[R <: P](packet: R)(implicit context: Context[R]): Seq[Bit] =
-    left.build(packet)(Context(Option(this))) ++ right.build(packet)(Context(Option(this)))
+  override def build[R <: P](packet: R)(implicit context: Context[R]): Seq[Bit] = {
+    val newContext: Context[R] = context.root match {
+      case None => Context(Option(this))
+      case Some(_) => context
+    }
+    left.build(packet)(newContext) ++ right.build(packet)(newContext)
+  }
+  
 }

@@ -37,11 +37,21 @@ object CommonBuilders {
    * Will count only the remaining length on the right.
    * Example: "oneByte :: remainingLength :: oneByte", remainingLength will builds in 00000001
    */
-  val remainingLength: Builder[Any] = new Builder[Any] {
+  def remainingLength: Builder[Any] = new Builder[Any] {
+    private val _this = this
+  
+    @scala.annotation.tailrec
+    def findNext[P](pair: BuilderPair[P]): Option[Builder[P]] = pair match {
+      case BuilderPair(`_this`, right) => Option(right)
+      case BuilderPair(_, `_this`) => Option.empty
+      case BuilderPair(_, right: BuilderPair[P]) => findNext(right)
+      case _ => Option.empty
+    }
+    
     override def build[R <: Any](value: R)(implicit context: Context[R]): Seq[Bit] = {
-      val data = context.parent.fold(Seq.empty[Bit])(p => p.right match {
-        case `remainingLength` => Seq.empty
-        case _ => p.right.build(value)(context)
+      val data = context.root.fold(Seq.empty[Bit])(p => findNext(p) match {
+        case Some(right) => right.build(value)(context)
+        case None => Seq.empty
       })
       VariableLengthInteger.encode(data.length / 8).toBitsSeq
     }

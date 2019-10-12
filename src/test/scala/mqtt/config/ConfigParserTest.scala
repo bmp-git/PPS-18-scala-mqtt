@@ -34,7 +34,7 @@ class ConfigParserTest extends FunSuite {
   }
   
   test("Parse a bad configuration file (port not present)") {
-    val input = "#comment\n\n\n\nport\n#comment\n#comment\n\nbind_address localhost#\nallow_anonymous false#"
+    val input = "#comment\n\n\n\nport \n#comment\n#comment\n\nbind_address localhost#\nallow_anonymous false#"
     assert(ConfigParser(input) == Option.empty)
   }
 }

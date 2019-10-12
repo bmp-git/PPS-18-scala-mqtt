@@ -27,7 +27,12 @@ object BuilderImplicits {
   
   implicit def fromDurationExtractorToBuilder[T](ex: T => Duration): Builder[T] = keepAliveBuilder from ex
   
-  implicit def dynamicBuilder[T](selector: T => Builder[T]): Builder[T] = new Builder[T] {
+  /**
+   * Converts implicitly a Builder selector to the builder selected dynamically.
+   * @param selector the select function
+   * @tparam T the type of the object needed to build
+   */
+  implicit class DynamicBuilder[T](selector: T => Builder[T]) extends Builder[T] {
     override def build[R <: T](value: R)(implicit context: Context[R]): Seq[Bit] = selector(value).build(value)
   }
 }
