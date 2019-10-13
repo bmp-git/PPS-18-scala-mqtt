@@ -50,4 +50,9 @@ case class ProgramState(brokerConfig: BrokerConfig, usersConfig: Map[String, Opt
    * @param state the new broker state
    */
   def brokerState_=(state: State): Unit = _brokerState = state
+  
+  /**
+   * Closes all sockets.
+   */
+  def close(): Unit = socketMap.foreach { case (_, idSocket) => idSocket.socket.close() }
 }
