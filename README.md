@@ -1,6 +1,6 @@
 ## PPS-18-scala-mqtt (PPS project a.a. 18-19)
 [![Build Status](https://travis-ci.org/bmp-git/PPS-18-scala-mqtt.svg?branch=develop)](https://travis-ci.org/bmp-git/PPS-18-scala-mqtt)
-[![codecov](https://codecov.io/gh/bmp-git/PPS-18-scala-mqtt/branch/develop/graph/badge.svg)](https://codecov.io/gh/bmp-git/PPS-18-scala-mqtt)
+[![codecov](https://codecov.io/gh/bmp-git/PPS-18-scala-mqtt/branch/master/graph/badge.svg)](https://codecov.io/gh/bmp-git/PPS-18-scala-mqtt)
 
 **scala-mqtt** is a MQTT message broker written in Scala.
 
