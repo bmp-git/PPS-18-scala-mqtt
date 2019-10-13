@@ -72,8 +72,8 @@ case class MqttBroker(brokerConfig: BrokerConfig, usersConfig: Map[String, Optio
   /**
    * Every 1 second it generates an empty Option. Needed to check timeouts.
    */
-  private lazy val tickStream = Observable.interval(1 second).takeUntil(_ => server.isClosed).map(a=> {
-    println(brokerConfig)
+  private lazy val tickStream = Observable.interval(1 second).takeUntil(_ => server.isClosed).map(a => {
+    logger.info(s"Still active: tick stream of $brokerConfig")
     a
   }).map(_ => Option.empty).subscribeOn(ioScheduler)
   /**
