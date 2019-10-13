@@ -5,7 +5,7 @@ import mqtt.model.QoS
 import org.scalatest.FunSuite
 
 class TestUtils extends FunSuite {
-  test("QoS1 is less than QoS2") {
+  test("QoS1 is less than QoS2.") {
     assert(Common.min(QoS(1), QoS(2)) == QoS(1))
   }
   

@@ -13,13 +13,13 @@ import scala.concurrent.duration.Duration
 trait TestConnect extends FunSuite {
   def ConnectHandler: (State, Connect, Channel) => State
   
-  test("Sending a connect packet with an invalid will message topic should disconnect") {
+  test("Sending a connect packet with an invalid will message topic should disconnect.") {
     val packet = sample_connect_packet_0.copy(protocol = Protocol("HTTP", 4))
     val bs1 = ConnectHandler(bs0, packet, sample_channel_0)
     assertClosing(sample_channel_0)(bs1)
   }
   
-  test("Sending a connect packet with and unsupported protocol name should disconnect") {
+  test("Sending a connect packet with and unsupported protocol name should disconnect.") {
     val packet = sample_connect_packet_0.copy(willMessage = Option(sample_application_message_0.copy(topic = "#")))
     val bs1 = ConnectHandler(bs0, packet, sample_channel_0)
     assertClosing(sample_channel_0)(bs1)
@@ -35,12 +35,12 @@ trait TestConnect extends FunSuite {
   }
   
   
-  test("Sending a connect packet with and unsupported protocol version should disconnect") {
+  test("Sending a connect packet with and unsupported protocol version should disconnect.") {
     val packet = sample_connect_packet_0.copy(protocol = Protocol("MQTT", 3))
     checkDisconnectionWithConnACKAfterConnect(packet, UnacceptableProtocolVersion)
   }
   
-  test("Sending a connect packet with a bad client identifier should disconnect") {
+  test("Sending a connect packet with a bad client identifier should disconnect.") {
     val packet = sample_connect_packet_0.copy(clientId = "")
     checkDisconnectionWithConnACKAfterConnect(packet, IdentifierRejected)
   }
@@ -75,12 +75,12 @@ trait TestConnect extends FunSuite {
     assertConnectionAccepted(sample_id_0)(bs1)
   }
   
-  test("Sending a legit connect packet should respond with ack 0") {
+  test("Sending a legit connect packet should respond with ack 0.") {
     val bs1 = ConnectHandler(bs0, sample_connect_packet_0, sample_channel_0)
     assertConnectionAccepted(sample_id_0)(bs1)
   }
   
-  test("Sending a connect packet with CleanSession 0 should clear the session") {
+  test("Sending a connect packet with CleanSession 0 should clear the session.") {
     val packet = sample_connect_packet_0.copy(cleanSession = true)
     val bs1 = bs0.setSession(sample_id_0, sample_session_0)
     val bs2 = ConnectHandler(bs1, packet, sample_channel_0)
@@ -97,12 +97,12 @@ trait TestConnect extends FunSuite {
     })
   }
   
-  test("Sending a connect with cleanSession 1 should set the persistent session flag to 0") {
+  test("Sending a connect with cleanSession 1 should set the persistent session flag to 0.") {
     val packet = sample_connect_packet_0.copy(cleanSession = true)
     checkPersistentFlag(packet, persistent = false)
   }
   
-  test("Sending a connect with cleanSession 0 should set the persistent session flag to 1") {
+  test("Sending a connect with cleanSession 0 should set the persistent session flag to 1.") {
     val packet = sample_connect_packet_0.copy(cleanSession = false)
     checkPersistentFlag(packet, persistent = true)
   }
@@ -116,25 +116,25 @@ trait TestConnect extends FunSuite {
     })
   }
   
-  test("Sending a connect packet with CleanSession 1 should reply with Session Present 0") {
+  test("Sending a connect packet with CleanSession 1 should reply with Session Present 0.") {
     checkCleanSession(cleanSession = true, SessionPresent = false, SessionWasPresent = true)
   }
   
-  test("Sending a connect packet with CleanSession 0 should reply with Session Present 1 if session was present") {
+  test("Sending a connect packet with CleanSession 0 should reply with Session Present 1 if session was present.") {
     checkCleanSession(cleanSession = false, SessionPresent = true, SessionWasPresent = true)
   }
   
-  test("Sending a connect packet with CleanSession 0 should reply with Session Present 0 if session was not present") {
+  test("Sending a connect packet with CleanSession 0 should reply with Session Present 0 if session was not present.") {
     checkCleanSession(cleanSession = false, SessionPresent = false, SessionWasPresent = false)
   }
   
-  test("A Connect from a new channel should disconnect the old one") {
+  test("A Connect from a new channel should disconnect the old one.") {
     val bs1 = ConnectHandler(bs0, sample_connect_packet_0, sample_channel_0)
     val bs2 = ConnectHandler(bs1, sample_connect_packet_0, sample_channel_1)
     assert(bs2.closing.get(sample_channel_0).isDefined)
   }
   
-  test("A Connect from a new channel should replace the old one") {
+  test("A Connect from a new channel should replace the old one.") {
     val bs1 = ConnectHandler(bs0, sample_connect_packet_0, sample_channel_0)
     val bs2 = ConnectHandler(bs1, sample_connect_packet_0, sample_channel_1)
     bs2.sessionFromClientID(sample_id_0).fold(fail)(s => {
@@ -142,13 +142,13 @@ trait TestConnect extends FunSuite {
     })
   }
   
-  test("The will message should be saved") {
+  test("The will message should be saved.") {
     val packet = sample_connect_packet_0.copy(willMessage = Option(sample_application_message_0))
     val bs1 = ConnectHandler(bs0, packet, sample_channel_0)
     bs1.wills.get(sample_channel_0).fold(fail)(m => assert(m.topic == sample_topic_0))
   }
   
-  test("The keep alive should be saved") {
+  test("The keep alive should be saved.") {
     val packet = sample_connect_packet_0.copy(keepAlive = Duration(10, "minutes"))
     val bs1 = ConnectHandler(bs0, packet, sample_channel_0)
     bs1.sessionFromClientID(sample_id_0).fold(fail)(s => {
@@ -156,13 +156,13 @@ trait TestConnect extends FunSuite {
     })
   }
   
-  test("Connecting two times should disconnect") {
+  test("Connecting two times should disconnect.") {
     val bs1 = ConnectHandler(bs0, sample_connect_packet_0, sample_channel_0)
     val bs2 = ConnectHandler(bs1, sample_connect_packet_0, sample_channel_0)
     assertClosing(sample_channel_0)(bs2)
   }
   
-  test("Causing a disconnection should publish the will message") {
+  test("Causing a disconnection should publish the will message.") {
     val applicationMessage = ApplicationMessage(retain = false, QoS(0), sample_topic_0, Seq())
     val packet = sample_connect_packet_0.copy(clientId = sample_id_1, willMessage = Option(applicationMessage))
   

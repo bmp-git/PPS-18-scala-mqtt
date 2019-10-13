@@ -14,7 +14,7 @@ trait Violation {
    *
    * @return the message.
    */
-  def msg: String
+  def message: String
   
   /**
    * Handles the violation, disconnecting the client related to the channel specified.
@@ -34,31 +34,31 @@ trait Violation {
    */
   def closePackets(): Seq[Packet]
   
-  override def toString: String = msg
+  override def toString: String = message
 }
 
 /**
  * Contains common violations.
  */
 object Violation {
-  class GenericViolation(override val msg: String) extends Violation {
+  class GenericViolation(override val message: String) extends Violation {
     override val closePackets: Seq[Connack] = Seq()
   }
   
   case object InvalidProtocolName extends GenericViolation("InvalidProtocolName")
   
   case object InvalidProtocolVersion extends Violation {
-    override def msg: String = "InvalidProtocolVersion"
+    override def message: String = "InvalidProtocolVersion"
     override val closePackets: Seq[Connack] = Seq(Connack(sessionPresent = false, UnacceptableProtocolVersion))
   }
   
   case object InvalidIdentifier extends Violation {
-    override def msg: String = "InvalidIdentifier"
+    override def message: String = "InvalidIdentifier"
     override val closePackets: Seq[Connack] = Seq(Connack(sessionPresent = false, IdentifierRejected))
   }
   
   case object ClientNotAuthorized extends Violation {
-    override def msg: String = "ClientNotAuthorized"
+    override def message: String = "ClientNotAuthorized"
     override val closePackets: Seq[Connack] = Seq(Connack(sessionPresent = false, NotAuthorized))
   }
   
