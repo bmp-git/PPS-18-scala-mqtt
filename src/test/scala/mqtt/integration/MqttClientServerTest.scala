@@ -37,6 +37,6 @@ abstract class MqttClientServerTest(serverIp: String, serverPort: Int) extends F
   }
   
   override def afterEach(): Unit = {
-    client.disconnect()
+    client.disconnect(2000)
   }
 }

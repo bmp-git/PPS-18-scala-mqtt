@@ -72,7 +72,10 @@ case class MqttBroker(brokerConfig: BrokerConfig, usersConfig: Map[String, Optio
   /**
    * Every 1 second it generates an empty Option. Needed to check timeouts.
    */
-  private lazy val tickStream = Observable.interval(1 second).takeUntil(_ => server.isClosed).map(_ => Option.empty).subscribeOn(ioScheduler)
+  private lazy val tickStream = Observable.interval(1 second).takeUntil(_ => server.isClosed).map(a=> {
+    println(brokerConfig)
+    a
+  }).map(_ => Option.empty).subscribeOn(ioScheduler)
   /**
    * Generates a stream of packets of a client.
    */
@@ -111,10 +114,11 @@ case class MqttBroker(brokerConfig: BrokerConfig, usersConfig: Map[String, Optio
   }
   
   /**
-   * THe default breaker.
+   * The default breaker. Use it for close an active MqttBroker.
    */
   private val breaker: Breaker = () => {
     server.close()
+    program.close()
     mainExecutor.shutdown()
     packetHandlerExecutor.shutdown()
   }

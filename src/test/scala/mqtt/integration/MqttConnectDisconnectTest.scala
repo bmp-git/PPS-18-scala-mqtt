@@ -36,11 +36,11 @@ class MqttConnectDisconnectTest extends FunSuite with BeforeAndAfterAll with Bef
     
     val conn = client.connectWithResult(opt(false))
     assert(!conn.getSessionPresent)
-    client.disconnect()
-    
+    client.disconnect(2000)
+
     val conn2 = client.connectWithResult(opt(false))
     assert(conn2 getSessionPresent)
-    client.disconnect()
+    client.disconnect(2000)
     
     client.close()
     server.stop()
