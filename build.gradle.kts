@@ -1,5 +1,5 @@
 group = "org.bmp.pps.scala-mqtt"
-version = "0.0.0"
+version = "1.0.0"
 
 plugins {
     scala
@@ -16,6 +16,23 @@ application {
 val run by tasks.getting(JavaExec::class) {
     standardInput = System.`in`
 }
+
+tasks {
+    register("fatJar", Jar::class.java) {
+        archiveClassifier.set("all")
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        manifest {
+            attributes("Main-Class" to "RxMain")
+        }
+        from(configurations.runtimeClasspath.get()
+                .onEach { println("add from dependencies: ${it.name}") }
+                .map { if (it.isDirectory) it else zipTree(it) })
+        val sourcesMain = sourceSets.main.get()
+        sourcesMain.allSource.forEach { println("add from sources: ${it.name}") }
+        from(sourcesMain.output)
+    }
+}
+
 
 repositories {
     mavenCentral()
