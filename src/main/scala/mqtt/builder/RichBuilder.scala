@@ -73,7 +73,7 @@ object RichBuilder {
   /**
    * Class that represents 'or' operator between builders. This builder will
    * try to match the build input with all the internal builder, the output is the result
-   * of the first matching builder or otherwise Option.empty.
+   * of the first matching builder or otherwise an empty sequence.
    *
    * @param builderA the first builder
    * @param builderB the second builder

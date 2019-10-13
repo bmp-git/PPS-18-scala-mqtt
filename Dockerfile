@@ -6,16 +6,9 @@ RUN	mkdir -p ${WORKINGDIR} && chmod 666 ${WORKINGDIR}
 
 WORKDIR ${WORKINGDIR}
 
-RUN	apt-get update						&&	\
-	apt-get install git
+ADD ./ ${WORKINGDIR}
 
-RUN git clone https://github.com/bmp-git/PPS-18-scala-mqtt.git ${WORKINGDIR}
-
-# This can be used instead of git clone
-# ADD ./ ${WORKINGDIR}
-
-# TODO remove -x test when tests will not fail
-RUN	./gradlew build -x test
+RUN	./gradlew build
 
 VOLUME "${WORKINGDIR}/config"
 

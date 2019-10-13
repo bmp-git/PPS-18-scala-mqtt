@@ -45,7 +45,7 @@ object CommonBuilders {
       case BuilderPair(`_this`, right) => Option(right)
       case BuilderPair(_, `_this`) => Option.empty
       case BuilderPair(_, right: BuilderPair[P]) => findNext(right)
-      case _ => Option.empty
+      case _ => Option.empty //only when given a wrong context
     }
     
     override def build[R <: Any](value: R)(implicit context: Context[R]): Seq[Bit] = {

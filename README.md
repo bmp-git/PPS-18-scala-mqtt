@@ -47,19 +47,19 @@ The file containing username and passwords is "users.conf".
 
 You can add user's authentication information in the following way:
 
-```username [sha256(password)]```: username with optionally a password hashed using sha256.
+```username:[sha256(password)]```: username with optionally a password hashed using sha256.
 
 ### Docker
-An docker image of the application can be built through the Dockerfile or can be pulled from [this](linkhere) docker hub repo.
+An docker image of the application can be built through the Dockerfile or can be pulled from [this](https://cloud.docker.com/u/docbmp/repository/docker/docbmp/pps-18-scala-mqtt/) docker hub repo.
 
 The container exposes port 1883 to access the broker.
 
 Currently the docker container support the default configuration:
-```bind_address "localhost"```
+```bind_address localhost```
 ```port 1883```
 ```allow_anonymous true```
 
 ### Authors
-Barbieri Edoardo, Lorenzo Mondani, Emanuele Pancisi
+Edoardo Barbieri, Lorenzo Mondani, Emanuele Pancisi
  
 Developed as final project for [81612 - Programming and Development paradigms](https://www.unibo.it/en/teaching/course-unit-catalogue/course-unit/2018/412597) course (academic year 2018/2019).
